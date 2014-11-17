@@ -9,7 +9,7 @@ import java.awt.geom.Point2D;
  * mainmouselistenerhandler created and / or used at a time
  *
  * @author Mikko Hilpinen.
- *         Created 29.12.2012.
+ * @since 29.12.2012.
  * @see genesis_graphic.GameWindow
  */
 public class MainMouseListenerHandler extends AbstractMouseListenerHandler

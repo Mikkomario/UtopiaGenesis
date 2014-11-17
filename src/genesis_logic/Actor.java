@@ -1,5 +1,8 @@
 package genesis_logic;
 
+import genesis_util.Handled;
+import genesis_util.StateOperator;
+
 
 /**
  * Each object implementing this interface will be considered an active creature 
@@ -12,9 +15,9 @@ package genesis_logic;
  * Each actor should also be able to respond to a try to end its existence
  *
  * @author Mikko Hilpinen.
- *         Created 27.11.2012.
+ * @since 27.11.2012.
  */
-public interface Actor extends LogicalHandled
+public interface Actor extends Handled
 {	
 	/**
 	 * This is the actors action, which will be called at each step
@@ -24,4 +27,9 @@ public interface Actor extends LogicalHandled
 	 * slower or faster than usual it might vary
 	 */
 	public void act(double steps);
+	
+	/**
+	 * @return The stateOperator that determines if the object's act method should be called.
+	 */
+	public StateOperator getIsActiveStateOperator();
 }

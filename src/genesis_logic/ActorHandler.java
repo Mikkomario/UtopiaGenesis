@@ -1,17 +1,24 @@
 package genesis_logic;
 
+import genesis_util.GenesisHandlerType;
+import genesis_util.Handled;
+import genesis_util.Handler;
+import genesis_util.HandlerType;
+import genesis_util.StateOperator;
+
 /**
  * The object from this class will control multiple actors, calling their 
  * act-methods and removing them when necessary
  *
  * @author Mikko Hilpinen.
- *         Created 27.11.2012.
+ * @since 27.11.2012.
  */
-public class ActorHandler extends LogicalHandler implements Actor
+public class ActorHandler extends Handler implements Actor
 {
 	// ATTRIBUTES	------------------------------------------------------
 	
 	private double laststeplength;
+	private StateOperator isActiveOperator;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -28,11 +35,18 @@ public class ActorHandler extends LogicalHandler implements Actor
 		
 		// Initializes attributes
 		this.laststeplength = 0;
+		this.isActiveOperator = new AnyHandledIsActiveOperator();
 	}
 	
 	
 	// IMPLEMENTED METHODS	----------------------------------------------
 
+	@Override
+	public StateOperator getIsActiveStateOperator()
+	{
+		return this.isActiveOperator;
+	}
+	
 	@Override
 	public void act(double steps)
 	{
@@ -42,9 +56,9 @@ public class ActorHandler extends LogicalHandler implements Actor
 	}
 	
 	@Override
-	protected Class<?> getSupportedClass()
+	public HandlerType getHandlerType()
 	{
-		return Actor.class;
+		return GenesisHandlerType.ACTORHANDLER;
 	}
 	
 	@Override
@@ -53,7 +67,7 @@ public class ActorHandler extends LogicalHandler implements Actor
 		// Calls the act method of active handleds
 		Actor a = (Actor) h;
 		
-		if (a.isActive())
+		if (a.getIsActiveStateOperator().getState())
 			a.act(this.laststeplength);
 		
 		return true;
@@ -70,5 +84,33 @@ public class ActorHandler extends LogicalHandler implements Actor
 	public void addActor(Actor a)
 	{
 		addHandled(a);
+	}
+	
+	
+	// SUBCLASSES	------------------------------------
+	
+	private class AnyHandledIsActiveOperator extends ForAnyHandledsOperator
+	{
+		// CONSTRUCTOR	--------------------------------
+		
+		public AnyHandledIsActiveOperator()
+		{
+			super(true);
+		}
+		
+		
+		// IMPLEMENTED METHODS	------------------------
+
+		@Override
+		protected void changeHandledState(Handled h, boolean newState)
+		{
+			((Actor) h).getIsActiveStateOperator().setState(newState);
+		}
+
+		@Override
+		protected boolean getHandledState(Handled h)
+		{
+			return ((Actor) h).getIsActiveStateOperator().getState();
+		}
 	}
 }

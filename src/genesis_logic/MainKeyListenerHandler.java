@@ -1,5 +1,8 @@
 package genesis_logic;
 
+import genesis_util.Handled;
+import genesis_util.StateOperator;
+
 import java.util.ArrayList;
 
 /**
@@ -8,9 +11,9 @@ import java.util.ArrayList;
  * events
  *
  * @author Mikko Hilpinen.
- *         Created 2.12.2012.
+ * @since 2.12.2012.
  */
-public class MainKeyListenerHandler extends LogicalHandler implements Actor
+public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 {
 	// ATTRIBUTES	------------------------------------------------------
 	
@@ -34,7 +37,7 @@ public class MainKeyListenerHandler extends LogicalHandler implements Actor
 	 */
 	public MainKeyListenerHandler(ActorHandler actorhandler)
 	{
-		super(false, actorhandler);
+		super(false, null);
 		
 		// Initializes the attributes
 		this.keysDown = new ArrayList<Character>();
@@ -44,11 +47,20 @@ public class MainKeyListenerHandler extends LogicalHandler implements Actor
 		this.codesPressed = new ArrayList<Integer>();
 		this.codesReleased = new ArrayList<Integer>();
 		this.lastkeyduration = 0;
+		
+		if (actorhandler != null)
+			actorhandler.addActor(this);
 	}
 	
 	
 	// IMPLEMENTED METHODS	----------------------------------------------
 
+	@Override
+	public StateOperator getIsActiveStateOperator()
+	{
+		return getListensToKeyEventsOperator();
+	}
+	
 	@Override
 	public void act(double steps)
 	{
@@ -66,19 +78,13 @@ public class MainKeyListenerHandler extends LogicalHandler implements Actor
 	}
 	
 	@Override
-	protected Class<?> getSupportedClass()
-	{
-		return AdvancedKeyListener.class;
-	}
-	
-	@Override
 	protected boolean handleObject(Handled h)
 	{
 		// Informs the object about the current event(s)
 		AdvancedKeyListener listener = (AdvancedKeyListener) h;
 		
 		// Only informs active objects
-		if (!listener.isActive())
+		if (!listener.getListensToKeyEventsOperator().getState())
 			return true;
 		
 		// Informs if a key was pressed
@@ -134,6 +140,7 @@ public class MainKeyListenerHandler extends LogicalHandler implements Actor
 	 * @param code The key's keycode
 	 * @param coded Does the key use its keycode
 	 */
+	@Override
 	public void onKeyPressed(char key, int code, boolean coded)
 	{
 		if (coded)
@@ -168,6 +175,7 @@ public class MainKeyListenerHandler extends LogicalHandler implements Actor
 	 * @param code The key's keycode
 	 * @param coded Does the key use its keycode
 	 */
+	@Override
 	public void onKeyReleased(char key, int code, boolean coded)
 	{
 		if (coded)
@@ -188,15 +196,5 @@ public class MainKeyListenerHandler extends LogicalHandler implements Actor
 			if (this.keysDown.contains(key))
 				this.keysDown.remove(this.keysDown.indexOf(key));
 		}
-	}
-	
-	/**
-	 * Adds a new keylistener to the informed keylistners
-	 *
-	 * @param k The KeyListener to be added
-	 */
-	public void addListener(AdvancedKeyListener k)
-	{
-		addHandled(k);
 	}
 }

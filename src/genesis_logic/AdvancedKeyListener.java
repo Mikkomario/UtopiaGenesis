@@ -1,15 +1,18 @@
 package genesis_logic;
 
+import genesis_util.Handled;
+import genesis_util.StateOperator;
+
 /**
  * Keylisteners are interested in the user's activities on the keyboard and 
  * should be notified when a key is pressed, down or released.<br>
  * Remember to add the listener to a KeyListenerHandler
  *
  * @author Mikko Hilpinen.
- *         Created 28.11.2012.
+ * @since 28.11.2012.
  * @see KeyListenerHandler
  */
-public interface AdvancedKeyListener extends LogicalHandled
+public interface AdvancedKeyListener extends Handled
 {
 	/**
 	 * This method is called at each step when a key is down
@@ -38,4 +41,10 @@ public interface AdvancedKeyListener extends LogicalHandled
 	 * @param coded Is the pressed key coded
 	 */
 	public void onKeyReleased(char key, int keyCode, boolean coded);
+	
+	/**
+	 * @return A stateOperator that determines whether the listener is currently interested 
+	 * in keyboard events.
+	 */
+	public StateOperator getListensToKeyEventsOperator();
 }

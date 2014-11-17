@@ -1,6 +1,7 @@
 package genesis_graphic;
 
-import genesis_logic.Handled;
+import genesis_util.Handled;
+import genesis_util.StateOperator;
 
 import java.awt.Graphics2D;
 
@@ -10,7 +11,7 @@ import java.awt.Graphics2D;
  * made temporarily and permanently invisible.
  *
  * @author Mikko Hilpinen.
- *         Created 26.11.2012.
+ * @since 26.11.2012.
  */
 public interface Drawable extends Handled
 {
@@ -22,19 +23,9 @@ public interface Drawable extends Handled
 	public void drawSelf(Graphics2D g2d);
 	
 	/**
-	 * @return Should the object be drawn at this time
+	 * @return The stateOperator that determines whether the object should be drawn
 	 */
-	public boolean isVisible();
-	
-	/**
-	 * Tries to set the object visible
-	 */
-	public void setVisible();
-	
-	/**
-	 * Tries to momentarily make the object invisible
-	 */
-	public void setInvisible();
+	public StateOperator getIsVisibleStateOperator();
 	
 	/**
 	 * @return How deep should the object be drawn (object with positive depth 

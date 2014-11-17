@@ -1,5 +1,8 @@
 package genesis_logic;
 
+import genesis_util.Handled;
+import genesis_util.StateOperator;
+
 import java.awt.geom.Point2D;
 
 /**
@@ -7,10 +10,10 @@ import java.awt.geom.Point2D;
  * Remember to add the object to a MouseListenerHandler
  *
  * @author Mikko Hilpinen.
- *         Created 28.12.2012.
+ * @since 28.12.2012.
  * @see MouseListenerHandler
  */
-public interface AdvancedMouseListener extends LogicalHandled
+public interface AdvancedMouseListener extends Handled
 {
 	/**
 	 * This method is called each time a mouse button event is caused in the 
@@ -72,6 +75,12 @@ public interface AdvancedMouseListener extends LogicalHandled
 	 * This affects what events are informed to the listener.
 	 */
 	public MouseButtonEventScale getCurrentButtonScaleOfInterest();
+	
+	/**
+	 * @return The stateOperator that determines whether the object is interested in 
+	 * mouse events.
+	 */
+	public StateOperator getListensToMouseEventsOperator();
 	
 	
 	// ENUMERATIONS	-------------------------------------------------------

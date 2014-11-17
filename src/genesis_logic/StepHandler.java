@@ -1,6 +1,8 @@
 package genesis_logic;
 
 import genesis_graphic.GameWindow;
+import genesis_util.LatchStateOperator;
+import genesis_util.StateOperator;
 
 /**
  * This class calculates millisconds and calls all actors when a certain number 
@@ -9,7 +11,7 @@ import genesis_graphic.GameWindow;
  * of actors.<p>
  *
  * @author Mikko Hilpinen.
- *         Created 29.11.2012.
+ * @since 29.11.2012.
  */
 public class StepHandler extends ActorHandler implements Runnable
 {
@@ -101,7 +103,7 @@ public class StepHandler extends ActorHandler implements Runnable
 		this.nextupdatemillis = System.currentTimeMillis() + this.callinterval;
 		
 		// Calls all actors
-		if (!isDead())
+		if (!getIsDeadStateOperator().getState())
 		{
 			// Calculates the step length that is informed for the objects
 			double steps = (System.currentTimeMillis() - this.lastactmillis) / 
@@ -166,7 +168,6 @@ public class StepHandler extends ActorHandler implements Runnable
 		private int breaklength;
 		private long lastcheck;
 		private boolean onbreak;
-		private boolean dead;
 		private int aps;
 		private int actions;
 		private long lastmillis;
@@ -174,6 +175,8 @@ public class StepHandler extends ActorHandler implements Runnable
 		private int stepsizeadjuster;
 		private int maxoptimizations;
 		private int optimizationsdone;
+		
+		private StateOperator isDeadStateOperator, isActiveOperator;
 		
 		
 		// CONSTRUCTOR	-------------------------------------------------
@@ -208,7 +211,6 @@ public class StepHandler extends ActorHandler implements Runnable
 			this.checkphase = 0;
 			this.lastcheck = System.currentTimeMillis();
 			this.onbreak = false;
-			this.dead = false;
 			this.actions = 0;
 			this.lastmillis = System.currentTimeMillis();
 			this.lastapsdifference = 0;
@@ -216,41 +218,24 @@ public class StepHandler extends ActorHandler implements Runnable
 			this.currentstepsizeadjustments = 0;
 			this.maxoptimizations = maximumoptimizations;
 			this.optimizationsdone = 0;
+			
+			this.isDeadStateOperator = new LatchStateOperator(false);
+			this.isActiveOperator = new StateOperator(true, false);
 		}
 		
 		
 		// IMPLEMENTED METHODS	-----------------------------------------
 		
 		@Override
-		public boolean isActive()
+		public StateOperator getIsActiveStateOperator()
 		{
-			// The optimizer is always active
-			return true;
+			return this.isActiveOperator;
 		}
-
+		
 		@Override
-		public void activate()
+		public StateOperator getIsDeadStateOperator()
 		{
-			// The optimizer is always active
-		}
-
-		@Override
-		public void inactivate()
-		{
-			// The optimizer is always active
-		}
-
-		@Override
-		public boolean isDead()
-		{
-			// The optimizer can only die while on break
-			return this.dead && this.onbreak;
-		}
-
-		@Override
-		public void kill()
-		{
-			this.dead = true;
+			return this.isDeadStateOperator;
 		}
 
 		@Override
@@ -347,7 +332,7 @@ public class StepHandler extends ActorHandler implements Runnable
 			
 			// If the optimizer has done enough optimizations, it kills itself
 			if (this.optimizationsdone >= this.maxoptimizations)
-				kill();
+				getIsDeadStateOperator().setState(true);
 		}
 	}
 }

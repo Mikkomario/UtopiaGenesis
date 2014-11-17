@@ -6,6 +6,7 @@ import genesis_logic.MainKeyListenerHandler;
 import genesis_logic.MainMouseListenerHandler;
 import genesis_logic.MouseListenerHandler;
 import genesis_logic.StepHandler;
+import genesis_util.HandlerRelay;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -31,7 +32,6 @@ import javax.swing.JPanel;
  * @since 8.8.2013
  * @see GamePanel
  */
-@SuppressWarnings("serial")
 public class GameWindow extends JFrame
 {	
 	// ATTRIBUTES ---------------------------------------------------------
@@ -41,13 +41,10 @@ public class GameWindow extends JFrame
 	private double xscale, yscale;
 	private int toppaddingheight, leftpaddingwidth;
 	
-	private MainKeyListenerHandler mainkeyhandler;
 	private MainMouseListenerHandler mainmousehandler;
-	private StepHandler stephandler;
-	private KeyListenerHandler keylistenerhandler;
-	private MouseListenerHandler mouselistenerhandler;
-	private ActorHandler listeneractorhandler;
+	private MainKeyListenerHandler mainKeyHandler;
 	private ScreenDrawer screendrawer;
+	private HandlerRelay handlerRelay;
 	
 	private ArrayList<GamePanel> panels;
 	private ArrayList<JPanel> paddings;
@@ -57,6 +54,7 @@ public class GameWindow extends JFrame
 	 * The height of the border at the top of the window (if there is one)
 	 */
 	private static final int BORDERHEIGHT = 32;
+	private static final long serialVersionUID = -7682965360963042160L;
 	
 	
 	// CONSTRUCTOR ---------------------------------------------------------
@@ -118,25 +116,30 @@ public class GameWindow extends JFrame
 		addKeyListener(new BasicKeyListener());
 		
 		// Creates and initializes important handlers
-		this.stephandler = new StepHandler(1000 / maxfpslimit, 
+		StepHandler stepHandler = new StepHandler(1000 / maxfpslimit, 
 				(int) Math.round((1000.0 / minimumsupportedfps) / 
 				StepHandler.STEPLENGTH), this, optimizeAps);
+		
 		// And the screen drawer
 		this.screendrawer = new ScreenDrawer(this);
 		
-		this.listeneractorhandler = new ActorHandler(false, this.stephandler);
-		this.mainkeyhandler = new MainKeyListenerHandler(this.listeneractorhandler);
-		this.mainmousehandler = new MainMouseListenerHandler(this.listeneractorhandler);
+		ActorHandler listenerActorHandler = new ActorHandler(false, stepHandler);
+		this.mainKeyHandler = new MainKeyListenerHandler(listenerActorHandler);
+		this.mainmousehandler = new MainMouseListenerHandler(listenerActorHandler);
 		
-		this.keylistenerhandler = new KeyListenerHandler(false, null);
-		this.mouselistenerhandler = new MouseListenerHandler(false, 
-				this.listeneractorhandler, null);
+		KeyListenerHandler keyHandler = new KeyListenerHandler(false, null);
+		MouseListenerHandler mouseHandler = new MouseListenerHandler(false, 
+				listenerActorHandler, null);
 		
-		this.mainkeyhandler.addListener(this.keylistenerhandler);
-		this.mainmousehandler.addMouseListener(this.mouselistenerhandler);
+		this.mainKeyHandler.addKeyListener(keyHandler);
+		this.mainmousehandler.addMouseListener(mouseHandler);
+		
+		this.handlerRelay.addHandler(stepHandler);
+		this.handlerRelay.addHandler(keyHandler);
+		this.handlerRelay.addHandler(mouseHandler);
 		
 		// Starts the game
-		new Thread(this.stephandler).start();
+		new Thread(stepHandler).start();
 		new Thread(this.screendrawer).start();
 	}
 	
@@ -160,7 +163,6 @@ public class GameWindow extends JFrame
 		//setLocationRelativeTo(null);
 		getContentPane().setBackground(Color.BLACK);
 	}
-	
 	
 	/**
 	 * Adds a new GamePanel to the given direction.
@@ -195,7 +197,7 @@ public class GameWindow extends JFrame
 		
 		// Kills the content of the panel if needed
 		if (killContent)
-			p.getDrawer().kill();
+			p.getDrawer().getIsDeadStateOperator().setState(true);
 	}
 	
 	/**
@@ -225,33 +227,15 @@ public class GameWindow extends JFrame
 	}
 	
 	/**
-	 * @return The keyListenerHandler that will inform objects about key events 
-	 * in this window
+	 * @return The handlerRelay this window uses
 	 */
-	public KeyListenerHandler getKeyListenerHandler()
+	public HandlerRelay getHandlerRelay()
 	{
-		return this.keylistenerhandler;
+		return this.handlerRelay;
 	}
 	
 	/**
-	 * @return The mouseListenerHandler that will inform objects about mouse 
-	 * events in this window
-	 */
-	public MouseListenerHandler getMouseListenerHandler()
-	{
-		return this.mouselistenerhandler;
-	}
-	
-	/**
-	 * @return The stepHandler that will inform the objects about step events
-	 */
-	public StepHandler getStepHandler()
-	{
-		return this.stephandler;
-	}
-	
-	/**
-	 * Scales the window to fill thi given size. Panels should already be 
+	 * Scales the window to fill the given size. Panels should already be 
 	 * added to the window or they won't be scaled. The resolution of the 
 	 * window stays the same.
 	 *
@@ -344,7 +328,7 @@ public class GameWindow extends JFrame
 		// TODO: Set so that the screen ratio remains (if needs to)
 		// -> xscale = yscale (min scale) in the panel(s)
 		// Problem is that even though the panel might be smaller than the 
-		// frame it may want to resize itself (swing "()#(¤)
+		// frame it may want to resize itself (swing "()#(¤ )
 		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		double screenwidth = screenSize.getWidth();
@@ -403,7 +387,8 @@ public class GameWindow extends JFrame
 	/**
 	 * Main window's helper class, which listens to what the mouse does.
 	 * 
-	 * @author Unto Solala. Created 8.8.2013
+	 * @author Unto Solala.
+	 * @since 8.8.2013
 	 */
 	private class BasicMouseListener implements MouseListener
 	{
@@ -449,21 +434,22 @@ public class GameWindow extends JFrame
 	/**
 	 * Main window's helper class, which listens to what the keyboard does.
 	 * 
-	 * @author Unto Solala. Created 8.8.2013
+	 * @author Unto Solala.
+	 * @since 8.8.2013
 	 */
 	private class BasicKeyListener implements KeyListener
 	{
 		@Override
 		public void keyPressed(KeyEvent ke)
 		{
-			GameWindow.this.mainkeyhandler.onKeyPressed(ke.getKeyChar(), 
+			GameWindow.this.mainKeyHandler.onKeyPressed(ke.getKeyChar(), 
 					ke.getKeyCode(), ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED);
 		}
 
 		@Override
 		public void keyReleased(KeyEvent ke)
 		{
-			GameWindow.this.mainkeyhandler.onKeyReleased(ke.getKeyChar(), 
+			GameWindow.this.mainKeyHandler.onKeyReleased(ke.getKeyChar(), 
 					ke.getKeyCode(), ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED);
 		}
 

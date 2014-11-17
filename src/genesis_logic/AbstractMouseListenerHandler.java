@@ -4,6 +4,11 @@ import genesis_logic.AdvancedMouseListener.MouseButton;
 import genesis_logic.AdvancedMouseListener.MouseButtonEventScale;
 import genesis_logic.AdvancedMouseListener.MouseButtonEventType;
 import genesis_logic.AdvancedMouseListener.MousePositionEventType;
+import genesis_util.GenesisHandlerType;
+import genesis_util.Handled;
+import genesis_util.Handler;
+import genesis_util.HandlerType;
+import genesis_util.StateOperator;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -13,10 +18,9 @@ import java.util.ArrayList;
  * any new information though which must be done in the subclasses.
  *
  * @author Mikko Hilpinen.
- *         Created 28.12.2012.
+ * @since 28.12.2012.
  */
-public abstract class AbstractMouseListenerHandler extends LogicalHandler 
-implements Actor
+public abstract class AbstractMouseListenerHandler extends Handler implements Actor
 {
 	// ATTRIBUTES	-------------------------------------------------------
 	
@@ -29,6 +33,8 @@ implements Actor
 	
 	private AdvancedMouseEvent lastevent;
 	private double lasteventduration;
+	
+	private StateOperator isActiveOperator;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -55,10 +61,24 @@ implements Actor
 		this.rreleased = false;
 		this.lastevent = AdvancedMouseEvent.OTHER;
 		this.lasteventduration = 0;
+		
+		this.isActiveOperator = new AnyHandledListensMouseOperator(false);
 	}
 
 	
 	// IMPLEMENTED METHODS	-----------------------------------------------
+	
+	@Override
+	public StateOperator getIsActiveStateOperator()
+	{
+		return this.isActiveOperator;
+	}
+	
+	@Override
+	public HandlerType getHandlerType()
+	{
+		return GenesisHandlerType.MOUSEHANDLER;
+	}
 	
 	@Override
 	public void act(double steps)
@@ -66,6 +86,7 @@ implements Actor
 		// Informs the objects
 		this.lastevent = AdvancedMouseEvent.OTHER;
 		this.lasteventduration = steps;
+		
 		handleObjects();
 		
 		// Refreshes memory
@@ -83,13 +104,6 @@ implements Actor
 	}
 	
 	@Override
-	protected Class<?> getSupportedClass()
-	{
-		return AdvancedMouseListener.class;
-	}
-	
-	
-	@Override
 	protected boolean handleObject(Handled h)
 	{
 		// Informs the object about the mouse's position
@@ -97,7 +111,7 @@ implements Actor
 		AdvancedMouseListener l = (AdvancedMouseListener) h;
 		
 		// Checks if informing is needed
-		if (!l.isActive())
+		if (!l.getListensToMouseEventsOperator().getState())
 			return true;
 		
 		// Mouse position update
@@ -280,5 +294,45 @@ implements Actor
 	private enum AdvancedMouseEvent
 	{
 		MOVE, OTHER;
+	}
+	
+	
+	// SUBCLASSES	-------------------------------------------
+	
+	/**
+	 * This StateOperator checks all the Handleds and is true if any of them listens to the 
+	 * mouse. This operator may allow state changes and it may not.
+	 * 
+	 * @author Mikko Hilpinen
+	 * @since 17.11.2014
+	 */
+	protected class AnyHandledListensMouseOperator extends ForAnyHandledsOperator
+	{
+		// CONSTRUCTOR	---------------------------------------
+		
+		/**
+		 * Creates a new StateOperator
+		 * 
+		 * @param mutable can the state of the handleds be changed through this operator
+		 */
+		public AnyHandledListensMouseOperator(boolean mutable)
+		{
+			super(mutable);
+		}
+		
+		
+		// IMPLEMENTED METHODS	-------------------------------
+
+		@Override
+		protected void changeHandledState(Handled h, boolean newState)
+		{
+			((AdvancedMouseListener) h).getListensToMouseEventsOperator().setState(newState);
+		}
+
+		@Override
+		protected boolean getHandledState(Handled h)
+		{
+			return ((AdvancedMouseListener) h).getListensToMouseEventsOperator().getState();
+		}
 	}
 }

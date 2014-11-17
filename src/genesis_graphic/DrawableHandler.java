@@ -1,7 +1,10 @@
 package genesis_graphic;
 
-import genesis_logic.Handled;
-import genesis_logic.Handler;
+import genesis_util.GenesisHandlerType;
+import genesis_util.Handled;
+import genesis_util.Handler;
+import genesis_util.HandlerType;
+import genesis_util.StateOperator;
 
 import java.awt.Graphics2D;
 import java.util.Comparator;
@@ -12,7 +15,7 @@ import java.util.Stack;
  * drawSelf-methods and removing them when necessary
  *
  * @author Mikko Hilpinen.
- *         Created 27.11.2012.
+ * @since 27.11.2012.
  */
 public class DrawableHandler extends Handler implements Drawable
 {	
@@ -24,6 +27,8 @@ public class DrawableHandler extends Handler implements Drawable
 	private boolean needsSorting, usesSubDrawers, subDrawersAreReady;
 	private SubDrawer[] subDrawers;
 	private Stack<Drawable> drawablesWaitingDepthSorting;
+	
+	private StateOperator isVisibleOperator;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -55,6 +60,8 @@ public class DrawableHandler extends Handler implements Drawable
 		this.needsSorting = false;
 		this.lastDrawableDepth = DepthConstants.BOTTOM;
 		this.subDrawersAreReady = false;
+		
+		this.isVisibleOperator = new ForAnyHandledsVisibilityOperator();
 		
 		// Initializes the subdrawers (if needed)
 		if (usesDepth && depthSortLayers > 1)
@@ -95,6 +102,18 @@ public class DrawableHandler extends Handler implements Drawable
 	// IMPLEMENTED METHODS	----------------------------------------------
 	
 	@Override
+	public StateOperator getIsVisibleStateOperator()
+	{
+		return this.isVisibleOperator;
+	}
+	
+	@Override
+	public HandlerType getHandlerType()
+	{
+		return GenesisHandlerType.DRAWABLEHANDLER;
+	}
+	
+	@Override
 	public void drawSelf(Graphics2D g2d)
 	{
 		// Handleobjects draws the handleds at default
@@ -102,36 +121,6 @@ public class DrawableHandler extends Handler implements Drawable
 		this.lastDrawableDepth = DepthConstants.BOTTOM + 1000;
 		
 		handleObjects();
-	}
-
-	@Override
-	public boolean isVisible()
-	{
-		// Checks the visibility of all handleds (until finds an visible one)
-		VisibilityCheckOperator checkoperator = new VisibilityCheckOperator();
-		handleObjects(checkoperator);
-		
-		return checkoperator.isVisible();
-	}
-
-	@Override
-	public void setVisible()
-	{
-		// Ends disabilities
-		endDisable();
-		
-		// tries to set all the drawables visible
-		handleObjects(new SetVisibleOperator());
-	}
-
-	@Override
-	public void setInvisible()
-	{
-		// Ends disables since invisibility is stronger
-		endDisable();
-				
-		// tries to set all the drawables invisible
-		handleObjects(new SetInVisibleOperator());
 	}
 	
 	@Override
@@ -210,18 +199,12 @@ public class DrawableHandler extends Handler implements Drawable
 	}
 	
 	@Override
-	protected Class<?> getSupportedClass()
-	{
-		return Drawable.class;
-	}
-	
-	@Override
 	protected boolean handleObject(Handled h)
 	{
 		Drawable d = (Drawable) h;
 		
 		// Draws the visible object
-		if (d.isVisible())
+		if (d.getIsVisibleStateOperator().getState())
 			d.drawSelf(this.lastg2d);
 		
 		// Also checks if the depths are still ok
@@ -276,61 +259,28 @@ public class DrawableHandler extends Handler implements Drawable
 		}	
 	}
 	
-	private class SetVisibleOperator extends HandlingOperator
+	private class ForAnyHandledsVisibilityOperator extends ForAnyHandledsOperator
 	{
-		@Override
-		protected boolean handleObject(Handled h)
+		// CONSTRUCTOR	-----------------------------------
+		
+		public ForAnyHandledsVisibilityOperator()
 		{
-			((Drawable) h).setVisible();
-			return true;
-		}	
-	}
-	
-	private class SetInVisibleOperator extends HandlingOperator
-	{
-		@Override
-		protected boolean handleObject(Handled h)
-		{
-			((Drawable) h).setInvisible();
-			return true;
-		}	
-	}
-	
-	private class VisibilityCheckOperator extends HandlingOperator
-	{
-		// ATTRIBUTES	------------------------------------------------
-		
-		private boolean foundvisible;
-		
-		
-		// CONSTRUCTOR	------------------------------------------------
-		
-		public VisibilityCheckOperator()
-		{
-			this.foundvisible = false;
+			super(true);
 		}
 		
 		
-		// IMPLEMENTED METHODS	----------------------------------------
-		
+		// IMPLEMENTED METHODS	---------------------------
+
 		@Override
-		protected boolean handleObject(Handled h)
+		protected void changeHandledState(Handled h, boolean newState)
 		{
-			if (((Drawable) h).isVisible())
-			{
-				this.foundvisible = true;
-				return false;
-			}
-			else
-				return true;
+			((Drawable) h).getIsVisibleStateOperator().setState(newState);
 		}
-		
-		
-		// GETTERS & SETTERS	----------------------------------------
-		
-		public boolean isVisible()
+
+		@Override
+		protected boolean getHandledState(Handled h)
 		{
-			return this.foundvisible;
+			return ((Drawable) h).getIsVisibleStateOperator().getState();
 		}
 	}
 	

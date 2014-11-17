@@ -1,14 +1,25 @@
 package genesis_logic;
 
+import genesis_util.GenesisHandlerType;
+import genesis_util.Handled;
+import genesis_util.Handler;
+import genesis_util.HandlerType;
+import genesis_util.StateOperator;
+
 /**
  * This class informs a group of keylisteners about the key events
  *
  * @author Mikko Hilpinen.
- *         Created 14.12.2012.
+ * @since 14.12.2012.
  */
-public class KeyListenerHandler extends LogicalHandler implements 
+public class KeyListenerHandler extends Handler implements 
 		AdvancedKeyListener
 {
+	// ATTRIBUTES	---------------------------------
+	
+	private StateOperator listensToKeysOperator;
+	
+	
 	// CONSTRUCTOR	-----------------------------------------------------
 	
 	/**
@@ -20,11 +31,20 @@ public class KeyListenerHandler extends LogicalHandler implements
 	public KeyListenerHandler(boolean autodeath, KeyListenerHandler superhandler)
 	{
 		super(autodeath, superhandler);
+		
+		// Initializes attributes
+		this.listensToKeysOperator = new AnyHandledListensKeyEventsOperator();
 	}
 	
 	
 	// IMPLEMENTED METHODS	---------------------------------------------
 
+	@Override
+	public StateOperator getListensToKeyEventsOperator()
+	{
+		return this.listensToKeysOperator;
+	}
+	
 	@Override
 	public void onKeyDown(char key, int keyCode, boolean coded, double steps)
 	{
@@ -47,9 +67,9 @@ public class KeyListenerHandler extends LogicalHandler implements
 	}
 	
 	@Override
-	protected Class<?> getSupportedClass()
+	public HandlerType getHandlerType()
 	{
-		return AdvancedKeyListener.class;
+		return GenesisHandlerType.KEYHANDLER;
 	}
 	
 	@Override
@@ -115,7 +135,7 @@ public class KeyListenerHandler extends LogicalHandler implements
 			AdvancedKeyListener l = (AdvancedKeyListener) h;
 			
 			// Only informs active handleds
-			if (!l.isActive())
+			if (!l.getListensToKeyEventsOperator().getState())
 				return true;
 			
 			// Calls an event for the handled
@@ -130,6 +150,31 @@ public class KeyListenerHandler extends LogicalHandler implements
 			}
 			
 			return true;
+		}
+	}
+	
+	private class AnyHandledListensKeyEventsOperator extends ForAnyHandledsOperator
+	{
+		// CONSTRUCTOR	-------------------------------------
+		
+		public AnyHandledListensKeyEventsOperator()
+		{
+			super(true);
+		}
+
+		
+		// IMPLEMENTED METHODS	------------------------------
+		
+		@Override
+		protected void changeHandledState(Handled h, boolean newState)
+		{
+			((AdvancedKeyListener) h).getListensToKeyEventsOperator().setState(newState);
+		}
+
+		@Override
+		protected boolean getHandledState(Handled h)
+		{
+			return ((AdvancedKeyListener) h).getListensToKeyEventsOperator().getState();
 		}
 	}
 }

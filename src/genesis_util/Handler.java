@@ -1,4 +1,4 @@
-package genesis_logic;
+package genesis_util;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -13,18 +14,17 @@ import java.util.concurrent.locks.ReentrantLock;
  * inform its subobjects and can be handled itself.
  *
  * @author Mikko Hilpinen.
- *         Created 8.12.2012.
+ * @since 8.12.2012.
  */
-public abstract class Handler implements Handled
+public abstract class Handler implements Handled, StateOperatorListener
 {
 	// ATTRIBUTES	-----------------------------------------------------
 	
 	private LinkedList<Handled> handleds;
 	private ArrayList<Handled> handledstoberemoved, handledstobeadded;
-	private boolean autodeath;
-	private boolean killed;
-	private boolean started; // Have any objects been added to the handler yet
 	private boolean disabled; // Has the handler been temporarily disabled
+	private StateOperator isDeadOperator;
+	private boolean started;
 	
 	private HashMap<HandlingOperation, ReentrantLock> locks;
 	
@@ -42,17 +42,21 @@ public abstract class Handler implements Handled
 	public Handler(boolean autodeath, Handler superhandler)
 	{
 		// Initializes attributes
-		this.autodeath = autodeath;
-		this.killed = false;
 		this.handleds = new LinkedList<Handled>();
 		this.handledstobeadded = new ArrayList<Handled>();
 		this.handledstoberemoved = new ArrayList<Handled>();
-		this.started = false;
 		this.disabled = false;
+		this.started = false;
 		this.locks = new HashMap<HandlingOperation, ReentrantLock>();
 		this.locks.put(HandlingOperation.HANDLE, new ReentrantLock());
 		this.locks.put(HandlingOperation.ADD, new ReentrantLock());
 		this.locks.put(HandlingOperation.REMOVE, new ReentrantLock());
+		
+		if (autodeath)
+			this.isDeadOperator = new HandledDependentAutodeathOperator();
+		else
+			this.isDeadOperator = new LatchStateOperator(false);
+		this.isDeadOperator.getListenerHandler().addStateListener(this);
 		
 		// Tries to add itself to the superhandler
 		if (superhandler != null)
@@ -63,9 +67,9 @@ public abstract class Handler implements Handled
 	// ABSTRACT METHODS	---------------------------------------------------
 	
 	/**
-	 * @return The class supported by the handler
+	 * @return Which kind of HandlerType this handler represents
 	 */
-	protected abstract Class<?> getSupportedClass();
+	public abstract HandlerType getHandlerType();
 	
 	/**
 	 * Many handlers are supposed to do something to the handled objects. 
@@ -82,60 +86,56 @@ public abstract class Handler implements Handled
 	// IMPLEMENTED METHODS	-----------------------------------------------
 
 	@Override
-	public boolean isDead()
+	public StateOperator getIsDeadStateOperator()
 	{
-		// The handler is dead if it was killed
-		if (this.killed)
-			return true;
-		
-		// or if autodeath is on and it's empty (but has had an object in it 
-		// previously)
-		if (this.autodeath)
-		{	
-			updateStatus();
-			//System.out.println("Started: " + this.started + ", empty: " + 
-			//this.handleds.isEmpty());
-			if (this.started && this.handleds.isEmpty())
-				return true;
-		}
-		
-		return false;
-	}
-
-	@Override
-	public void kill()
-	{
-		// Tries to permanently inactivate all subhandleds and kill the handler
-		Iterator<Handled> iterator = getIterator();
-		
-		while (iterator.hasNext())
-		{
-			iterator.next().kill();
-		}
-		
-		// Also erases the memory
-		killWithoutKillingHandleds();
+		return this.isDeadOperator;
 	}
 	
-	/**
-	 * Kills the handler but spares the handleds in the handler. This should 
-	 * be used instead of kill -method if, for example, the handleds are still 
-	 * used in another handler.
-	 */
-	public void killWithoutKillingHandleds()
+	@Override
+	public void onStateChange(StateOperator source, boolean newState)
 	{
-		// Safely clears the handleds
-		clearOperationList(HandlingOperation.HANDLE);
-		// Safely clears the added handleds
-		clearOperationList(HandlingOperation.ADD);
-		// And finally clears the removed handleds
-		clearOperationList(HandlingOperation.REMOVE);
-		
-		this.killed = true;
+		// If the Handler was killed, clears the remaining operation lists
+		if (newState && source == this.isDeadOperator)
+		{
+			// Safely clears the handleds
+			clearOperationList(HandlingOperation.HANDLE);
+			// Safely clears the added handleds
+			clearOperationList(HandlingOperation.ADD);
+			// And finally clears the removed handleds
+			clearOperationList(HandlingOperation.REMOVE);
+		}
 	}
 	
 	
 	// OTHER METHODS	---------------------------------------------------
+	
+	/**
+	 * Takes Handleds from another handler and moves them to this handler instead.
+	 * 
+	 * @param other The handler from which the Handleds are moved from. 
+	 * Must be of the same HandlerType with this handler.
+	 * @throws HandledTypeException If the given handler is not of the same type with 
+	 * this handler
+	 */
+	protected void transferHandledsFrom(Handler other) throws HandledTypeException
+	{
+		// Checks that the given handler is of the right type
+		if (other.getHandlerType() != getHandlerType())
+			throw new HandledTypeException("Cannot accept elements from handler of type " + 
+					other.getHandlerType());
+		
+		// Transfers the handleds
+		List<Handled> handledsToBeTransferred = new ArrayList<Handled>();
+		handledsToBeTransferred.addAll(other.handleds);
+		
+		for (Handled h : handledsToBeTransferred)
+		{
+			addHandled(h);
+			other.removeHandled(h);
+		}
+		
+		handledsToBeTransferred.clear();
+	}
 	
 	/**
 	 * Goes through all the handleds and calls the operator's handleObject() 
@@ -165,12 +165,13 @@ public abstract class Handler implements Handled
 			
 			while (iterator.hasNext())
 			{
+				/*
 				if (this.killed)
 					break;
-				
+				*/
 				Handled h = iterator.next();
 				
-				if (!h.isDead() /*&& !this.handledstoberemoved.containsKey(h)*/)
+				if (!h.getIsDeadStateOperator().getState())
 				{	
 					// Doesn't handle objects after handleobjects has returned 
 					// false. Continues through the cycle though to remove dead 
@@ -181,7 +182,6 @@ public abstract class Handler implements Handled
 						{
 							if (!handleObject(h))
 								handlingskipped = true;
-							
 						}
 						else if (!operator.handleObject(h))
 							handlingskipped = true;
@@ -225,11 +225,9 @@ public abstract class Handler implements Handled
 	 * @param h The object to be handled
 	 */
 	protected void addHandled(Handled h)
-	{	
-		//System.out.println(this + " tries to add a handled");
-		
+	{
 		// Handled must be of the supported class
-		if (!getSupportedClass().isInstance(h))
+		if (!getHandlerType().getSupportedHandledClass().isInstance(h))
 		{
 			System.err.println(getClass().getName() + 
 					" does not support given object's class");
@@ -508,6 +506,35 @@ public abstract class Handler implements Handled
 	// SUBCLASSES	-------------------------------------------------------
 	
 	/**
+	 * HandledTypeExceptions are thrown when unsupported handled classes or handler types 
+	 * are used. This can be considered fatal programming errors.
+	 * 
+	 * @author Mikko Hilpinen
+	 * @since 16.11.2014
+	 */
+	public static class HandledTypeException extends RuntimeException
+	{
+		private static final long serialVersionUID = 272001470257069786L;
+
+		/**
+		 * Creates a new exception with the given message
+		 * @param message The message that will be sent along with the exception
+		 */
+		public HandledTypeException(String message)
+		{
+			super(message);
+		}
+		
+		/**
+		 * Creates a new exception without a message
+		 */
+		public HandledTypeException()
+		{
+			super();
+		}
+	}
+	
+	/**
 	 * HandlingOperator is a function object that does a specific operation 
 	 * for a single handled. The subclasses of this class will define the 
 	 * nature of the operation.<br>
@@ -515,7 +542,7 @@ public abstract class Handler implements Handled
 	 * used with multiple handleds in succession.
 	 *
 	 * @author Mikko Hilpinen.
-	 *         Created 19.10.2013.
+	 * @since 19.10.2013.
 	 */
 	protected abstract class HandlingOperator
 	{
@@ -528,5 +555,254 @@ public abstract class Handler implements Handled
 		 * @return Should the operation be done for the remaining handleds as well
 		 */
 		protected abstract boolean handleObject(Handled h);
+	}
+	
+	private abstract class IterativeStateOperator extends StateOperator implements 
+			StateOperatorListener
+	{
+		// ATTRIBUTES	--------------------------------------
+		
+		private StateOperator isDeadOperator;
+				
+		
+		// CONSTRUCTOR	--------------------------------------
+				
+		public IterativeStateOperator(boolean mutable)
+		{
+			super(true, mutable);
+			
+			// Initializes attributes
+			this.isDeadOperator = new StateOperator(false, false);
+			getListenerHandler().addStateListener(this);
+		}
+		
+		// ABSTRACT METHODS	----------------------------------
+		
+		/**
+		 * Changes a state of a handled
+		 * @param h the handled that will be modified
+		 * @param newState The new state the handled should receive
+		 */
+		protected abstract void changeHandledState(Handled h, boolean newState);
+		
+		/**
+		 * Checks a state of a handled
+		 * @param h The handled that will be checked
+		 * @return The state of the handled
+		 */
+		protected abstract boolean getHandledState(Handled h);
+		
+		
+		// IMPLEMENTED METHODS	------------------------------
+		
+		@Override
+		public StateOperator getIsDeadStateOperator()
+		{
+			return this.isDeadOperator;
+		}
+		
+		@Override
+		public void onStateChange(StateOperator source, boolean newState)
+		{
+			// Tries to change the state of all the handleds
+			HandlingOperator operator = new StateAdjustMentOperator(newState);
+			handleObjects(operator);
+		}
+		
+		
+		// SUBCLASSES	-----------------------------------------
+		
+		private class StateAdjustMentOperator extends HandlingOperator
+		{
+			// ATTRIBUTES	-------------------------------------
+			
+			private boolean newState;
+			
+			
+			// CONSTRUCTOR	-------------------------------------
+			
+			public StateAdjustMentOperator(boolean newState)
+			{
+				// Initializes attributes
+				this.newState = newState;
+			}
+			
+			
+			// IMPLEMENTED METHODS	-----------------------------
+			
+			@Override
+			protected boolean handleObject(Handled h)
+			{
+				changeHandledState(h, this.newState);
+				return true;
+			}	
+		}
+		
+		protected class StateCheckOperator extends HandlingOperator
+		{
+			// ATTRIBUTES	------------------------------------
+			
+			private boolean found, searchedState;
+			
+			
+			// CONSTRUCTOR	------------------------------------
+			
+			public StateCheckOperator(boolean searchedState)
+			{
+				// Initializes attributes
+				this.found = false;
+				this.searchedState = searchedState;
+			}
+			
+			
+			// IMPLEMENTED METHODS	----------------------------
+			
+			@Override
+			protected boolean handleObject(Handled h)
+			{
+				if (getHandledState(h) == this.searchedState)
+				{
+					this.found = true;
+					return false;
+				}
+				else
+					return true;
+			}
+			
+			
+			// OTHER METHODS	--------------------------------
+			
+			public boolean getState()
+			{
+				return this.found;
+			}
+		}
+	}
+	
+	/**
+	 * This StateOperator affects and checks the state of all the Handleds kept in this 
+	 * Handler. There must be only one handled with true state in order for the operator's 
+	 * state to be true. The class is abstract since only the subclasses know the methods of 
+	 * using handled states.
+	 * 
+	 * @author Mikko Hilpinen
+	 * @since 17.11.2014
+	 */
+	protected abstract class ForAnyHandledsOperator extends IterativeStateOperator
+	{
+		// CONSTRUCTOR	--------------------------------------
+		
+		/**
+		 * Creates a new StateOperator.
+		 * 
+		 * @param mutable can the state of the handleds be modified by external sources
+		 */
+		public ForAnyHandledsOperator(boolean mutable)
+		{
+			super(mutable);
+		}
+		
+		
+		// IMPLEMENTED METHODS	------------------------------
+		
+		@Override
+		public boolean getState()
+		{
+			// The operator's state depends on the state of the handleds
+			StateCheckOperator operator = new StateCheckOperator(true);
+			handleObjects(operator);
+			return operator.getState();
+		}
+	}
+	
+	/**
+	 * This StateOperator affects and checks the state of all the Handleds kept in this 
+	 * Handler. All the handlers' states must be true in order for the operator's state 
+	 * to be true. The class is abstract since only the subclasses know the methods of 
+	 * using handled states.
+	 * 
+	 * @author Mikko Hilpinen
+	 * @since 16.11.2014
+	 */
+	protected abstract class ForAllHandledsOperator extends IterativeStateOperator
+	{
+		// CONSTRUCTOR	--------------------------------------
+		
+		/**
+		 * Creates a new StateOperator.
+		 * 
+		 * @param mutable can the state of the handleds be modified by external sources
+		 */
+		public ForAllHandledsOperator(boolean mutable)
+		{
+			super(mutable);
+		}
+		
+		
+		// IMPLEMENTED METHODS	------------------------------
+		
+		@Override
+		public boolean getState()
+		{
+			// The operator's state depends on the state of the handleds
+			StateCheckOperator operator = new StateCheckOperator(false);
+			handleObjects(operator);
+			return !operator.getState();
+		}
+	}
+	
+	private class ForAllHandledsIsDeadOperator extends ForAllHandledsOperator
+	{
+		// CONSTRUCTOR	----------------------------------------
+		
+		public ForAllHandledsIsDeadOperator()
+		{
+			super(true);
+		}
+		
+		
+		// IMPLEMENTED METHODS	--------------------------------
+
+		@Override
+		protected void changeHandledState(Handled h, boolean newState)
+		{
+			h.getIsDeadStateOperator().setState(newState);
+		}
+
+		@Override
+		protected boolean getHandledState(Handled h)
+		{
+			return h.getIsDeadStateOperator().getState();
+		}
+	}
+	
+	private class HandledDependentAutodeathOperator extends StateOperator
+	{
+		// ATTRIBUTES	------------------------------------
+		
+		private StateOperator allHandledsAreDeadOperator;
+		
+		
+		// CONSTRUCTOR	------------------------------------
+		
+		public HandledDependentAutodeathOperator()
+		{
+			super(false, true);
+			
+			// Initializes attributes
+			this.allHandledsAreDeadOperator = new ForAllHandledsIsDeadOperator();
+		}
+		
+		
+		// IMPLEMENTED METHODS	----------------------------
+		
+		@Override
+		public boolean getState()
+		{
+			if (!Handler.this.started)
+				return super.getState();
+			else
+				return super.getState() || this.allHandledsAreDeadOperator.getState();
+		}
 	}
 }

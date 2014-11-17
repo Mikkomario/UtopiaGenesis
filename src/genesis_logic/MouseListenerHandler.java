@@ -1,12 +1,14 @@
 package genesis_logic;
 
+import genesis_util.StateOperator;
+
 import java.awt.geom.Point2D;
 
 /**
  * Informs multiple mouselisteners about the mouse's movements and button status
  *
  * @author Mikko Hilpinen.
- *         Created 28.12.2012.
+ * @since 28.12.2012.
  */
 public class MouseListenerHandler extends AbstractMouseListenerHandler 
 	implements AdvancedMouseListener
@@ -35,6 +37,12 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	
 	// IMPLEMENTED METHODS	-------------------------------------------------
 
+	@Override
+	public StateOperator getListensToMouseEventsOperator()
+	{
+		return getIsActiveStateOperator();
+	}
+	
 	@Override
 	public boolean listensMouseEnterExit()
 	{
@@ -86,7 +94,6 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 		// Handlers are interested in all areas
 		return true;
 	}
-
 
 	@Override
 	public void onMousePositionEvent(MousePositionEventType eventType,
