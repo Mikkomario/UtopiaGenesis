@@ -1,9 +1,9 @@
 package genesis_logic;
 
-import genesis_logic.AdvancedMouseListener.MouseButton;
-import genesis_logic.AdvancedMouseListener.MouseButtonEventScale;
-import genesis_logic.AdvancedMouseListener.MouseButtonEventType;
-import genesis_logic.AdvancedMouseListener.MousePositionEventType;
+import genesis_logic.AdvancedMouseEvent.MouseButton;
+import genesis_logic.AdvancedMouseEvent.MouseButtonEventScale;
+import genesis_logic.AdvancedMouseEvent.MouseButtonEventType;
+import genesis_logic.AdvancedMouseEvent.MouseMovementEventType;
 import genesis_util.GenesisHandlerType;
 import genesis_util.Handled;
 import genesis_util.Handler;
@@ -13,10 +13,12 @@ import genesis_util.StateOperator;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
- * This class handles the informing of mouselsteners. It does not actively find 
- * any new information though which must be done in the subclasses.
+ * This class handles the informing of mouseListeners. It does not actively find 
+ * any new information though, which must be done through the subclasses.
  *
  * @author Mikko Hilpinen.
  * @since 28.12.2012.
@@ -26,14 +28,10 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	// ATTRIBUTES	-------------------------------------------------------
 	
 	private Point2D.Double currentMousePosition;
-	private boolean ldown, rdown, lpressed, rpressed, lreleased, rreleased;
+	private HashMap<MouseButtonEventType, HashMap<MouseButton, Boolean>> mouseButtonStates;
+	private HashMap<MouseMovementEventType, List<AdvancedMouseListener>> movementEventTargets;
 	
-	private ArrayList<AdvancedMouseListener> entered;
-	private ArrayList<AdvancedMouseListener> over;
-	private ArrayList<AdvancedMouseListener> exited;
-	
-	private AdvancedMouseEvent lastevent;
-	private double lasteventduration;
+	private double lastStepDuration;
 	
 	private StateOperator isActiveOperator;
 	
@@ -74,6 +72,8 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	public AbstractMouseListenerHandler(boolean autoDeath)
 	{
 		super(autoDeath);
+		
+		initialize();
 	}
 
 	
@@ -94,114 +94,45 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	@Override
 	public void act(double steps)
 	{
+		this.lastStepDuration = steps;
+		
 		// Informs the objects
-		this.lastevent = AdvancedMouseEvent.OTHER;
-		this.lasteventduration = steps;
-		
-		handleObjects();
-		
-		// Refreshes memory
-		if (this.entered.size() > 0)
-		{
-			this.over.addAll(this.entered);
-			this.entered.clear();
-		}
-		
-		this.exited.clear();
-		this.lpressed = false;
-		this.rpressed = false;
-		this.lreleased = false;
-		this.rreleased = false;
+		informObjectsAboutMouseButtonEvents(new AdvancedMouseEvent(MouseButtonEventType.NONE, 
+				MouseButton.NONE, this.currentMousePosition, steps));
+		informObjectsAboutMouseEnterExit(new AdvancedMouseEvent(this.currentMousePosition, 
+				steps));
 	}
 	
 	@Override
 	protected boolean handleObject(Handled h)
 	{
-		// Informs the object about the mouse's position
-		// Or button status
+		// Handles mouse move event
+		
 		AdvancedMouseListener l = (AdvancedMouseListener) h;
 		
 		// Checks if informing is needed
 		if (!l.getListensToMouseEventsOperator().getState())
 			return true;
 		
-		// Mouse position update
-		if (this.lastevent == AdvancedMouseEvent.MOVE)
-		{
-			// Updates mouse-enter and mouse-leave
-			if (l.listensMouseEnterExit())
-			{		
-				// Checks if entered
-				if (!this.over.contains(l) && !this.entered.contains(l) 
-						&& l.listensPosition(getMousePosition()))
-				{
-					this.entered.add(l);
-					return true;
-				}
+		// Updates mouse-enter and mouse-exit	
+		// Checks if entered
+		if (!this.movementEventTargets.get(MouseMovementEventType.OVER).contains(l) && 
+				!this.movementEventTargets.get(MouseMovementEventType.ENTER).contains(l) 
+				&& l.isInAreaOfInterest(getMousePosition()))
+			this.movementEventTargets.get(MouseMovementEventType.ENTER).add(l);
 
-				// Checks if exited
-				if (this.over.contains(l) && !this.exited.contains(l) && 
-						!l.listensPosition(getMousePosition()))
-				{
-					this.over.remove(l);
-					this.exited.add(l);
-				}
-			}
-			// Informs the listener about the move-event as well
-			l.onMouseMove(getMousePosition());
-		}
-		else if (this.lastevent == AdvancedMouseEvent.OTHER)
+		// Checks if exited
+		else if (this.movementEventTargets.get(MouseMovementEventType.OVER).contains(l) && 
+				!this.movementEventTargets.get(MouseMovementEventType.EXIT).contains(l) && 
+				!l.isInAreaOfInterest(getMousePosition()))
 		{
-			// Only if the object cares about mouse movement
-			if (l.listensMouseEnterExit())
-			{
-				// Mouseover
-				if (this.over.contains(l))
-					l.onMousePositionEvent(MousePositionEventType.OVER, 
-							getMousePosition(), this.lasteventduration);
-				// Exiting
-				else if (this.exited.contains(l))
-					l.onMousePositionEvent(MousePositionEventType.EXIT, 
-							getMousePosition(), this.lasteventduration);
-				// Entering
-				else if (this.entered.contains(l))
-					l.onMousePositionEvent(MousePositionEventType.ENTER, 
-							getMousePosition(), this.lasteventduration);
-			}
-			
-			// Informs about mouse buttons (if the listener is interested)
-			if (l.getCurrentButtonScaleOfInterest().equals(
-					MouseButtonEventScale.GLOBAL) || 
-					(l.getCurrentButtonScaleOfInterest().equals(
-					MouseButtonEventScale.LOCAL) && 
-					l.listensPosition(getMousePosition())))
-			{
-				if (leftIsDown())
-					l.onMouseButtonEvent(MouseButton.LEFT, 
-							MouseButtonEventType.DOWN, getMousePosition(), 
-							this.lasteventduration);
-				if (rightIsDown())
-					l.onMouseButtonEvent(MouseButton.RIGHT, 
-							MouseButtonEventType.DOWN, getMousePosition(), 
-							this.lasteventduration);
-				if (this.lpressed)
-					l.onMouseButtonEvent(MouseButton.LEFT, 
-							MouseButtonEventType.PRESSED, getMousePosition(), 
-							this.lasteventduration);
-				if (this.rpressed)
-					l.onMouseButtonEvent(MouseButton.RIGHT, 
-							MouseButtonEventType.PRESSED, getMousePosition(), 
-							this.lasteventduration);
-				if (this.lreleased)
-					l.onMouseButtonEvent(MouseButton.LEFT, 
-							MouseButtonEventType.RELEASED, getMousePosition(), 
-							this.lasteventduration);
-				if (this.rreleased)
-					l.onMouseButtonEvent(MouseButton.RIGHT, 
-							MouseButtonEventType.RELEASED, getMousePosition(), 
-							this.lasteventduration);
-			}
+			this.movementEventTargets.get(MouseMovementEventType.OVER).remove(l);
+			this.movementEventTargets.get(MouseMovementEventType.EXIT).add(l);
 		}
+		
+		// Informs the listener about the move-event as well
+		informObjectAboutMouseEvent(l, new AdvancedMouseEvent(getMousePosition(), 
+				this.lastStepDuration).withMovementType(MouseMovementEventType.MOVE));
 		
 		return true;
 	}
@@ -218,19 +149,31 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	}
 	
 	/**
-	 * @return Is the left mouse button currently down
+	 * @param button The mouse button that might be down
+	 * @return Is the given mouse button currently pressed down
 	 */
-	public boolean leftIsDown()
+	public boolean buttonIsDown(MouseButton button)
 	{
-		return this.ldown;
+		return this.mouseButtonStates.get(MouseButtonEventType.DOWN).get(button);
 	}
 	
 	/**
-	 * @return Is the right mouse button currently down
+	 * Informs the handler about a mouse button's new status
+	 * 
+	 * @param button The button whose status is updated
+	 * @param isDown Is the given button currently pressed down
 	 */
-	public boolean rightIsDown()
+	public void setButtonState(MouseButton button, boolean isDown)
 	{
-		return this.rdown;
+		if (buttonIsDown(button) != isDown)
+		{
+			this.mouseButtonStates.get(MouseButtonEventType.DOWN).put(button, isDown);
+			
+			if (isDown)
+				this.mouseButtonStates.get(MouseButtonEventType.PRESSED).put(button, true);
+			else
+				this.mouseButtonStates.get(MouseButtonEventType.RELEASED).put(button, true);
+		}
 	}
 	
 	/**
@@ -241,48 +184,11 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	public void setMousePosition(Point2D.Double newMousePosition)
 	{		
 		if (!getMousePosition().equals(newMousePosition))
-		{		
+		{
 			this.currentMousePosition = (Point2D.Double) newMousePosition.clone();
 			
 			// Informs the objects
-			this.lastevent = AdvancedMouseEvent.MOVE;
 			handleObjects();
-		}
-	}
-	
-	/**
-	 * Informs the object about the mouse's left button's status
-	 *
-	 * @param leftmousedown Is the mouse's left button down
-	 */
-	public void setLeftMouseDown(boolean leftmousedown)
-	{
-		if (this.ldown != leftmousedown)
-		{
-			this.ldown = leftmousedown;
-			
-			if (leftmousedown)
-				this.lpressed = true;
-			else
-				this.lreleased = true;
-		}
-	}
-	
-	/**
-	 * Informs the object about the mouse's right button's status
-	 *
-	 * @param rightmousedown Is the mouse's right button down
-	 */
-	public void setRightMouseDown(boolean rightmousedown)
-	{
-		if (this.rdown != rightmousedown)
-		{
-			this.rdown = rightmousedown;
-			
-			if (rightmousedown)
-				this.rpressed = true;
-			else
-				this.rreleased = true;
 		}
 	}
 	
@@ -299,29 +205,75 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 		addHandled(m);
 	}
 	
+	private void informObjectsAboutMouseEnterExit(AdvancedMouseEvent baseEvent)
+	{
+		handleObjects(new MouseMovementEventOperator(baseEvent));
+		
+		// After the entered -event has been informed, over -event will be informed in the 
+		// future instead
+		List<AdvancedMouseListener> entered = 
+				this.movementEventTargets.get(MouseMovementEventType.ENTER);
+		if (!entered.isEmpty())
+		{
+			this.movementEventTargets.get(MouseMovementEventType.OVER).addAll(entered);
+			entered.clear();
+		}
+		
+		this.movementEventTargets.get(MouseMovementEventType.EXIT).clear();
+	}
+	
+	private void informObjectsAboutMouseButtonEvents(AdvancedMouseEvent baseEvent)
+	{
+		handleObjects(new MouseButtonEventOperator(baseEvent));
+		
+		for (MouseButtonEventType buttonEvent : this.mouseButtonStates.keySet())
+		{
+			if (buttonEvent != MouseButtonEventType.DOWN)
+			{
+				for (MouseButton button : this.mouseButtonStates.get(buttonEvent).keySet())
+				{
+					this.mouseButtonStates.get(buttonEvent).put(button, false);
+				}
+			}
+		}
+	}
+	
+	private static void informObjectAboutMouseEvent(AdvancedMouseListener listener, 
+			AdvancedMouseEvent event)
+	{
+		// Checks if the event should be given to the listener
+		if (listener.getMouseEventSelector().selects(event))
+			listener.onMouseEvent(event);
+	}
+	
 	private void initialize()
 	{
 		// Initializes attributes
 		this.currentMousePosition = new Point2D.Double(0, 0);
-		this.entered = new ArrayList<AdvancedMouseListener>();
-		this.over = new ArrayList<AdvancedMouseListener>();
-		this.exited = new ArrayList<AdvancedMouseListener>();
-		this.lpressed = false;
-		this.rpressed = false;
-		this.lreleased = false;
-		this.rreleased = false;
-		this.lastevent = AdvancedMouseEvent.OTHER;
-		this.lasteventduration = 0;
+		this.lastStepDuration = 0;
 		
 		this.isActiveOperator = new AnyHandledListensMouseOperator(false);
-	}
-	
-	
-	// ENUMERATIONS	------------------------------------------------------
-	
-	private enum AdvancedMouseEvent
-	{
-		MOVE, OTHER;
+		
+		this.mouseButtonStates = new HashMap<MouseButtonEventType, HashMap<MouseButton, 
+				Boolean>>();
+		this.movementEventTargets = new HashMap<MouseMovementEventType, 
+				List<AdvancedMouseListener>>();
+		
+		for (MouseButtonEventType type : MouseButtonEventType.values())
+		{
+			this.mouseButtonStates.put(type, new HashMap<MouseButton, Boolean>());
+			
+			for (MouseButton button : MouseButton.values())
+			{
+				this.mouseButtonStates.get(button).put(button, false);
+			}
+		}
+		
+		for (MouseMovementEventType type : MouseMovementEventType.values())
+		{
+			if (type != MouseMovementEventType.NONE && type != MouseMovementEventType.MOVE)
+				this.movementEventTargets.put(type, new ArrayList<AdvancedMouseListener>());
+		}
 	}
 	
 	
@@ -362,5 +314,107 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 		{
 			return ((AdvancedMouseListener) h).getListensToMouseEventsOperator().getState();
 		}
+	}
+	
+	private abstract class MouseEventOperator extends HandlingOperator
+	{
+		// ATTRIBUTES	---------------------------------------
+		
+		private AdvancedMouseEvent baseEvent;
+		
+		
+		// CONSTRUCTOR	---------------------------------------
+		
+		public MouseEventOperator(AdvancedMouseEvent baseEvent)
+		{
+			this.baseEvent = baseEvent;
+		}
+		
+		
+		// GETTERS & SETTERS	-------------------------------
+		
+		protected AdvancedMouseEvent getBaseEvent()
+		{
+			return this.baseEvent;
+		}
+	}
+	
+	private class MouseMovementEventOperator extends MouseEventOperator
+	{	
+		// CONSTRUCTOR	---------------------------------------
+		
+		public MouseMovementEventOperator(AdvancedMouseEvent baseEvent)
+		{
+			super(baseEvent);
+		}
+		
+		
+		// IMPLEMENTED METHODS	-------------------------------
+		
+		@Override
+		protected boolean handleObject(Handled h)
+		{
+			AdvancedMouseListener l = (AdvancedMouseListener) h;
+			
+			// Checks if informing is needed
+			if (!l.getListensToMouseEventsOperator().getState())
+				return true;
+			
+			for (MouseMovementEventType movementType : 
+					AbstractMouseListenerHandler.this.movementEventTargets.keySet())
+			{
+				if (AbstractMouseListenerHandler.this.movementEventTargets.get(movementType).contains(l))
+				{
+					informObjectAboutMouseEvent(l, getBaseEvent().withMovementType(movementType));
+					break;
+				}
+			}
+			
+			return true;
+		}
+	}
+	
+	private class MouseButtonEventOperator extends MouseEventOperator
+	{
+		// CONSTRUCTOR	----------------------------------------
+		
+		public MouseButtonEventOperator(AdvancedMouseEvent baseEvent)
+		{
+			super(baseEvent);
+		}
+		
+		
+		// IMPLEMENTED METHODS	--------------------------------
+
+		@Override
+		protected boolean handleObject(Handled h)
+		{
+			AdvancedMouseListener l = (AdvancedMouseListener) h;
+			
+			// Checks if informing is needed
+			if (!l.getListensToMouseEventsOperator().getState())
+				return true;
+			
+			// Checks the event scale
+			MouseButtonEventScale scale = MouseButtonEventScale.GLOBAL;
+			if (l.isInAreaOfInterest(getBaseEvent().getPosition()))
+				scale = MouseButtonEventScale.LOCAL;
+			
+			HashMap<MouseButtonEventType, HashMap<MouseButton, Boolean>> buttonStates = 
+					AbstractMouseListenerHandler.this.mouseButtonStates;
+			for (MouseButtonEventType buttonEventType : buttonStates.keySet())
+			{
+				for (MouseButton button : buttonStates.get(buttonEventType).keySet())
+				{
+					if (buttonStates.get(buttonEventType).get(button))
+						informObjectAboutMouseEvent(l, new AdvancedMouseEvent(buttonEventType, 
+								button, getBaseEvent().getPosition(), 
+								getBaseEvent().getDuration()).withScale(scale));
+				}
+			}
+			
+			return true;
+		}
+		
 	}
 }

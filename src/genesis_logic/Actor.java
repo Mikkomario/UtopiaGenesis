@@ -22,11 +22,11 @@ public interface Actor extends Handled
 	/**
 	 * This is the actors action, which will be called at each step
 	 * 
-	 * @param steps How many steps passed before the last update.<br>
+	 * @param duration How many steps passed since the last update.<br>
 	 * Under normal circumstances this should be 1 but in programs that run 
 	 * slower or faster than usual it might vary
 	 */
-	public void act(double steps);
+	public void act(double duration);
 	
 	/**
 	 * @return The stateOperator that determines if the object's act method should be called.

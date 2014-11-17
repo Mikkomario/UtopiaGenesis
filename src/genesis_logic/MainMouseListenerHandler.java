@@ -1,5 +1,6 @@
 package genesis_logic;
 
+import genesis_logic.AdvancedMouseEvent.MouseButton;
 import genesis_util.HandlerRelay;
 
 import java.awt.event.MouseEvent;
@@ -63,15 +64,24 @@ public class MainMouseListenerHandler extends AbstractMouseListenerHandler
 		
 		if (mousePressed)
 		{
-			if (mouseButton == MouseEvent.BUTTON1)
-				setLeftMouseDown(true);
-			else if (mouseButton == MouseEvent.BUTTON3)
-				setRightMouseDown(true);
+			MouseButton button = MouseButton.NONE;
+			
+			switch (mouseButton)
+			{
+				case MouseEvent.BUTTON1: button = MouseButton.LEFT; break;
+				case MouseEvent.BUTTON2: button = MouseButton.MIDDLE; break;
+				case MouseEvent.BUTTON3: button = MouseButton.RIGHT; break;
+			}
+			
+			setButtonState(button, true);
 		}
 		else
 		{
-			setLeftMouseDown(false);
-			setRightMouseDown(false);
+			for (MouseButton button : MouseButton.values())
+			{
+				if (button != MouseButton.NONE)
+					setButtonState(button, false);
+			}
 		}
 	}
 }

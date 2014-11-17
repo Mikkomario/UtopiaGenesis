@@ -1,5 +1,8 @@
 package genesis_logic;
 
+import genesis_logic.AdvancedMouseEvent.MouseButtonEventScale;
+import genesis_logic.AdvancedMouseEvent.MouseButtonEventType;
+import genesis_logic.AdvancedMouseEvent.MouseEventType;
 import genesis_util.HandlerRelay;
 import genesis_util.StateOperator;
 
@@ -14,6 +17,11 @@ import java.awt.geom.Point2D;
 public class MouseListenerHandler extends AbstractMouseListenerHandler 
 	implements AdvancedMouseListener
 {
+	// ATTRIBUTES	---------------------------------------
+	
+	private MultiMouseEventSelector selector;
+	
+	
 	// CONSTRUCTOR	-------------------------------------------------------
 	
 	/**
@@ -30,6 +38,8 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	{
 		super(autodeath, actorhandler);
 		
+		initialize();
+		
 		// Tries to add the object to the second handler
 		if (superhandler != null)
 			superhandler.addMouseListener(this);
@@ -44,6 +54,8 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	public MouseListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
 	{
 		super(autoDeath, superHandlers);
+		
+		initialize();
 	}
 	
 	/**
@@ -53,73 +65,60 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	public MouseListenerHandler(boolean autoDeath)
 	{
 		super(autoDeath);
+		
+		initialize();
 	}
 	
 	
 	// IMPLEMENTED METHODS	-------------------------------------------------
 
 	@Override
+	public void onMouseEvent(AdvancedMouseEvent event)
+	{
+		// Updates mouse status
+		setMousePosition(event.getPosition());
+		
+		if (event.getType() == MouseEventType.BUTTON)
+		{
+			boolean newState = false;
+			if (event.getButtonEventType() == MouseButtonEventType.PRESSED)
+				newState = true;
+			
+			setButtonState(event.getButton(), newState);
+		}
+	}
+
+	@Override
+	public MouseEventSelector getMouseEventSelector()
+	{
+		return this.selector;
+	}
+	
+	@Override
 	public StateOperator getListensToMouseEventsOperator()
 	{
 		return getIsActiveStateOperator();
 	}
-	
-	@Override
-	public boolean listensMouseEnterExit()
-	{
-		// Does not have a special area of interest
-		return false;
-	}
 
 	@Override
-	public void onMouseMove(Point2D.Double mousePosition)
-	{
-		// Updates mouse status
-		setMousePosition(mousePosition);
-	}
-
-	@Override
-	public MouseButtonEventScale getCurrentButtonScaleOfInterest()
-	{
-		// Handlers are interested in all button events
-		return MouseButtonEventScale.GLOBAL;
-	}
-
-	@Override
-	public void onMouseButtonEvent(MouseButton button,
-			MouseButtonEventType eventType, Point2D.Double mousePosition,
-			double eventStepTime)
-	{
-		// TODO: Change this old system into a more elegant one
-		
-		// Updates the mouse status
-		if (eventType == MouseButtonEventType.PRESSED)
-		{
-			if (button == MouseButton.LEFT)
-				setLeftMouseDown(true);
-			else
-				setRightMouseDown(true);
-		}
-		else if (eventType == MouseButtonEventType.RELEASED)
-		{
-			if (button == MouseButton.LEFT)
-				setLeftMouseDown(false);
-			else
-				setRightMouseDown(false);
-		}
-	}
-
-	@Override
-	public boolean listensPosition(Point2D.Double testedPosition)
+	public boolean isInAreaOfInterest(Point2D.Double testedPosition)
 	{
 		// Handlers are interested in all areas
 		return true;
 	}
-
-	@Override
-	public void onMousePositionEvent(MousePositionEventType eventType,
-			Point2D.Double mousePosition, double eventStepTime)
+	
+	
+	// OTHER METHODS	----------------------------------
+	
+	private void initialize()
 	{
-		// Doesn't react to mouse position events
+		// The handler accepts the mouse move event as well as global mouse button events
+		this.selector = new MultiMouseEventSelector();
+		
+		StrictMouseEventSelector globalButtonSelector = 
+				StrictMouseEventSelector.createButtonStateChangeSelector();
+		globalButtonSelector.addRequiredFeature(MouseButtonEventScale.GLOBAL);
+		this.selector.addOption(globalButtonSelector);
+		this.selector.addOption(StrictMouseEventSelector.createMouseMoveSelector());
 	}
 }
