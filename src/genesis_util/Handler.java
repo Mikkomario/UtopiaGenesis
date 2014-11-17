@@ -42,25 +42,36 @@ public abstract class Handler implements Handled, StateOperatorListener
 	public Handler(boolean autodeath, Handler superhandler)
 	{
 		// Initializes attributes
-		this.handleds = new LinkedList<Handled>();
-		this.handledstobeadded = new ArrayList<Handled>();
-		this.handledstoberemoved = new ArrayList<Handled>();
-		this.disabled = false;
-		this.started = false;
-		this.locks = new HashMap<HandlingOperation, ReentrantLock>();
-		this.locks.put(HandlingOperation.HANDLE, new ReentrantLock());
-		this.locks.put(HandlingOperation.ADD, new ReentrantLock());
-		this.locks.put(HandlingOperation.REMOVE, new ReentrantLock());
-		
-		if (autodeath)
-			this.isDeadOperator = new HandledDependentAutodeathOperator();
-		else
-			this.isDeadOperator = new LatchStateOperator(false);
-		this.isDeadOperator.getListenerHandler().addStateListener(this);
+		initialize(autodeath);
 		
 		// Tries to add itself to the superhandler
 		if (superhandler != null)
 			superhandler.addHandled(this);
+	}
+	
+	/**
+	 * Creates a new Handler and adds it as a handled to the applicable handlers in the given 
+	 * relay.
+	 * @param autoDeath Will the handler die once it becomes empty again
+	 * @param superHandlers A HandlerRelay that holds the Handlers that handle this handler (optional)
+	 */
+	public Handler(boolean autoDeath, HandlerRelay superHandlers)
+	{
+		// Initializes attributes
+		initialize(autoDeath);
+		
+		if (superHandlers != null)
+			superHandlers.addHandled(this);
+	}
+	
+	/**
+	 * Creates a new Handler that won't be handled by any handler.
+	 * 
+	 * @param autoDeath Will the handler die once it becomes empty again
+	 */
+	public Handler(boolean autoDeath)
+	{
+		initialize(autoDeath);
 	}
 	
 	
@@ -492,6 +503,25 @@ public abstract class Handler implements Handled, StateOperatorListener
 		{
 			this.locks.get(o).unlock();
 		}
+	}
+	
+	private void initialize(boolean autoDeath)
+	{
+		this.handleds = new LinkedList<Handled>();
+		this.handledstobeadded = new ArrayList<Handled>();
+		this.handledstoberemoved = new ArrayList<Handled>();
+		this.disabled = false;
+		this.started = false;
+		this.locks = new HashMap<HandlingOperation, ReentrantLock>();
+		this.locks.put(HandlingOperation.HANDLE, new ReentrantLock());
+		this.locks.put(HandlingOperation.ADD, new ReentrantLock());
+		this.locks.put(HandlingOperation.REMOVE, new ReentrantLock());
+		
+		if (autoDeath)
+			this.isDeadOperator = new HandledDependentAutodeathOperator();
+		else
+			this.isDeadOperator = new LatchStateOperator(false);
+		this.isDeadOperator.getListenerHandler().addStateListener(this);
 	}
 	
 	

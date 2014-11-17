@@ -3,6 +3,7 @@ package genesis_logic;
 import genesis_util.GenesisHandlerType;
 import genesis_util.Handled;
 import genesis_util.Handler;
+import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
 import genesis_util.StateOperator;
 
@@ -34,8 +35,32 @@ public class ActorHandler extends Handler implements Actor
 		super(autodeath, superhandler);
 		
 		// Initializes attributes
-		this.laststeplength = 0;
-		this.isActiveOperator = new AnyHandledIsActiveOperator();
+		initialize();
+	}
+	
+	/**
+	 * Creates a new empty ActorHandler
+	 * 
+	 * @param autoDeath Will the Handler die once it becomes empty
+	 * @param superHandlers The HandlerRelay that holds the handlers that will handle this Handler
+	 */
+	public ActorHandler(boolean autoDeath, HandlerRelay superHandlers)
+	{
+		super(autoDeath, superHandlers);
+		
+		initialize();
+	}
+	
+	/**
+	 * Creates a new empty ActorHandler
+	 * 
+	 * @param autoDeath Will the Handler die once it becomes empty
+	 */
+	public ActorHandler(boolean autoDeath)
+	{
+		super(autoDeath);
+		
+		initialize();
 	}
 	
 	
@@ -84,6 +109,13 @@ public class ActorHandler extends Handler implements Actor
 	public void addActor(Actor a)
 	{
 		addHandled(a);
+	}
+	
+	private void initialize()
+	{
+		// Initializes attributes
+		this.laststeplength = 0;
+		this.isActiveOperator = new AnyHandledIsActiveOperator();
 	}
 	
 	

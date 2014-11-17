@@ -57,7 +57,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	public StepHandler(int callInterval, int maxStepsPerCall, 
 			GameWindow window, boolean optimizesteplength)
 	{
-		super(false, null); // Stephandler doesn't have a superhandler
+		super(false); // Stephandler doesn't have a superhandler
 		
 		// Initializes attributes
 		this.callinterval = callInterval;

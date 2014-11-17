@@ -50,8 +50,7 @@ public class GamePanel extends JPanel
 		this.clearPrevious = true;
 		
 		// TODO: Check that 5 is good
-		this.drawer = new DrawableHandler(false, true, DepthConstants.NORMAL, 5,
-				null);
+		this.drawer = new DrawableHandler(false, true, DepthConstants.NORMAL, 5);
 		
 		//Let's format our panel
 		this.formatPanel();

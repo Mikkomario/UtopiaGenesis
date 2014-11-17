@@ -127,11 +127,10 @@ public class GameWindow extends JFrame
 		this.mainKeyHandler = new MainKeyListenerHandler(listenerActorHandler);
 		this.mainmousehandler = new MainMouseListenerHandler(listenerActorHandler);
 		
-		KeyListenerHandler keyHandler = new KeyListenerHandler(false, null);
+		KeyListenerHandler keyHandler = new KeyListenerHandler(false, this.mainKeyHandler);
 		MouseListenerHandler mouseHandler = new MouseListenerHandler(false, 
 				listenerActorHandler, null);
 		
-		this.mainKeyHandler.addKeyListener(keyHandler);
 		this.mainmousehandler.addMouseListener(mouseHandler);
 		
 		this.handlerRelay.addHandler(stepHandler);

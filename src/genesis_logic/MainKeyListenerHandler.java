@@ -37,19 +37,23 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	 */
 	public MainKeyListenerHandler(ActorHandler actorhandler)
 	{
-		super(false, null);
+		super(false);
 		
 		// Initializes the attributes
-		this.keysDown = new ArrayList<Character>();
-		this.codesDown = new ArrayList<Integer>();
-		this.keysPressed = new ArrayList<Character>();
-		this.keysReleased = new ArrayList<Character>();
-		this.codesPressed = new ArrayList<Integer>();
-		this.codesReleased = new ArrayList<Integer>();
-		this.lastkeyduration = 0;
+		initialize();
 		
 		if (actorhandler != null)
 			actorhandler.addActor(this);
+	}
+	
+	/**
+	 * Creates a new empty MainKeyListenerHandler
+	 */
+	public MainKeyListenerHandler()
+	{
+		super(false);
+		
+		initialize();
 	}
 	
 	
@@ -196,5 +200,17 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 			if (this.keysDown.contains(key))
 				this.keysDown.remove(this.keysDown.indexOf(key));
 		}
+	}
+	
+	private void initialize()
+	{
+		// Initializes the attributes
+		this.keysDown = new ArrayList<Character>();
+		this.codesDown = new ArrayList<Integer>();
+		this.keysPressed = new ArrayList<Character>();
+		this.keysReleased = new ArrayList<Character>();
+		this.codesPressed = new ArrayList<Integer>();
+		this.codesReleased = new ArrayList<Integer>();
+		this.lastkeyduration = 0;
 	}
 }

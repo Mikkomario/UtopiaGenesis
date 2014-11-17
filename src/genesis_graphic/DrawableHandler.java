@@ -3,6 +3,7 @@ package genesis_graphic;
 import genesis_util.GenesisHandlerType;
 import genesis_util.Handled;
 import genesis_util.Handler;
+import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
 import genesis_util.StateOperator;
 
@@ -53,49 +54,48 @@ public class DrawableHandler extends Handler implements Drawable
 		super(autodeath, superhandler);
 		
 		// Initializes attributes
-		this.drawablesWaitingDepthSorting = new Stack<Drawable>();
-		this.depth = depth;
-		this.usesDepth = usesDepth;
-		this.lastg2d = null;
-		this.needsSorting = false;
-		this.lastDrawableDepth = DepthConstants.BOTTOM;
-		this.subDrawersAreReady = false;
+		initialize(usesDepth, depth, depthSortLayers);
+	}
+	
+	/**
+	 * Creates a new drawablehandler. Drawables must be added later manually.
+	 *
+	 * @param autoDeath Will the handler die if it has no living drawables to handle
+	 * @param usesDepth Will the handler draw the objects in a depth-specific order
+	 * @param depth How 'deep' the objects in this handler are drawn
+	 * @param depthSortLayers In how many sections the depthSorting is done. 
+	 * For handlers that contain objects that have small or no depth changes, 
+	 * a larger number like 5-6 is excellent. For handlers that contain objects 
+	 * that have large depth changes a smaller number 1-3 is better. If the 
+	 * handler doesn't use depth this doesn't matter.
+	 * @param superHandlers The HandlerRelay that holds the handlers that will handle this handler
+	 * @see DepthConstants
+	 */
+	public DrawableHandler(boolean autoDeath, boolean usesDepth, int depth, 
+			int depthSortLayers, HandlerRelay superHandlers)
+	{
+		super(autoDeath, superHandlers);
 		
-		this.isVisibleOperator = new ForAnyHandledsVisibilityOperator();
+		initialize(usesDepth, depth, depthSortLayers);
+	}
+	
+	/**
+	 * Creates a new drawablehandler. Drawables must be added later manually.
+	 *
+	 * @param autoDeath Will the handler die if it has no living drawables to handle
+	 * @param usesDepth Will the handler draw the objects in a depth-specific order
+	 * @param depth How 'deep' the objects in this handler are drawn
+	 * @param depthSortLayers In how many sections the depthSorting is done. 
+	 * For handlers that contain objects that have small or no depth changes, 
+	 * a larger number like 5-6 is excellent. For handlers that contain objects 
+	 * that have large depth changes a smaller number 1-3 is better. If the 
+	 * handler doesn't use depth this doesn't matter.
+	 */
+	public DrawableHandler(boolean autoDeath, boolean usesDepth, int depth, int depthSortLayers)
+	{
+		super(autoDeath);
 		
-		// Initializes the subdrawers (if needed)
-		if (usesDepth && depthSortLayers > 1)
-		{
-			this.usesSubDrawers = true;
-			
-			this.subDrawers = new SubDrawer[depthSortLayers];
-			int depthRange = ((DepthConstants.BOTTOM + 100) - 
-					(DepthConstants.TOP - 100)) / this.subDrawers.length;
-			int lastMaxDepth = DepthConstants.BOTTOM + 100;
-			
-			for (int i = 0; i < this.subDrawers.length; i++)
-			{
-				this.subDrawers[i] = new SubDrawer(this, 
-						lastMaxDepth - depthRange, lastMaxDepth);
-				lastMaxDepth -= depthRange;
-			}
-			
-			this.subDrawersAreReady = true;
-			/*
-			System.out.println("SubDrawers created with " + 
-					this.drawablesWaitingDepthSorting.size() + " drawables waiting");
-			*/
-			
-			// Adds all 1000 drawables that wanted to be added before the 
-			// subDrawers could be initialized
-			while (this.drawablesWaitingDepthSorting.size() > 0)
-				addDrawable(this.drawablesWaitingDepthSorting.pop());
-		}
-		else
-		{
-			this.subDrawers = null;
-			this.usesSubDrawers = false;
-		}
+		initialize(usesDepth, depth, depthSortLayers);
 	}
 	
 	
@@ -238,6 +238,54 @@ public class DrawableHandler extends Handler implements Drawable
 	public void addDrawable(Drawable d)
 	{
 		addHandled(d);
+	}
+	
+	private void initialize(boolean usesDepth, int depth, int depthSortLayers)
+	{
+		// Initializes attributes
+		this.drawablesWaitingDepthSorting = new Stack<Drawable>();
+		this.depth = depth;
+		this.usesDepth = usesDepth;
+		this.lastg2d = null;
+		this.needsSorting = false;
+		this.lastDrawableDepth = DepthConstants.BOTTOM;
+		this.subDrawersAreReady = false;
+		
+		this.isVisibleOperator = new ForAnyHandledsVisibilityOperator();
+		
+		// Initializes the subdrawers (if needed)
+		if (usesDepth && depthSortLayers > 1)
+		{
+			this.usesSubDrawers = true;
+			
+			this.subDrawers = new SubDrawer[depthSortLayers];
+			int depthRange = ((DepthConstants.BOTTOM + 100) - 
+					(DepthConstants.TOP - 100)) / this.subDrawers.length;
+			int lastMaxDepth = DepthConstants.BOTTOM + 100;
+			
+			for (int i = 0; i < this.subDrawers.length; i++)
+			{
+				this.subDrawers[i] = new SubDrawer(this, 
+						lastMaxDepth - depthRange, lastMaxDepth);
+				lastMaxDepth -= depthRange;
+			}
+			
+			this.subDrawersAreReady = true;
+			/*
+			System.out.println("SubDrawers created with " + 
+					this.drawablesWaitingDepthSorting.size() + " drawables waiting");
+			*/
+			
+			// Adds all 1000 drawables that wanted to be added before the 
+			// subDrawers could be initialized
+			while (this.drawablesWaitingDepthSorting.size() > 0)
+				addDrawable(this.drawablesWaitingDepthSorting.pop());
+		}
+		else
+		{
+			this.subDrawers = null;
+			this.usesSubDrawers = false;
+		}
 	}
 	
 	

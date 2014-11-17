@@ -7,6 +7,7 @@ import genesis_logic.AdvancedMouseListener.MousePositionEventType;
 import genesis_util.GenesisHandlerType;
 import genesis_util.Handled;
 import genesis_util.Handler;
+import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
 import genesis_util.StateOperator;
 
@@ -51,18 +52,28 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 		super(autodeath, actorhandler);
 		
 		// Initializes attributes
-		this.currentMousePosition = new Point2D.Double(0, 0);
-		this.entered = new ArrayList<AdvancedMouseListener>();
-		this.over = new ArrayList<AdvancedMouseListener>();
-		this.exited = new ArrayList<AdvancedMouseListener>();
-		this.lpressed = false;
-		this.rpressed = false;
-		this.lreleased = false;
-		this.rreleased = false;
-		this.lastevent = AdvancedMouseEvent.OTHER;
-		this.lasteventduration = 0;
+		initialize();
+	}
+	
+	/**
+	 * Creates a new empty mouselistenerhandler
+	 * @param autoDeath Will the handler die when it runs out of living listeners
+	 * @param superHandlers The handlerRelay that holds the handlers that will handle this handler
+	 */
+	public AbstractMouseListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
+	{
+		super(autoDeath, superHandlers);
 		
-		this.isActiveOperator = new AnyHandledListensMouseOperator(false);
+		initialize();
+	}
+	
+	/**
+	 * Creates a new empty mouseListenerHandler
+	 * @param autoDeath Will the handler die once it runs out of handleds
+	 */
+	public AbstractMouseListenerHandler(boolean autoDeath)
+	{
+		super(autoDeath);
 	}
 
 	
@@ -286,6 +297,23 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	public void addMouseListener(AdvancedMouseListener m)
 	{
 		addHandled(m);
+	}
+	
+	private void initialize()
+	{
+		// Initializes attributes
+		this.currentMousePosition = new Point2D.Double(0, 0);
+		this.entered = new ArrayList<AdvancedMouseListener>();
+		this.over = new ArrayList<AdvancedMouseListener>();
+		this.exited = new ArrayList<AdvancedMouseListener>();
+		this.lpressed = false;
+		this.rpressed = false;
+		this.lreleased = false;
+		this.rreleased = false;
+		this.lastevent = AdvancedMouseEvent.OTHER;
+		this.lasteventduration = 0;
+		
+		this.isActiveOperator = new AnyHandledListensMouseOperator(false);
 	}
 	
 	

@@ -3,6 +3,7 @@ package genesis_logic;
 import genesis_util.GenesisHandlerType;
 import genesis_util.Handled;
 import genesis_util.Handler;
+import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
 import genesis_util.StateOperator;
 
@@ -33,7 +34,32 @@ public class KeyListenerHandler extends Handler implements
 		super(autodeath, superhandler);
 		
 		// Initializes attributes
-		this.listensToKeysOperator = new AnyHandledListensKeyEventsOperator();
+		initialize();
+	}
+	
+	/**
+	 * Creates a new empty KeyListenerHandler
+	 * 
+	 * @param autoDeath Will the handler die once it becomes empty
+	 * @param superHandlers The HandlerRelay that holds the Handlers that will handle this Handler
+	 */
+	public KeyListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
+	{
+		super(autoDeath, superHandlers);
+		
+		initialize();
+	}
+	
+	/**
+	 * Creates a new empty KeyListenerHandler
+	 * 
+	 * @param autoDeath Will the handler die once it becomes empty
+	 */
+	public KeyListenerHandler(boolean autoDeath)
+	{
+		super(autoDeath);
+		
+		initialize();
 	}
 	
 	
@@ -90,6 +116,12 @@ public class KeyListenerHandler extends Handler implements
 	public void addKeyListener(AdvancedKeyListener k)
 	{
 		addHandled(k);
+	}
+	
+	private void initialize()
+	{
+		// Initializes attributes
+		this.listensToKeysOperator = new AnyHandledListensKeyEventsOperator();
 	}
 	
 	
