@@ -1,5 +1,6 @@
 package genesis_logic;
 
+import genesis_util.HandlerRelay;
 import genesis_util.StateOperator;
 
 import java.awt.geom.Point2D;
@@ -32,6 +33,26 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 		// Tries to add the object to the second handler
 		if (superhandler != null)
 			superhandler.addMouseListener(this);
+	}
+	
+	/**
+	 * Creates a new MouseListenerHandler
+	 * 
+	 * @param autoDeath Will the handler die automatically once it becomes empty again
+	 * @param superHandlers The HandlerRelay that holds the handlers that will handle this handler
+	 */
+	public MouseListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
+	{
+		super(autoDeath, superHandlers);
+	}
+	
+	/**
+	 * Creates a new empty mouseListenerHandler
+	 * @param autoDeath Will the handler die once it empties
+	 */
+	public MouseListenerHandler(boolean autoDeath)
+	{
+		super(autoDeath);
 	}
 	
 	

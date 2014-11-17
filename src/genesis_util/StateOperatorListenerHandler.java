@@ -22,9 +22,31 @@ public class StateOperatorListenerHandler extends Handler implements StateOperat
 	 * @param autodeath Will the stateListenerHandler die once it runs out of living listeners
 	 * @param superhandler The StateListenerHandler that will handle this handler (optional)
 	 */
-	public StateOperatorListenerHandler(boolean autodeath, StateOperatorListenerHandler superhandler)
+	public StateOperatorListenerHandler(boolean autodeath, 
+			StateOperatorListenerHandler superhandler)
 	{
 		super(autodeath, superhandler);
+	}
+	
+	/**
+	 * Creates a new empty handler
+	 * @param autoDeath Will the handler die once it empties
+	 * @param superHandlers The handlerRelay that holds the handlers that will handle this 
+	 * handler
+	 */
+	public StateOperatorListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
+	{
+		super(autoDeath, superHandlers);
+	}
+	
+	/**
+	 * Creates a new empty handler
+	 * 
+	 * @param autoDeath Will the handler die once it empties
+	 */
+	public StateOperatorListenerHandler(boolean autoDeath)
+	{
+		super(autoDeath);
 	}
 	
 	

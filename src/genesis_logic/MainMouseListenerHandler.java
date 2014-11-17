@@ -1,5 +1,7 @@
 package genesis_logic;
 
+import genesis_util.HandlerRelay;
+
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 
@@ -25,6 +27,23 @@ public class MainMouseListenerHandler extends AbstractMouseListenerHandler
 	public MainMouseListenerHandler(ActorHandler actorhandler)
 	{
 		super(false, actorhandler);
+	}
+	
+	/**
+	 * Creates a new empty MainMouseListenerHandler.
+	 * @param superHandlers The HandlerRelay that holds the handlers that handle this handler
+	 */
+	public MainMouseListenerHandler(HandlerRelay superHandlers)
+	{
+		super(false, superHandlers);
+	}
+	
+	/**
+	 * Creates a new empty MainMouseListenerHandler
+	 */
+	public MainMouseListenerHandler()
+	{
+		super(false);
 	}
 	
 	

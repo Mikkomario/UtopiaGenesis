@@ -27,7 +27,7 @@ public class StateOperator
 		// Initializes attributes
 		this.state = initialState;
 		this.mutable = mutable;
-		this.listenerHandler = new StateOperatorListenerHandler(false, null);
+		this.listenerHandler = new StateOperatorListenerHandler(false);
 	}
 	
 	
