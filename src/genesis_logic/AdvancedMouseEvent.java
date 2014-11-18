@@ -10,7 +10,7 @@ import java.util.List;
  * @author Mikko Hilpinen
  * @since 17.11.2014
  */
-public class AdvancedMouseEvent
+public class AdvancedMouseEvent implements Event
 {
 	// ATTRIBUTES	---------------------------------------
 	
@@ -88,6 +88,23 @@ public class AdvancedMouseEvent
 	}
 	
 	
+	// IMPLEMENTED METHODS	-------------------------------
+	
+	@Override
+	public List<Event.Feature> getFeatures()
+	{
+		// Collects the event's information into a list an returns it
+		List<Event.Feature> information = new ArrayList<Event.Feature>();
+		
+		information.add(getButton());
+		information.add(getType());
+		information.add(getButtonEventType());
+		information.add(getMovementEventType());
+		
+		return information;
+	}
+	
+	
 	// GETTERS & SETTERS	-------------------------------
 	
 	/**
@@ -148,22 +165,6 @@ public class AdvancedMouseEvent
 	
 	
 	// OTHER METHODS	-----------------------------------
-
-	/**
-	 * @return The basic attributes / describing features of this MouseEvent
-	 */
-	protected List<Feature> getEventFeatures()
-	{
-		// Collects the event's information into a list an returns it
-		List<Feature> information = new ArrayList<Feature>();
-		
-		information.add(getButton());
-		information.add(getType());
-		information.add(getButtonEventType());
-		information.add(getMovementEventType());
-		
-		return information;
-	}
 	
 	/**
 	 * Returns a mouseEvent that has the the same features as this one except the given 
@@ -189,6 +190,78 @@ public class AdvancedMouseEvent
 		return new AdvancedMouseEvent(this, movementType);
 	}
 	
+	/**
+	 * @return A selector that accepts mouse button events
+	 */
+	public static StrictEventSelector createButtonEventSelector()
+	{
+		StrictEventSelector selector = new StrictEventSelector();
+		selector.addRequiredFeature(MouseEventType.BUTTON);
+		return selector;
+	}
+	
+	/**
+	 * @return A selector that accepts mouse movement events
+	 */
+	public static StrictEventSelector createMovementEventSelector()
+	{
+		StrictEventSelector selector = new StrictEventSelector();
+		selector.addRequiredFeature(MouseEventType.MOVEMENT);
+		return selector;
+	}
+	
+	/**
+	 * @return A selector that accepts mouse button state change events (presses & releases)
+	 */
+	public static StrictEventSelector createButtonStateChangeSelector()
+	{
+		StrictEventSelector selector = createButtonEventSelector();
+		selector.addUnacceptableFeature(MouseButtonEventType.DOWN);
+		return selector;
+	}
+	
+	/**
+	 * @return A selector that accepts mouse button state change events that occur in an 
+	 * object's local scale.
+	 */
+	public static StrictEventSelector createLocalButtonStateChangeSelector()
+	{
+		StrictEventSelector selector = createButtonStateChangeSelector();
+		selector.addRequiredFeature(MouseButtonEventScale.LOCAL);
+		return selector;
+	}
+	
+	/**
+	 * @return A selector that accepts mouse entering and mouse exiting events
+	 */
+	public static StrictEventSelector createEnterExitSelector()
+	{
+		StrictEventSelector selector = createMovementEventSelector();
+		selector.addUnacceptableFeature(MouseMovementEventType.MOVE);
+		return selector;
+	}
+	
+	/**
+	 * @return A selector that accepts only the mouse move event
+	 */
+	public static StrictEventSelector createMouseMoveSelector()
+	{
+		StrictEventSelector selector = createMovementEventSelector();
+		selector.addRequiredFeature(MouseMovementEventType.MOVE);
+		return selector;
+	}
+	
+	/**
+	 * @param requiredButton The mouse button that should originate the selected events.
+	 * @return A selector that accepts only events caused by a single mouse button
+	 */
+	public static StrictEventSelector createMouseButtonSelector(MouseButton requiredButton)
+	{
+		StrictEventSelector selector = createButtonEventSelector();
+		selector.addRequiredFeature(requiredButton);
+		return selector;
+	}
+	
 	
 	// SUBCLASSES	---------------------------------------
 	
@@ -198,7 +271,7 @@ public class AdvancedMouseEvent
 	 * @author Mikko Hilpinen
 	 * @since 17.11.2014
 	 */
-	protected static interface Feature
+	protected static interface Feature extends Event.Feature
 	{
 		// This interface is used as a wrapper
 	}

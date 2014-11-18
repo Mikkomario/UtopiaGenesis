@@ -10,11 +10,11 @@ import java.util.List;
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
-public class MultiMouseEventSelector implements MouseEventSelector
+public class MultiEventSelector implements EventSelector
 {
 	// ATTRIBUTES	-------------------------------------------
 	
-	private List<MouseEventSelector> selectors;
+	private List<EventSelector> selectors;
 	
 	
 	// CONSTRUCTOR	------------------------------------
@@ -23,19 +23,19 @@ public class MultiMouseEventSelector implements MouseEventSelector
 	 * Creates a eventSelector that doesn't accept any events. Additional selectors / options
 	 * can be added manually
 	 */
-	public MultiMouseEventSelector()
+	public MultiEventSelector()
 	{
 		// Initializes attributes
-		this.selectors = new ArrayList<MouseEventSelector>();
+		this.selectors = new ArrayList<EventSelector>();
 	}
 	
 	
 	// IMPLEMENTED METHODS	-----------------------------
 
 	@Override
-	public boolean selects(AdvancedMouseEvent event)
+	public boolean selects(Event event)
 	{
-		for (MouseEventSelector selector : this.selectors)
+		for (EventSelector selector : this.selectors)
 		{
 			if (selector.selects(event))
 				return true;
@@ -51,7 +51,7 @@ public class MultiMouseEventSelector implements MouseEventSelector
 	 * Adds a new option to the accepted 
 	 * @param selector The selector that will work as an option for selection
 	 */
-	public void addOption(MouseEventSelector selector)
+	public void addOption(EventSelector selector)
 	{
 		if (!this.selectors.contains(selector))
 			this.selectors.add(selector);

@@ -7,7 +7,7 @@ package genesis_logic;
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
-public interface MouseEventSelector
+public interface EventSelector
 {
 	/**
 	 * Tells whether this selector would select the given event / does the given element 
@@ -16,5 +16,5 @@ public interface MouseEventSelector
 	 * @param event The event that is tested
 	 * @return Would the selector select the event
 	 */
-	public boolean selects(AdvancedMouseEvent event);
+	public boolean selects(Event event);
 }
