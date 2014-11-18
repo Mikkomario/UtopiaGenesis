@@ -1,5 +1,6 @@
 package genesis_graphic;
 
+import genesis_graphic.MainPanel.ScreenSplit;
 import genesis_logic.ActorHandler;
 import genesis_logic.KeyListenerHandler;
 import genesis_logic.MainKeyListenerHandler;
@@ -7,6 +8,7 @@ import genesis_logic.MainMouseListenerHandler;
 import genesis_logic.MouseListenerHandler;
 import genesis_logic.StepHandler;
 import genesis_util.HandlerRelay;
+import genesis_util.Vector2D;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -46,9 +48,8 @@ public class GameWindow extends JFrame
 	private ScreenDrawer screendrawer;
 	private HandlerRelay handlerRelay;
 	
-	private ArrayList<GamePanel> panels;
 	private ArrayList<JPanel> paddings;
-	private JPanel gamepanel;
+	private MainPanel mainPanel;
 	
 	/**
 	 * The height of the border at the top of the window (if there is one)
@@ -75,13 +76,14 @@ public class GameWindow extends JFrame
 	 * to slow down if the fps drops below this value so keeping it low increases 
 	 * usability. The program's physics may not support very low framerates 
 	 * though. (> 0)
+	 * @param split How the screen is split between multiple panels
 	 * @param optimizeAps Should Aps (actions per second) optimization be 
 	 * activated. The optimization tries to increase / decrease the Aps to the 
 	 * optimal value. Usually this is unnecessary but may counter the 
 	 * computer's attempts to limit the Aps
 	 */
 	public GameWindow(int width, int height, String title, boolean hastoolbar, 
-			int maxfpslimit, int minimumsupportedfps, boolean optimizeAps)
+			int maxfpslimit, int minimumsupportedfps, ScreenSplit split, boolean optimizeAps)
 	{
 		// Sets the decorations off if needed
 		if (!hastoolbar)
@@ -92,10 +94,10 @@ public class GameWindow extends JFrame
 		this.height = height;
 		this.xscale = 1;
 		this.yscale = 1;
-		this.panels = new ArrayList<GamePanel>();
 		this.paddings = new ArrayList<JPanel>();
 		this.toppaddingheight = 0;
 		this.leftpaddingwidth = 0;
+		this.mainPanel = new MainPanel(new Vector2D(width, height), split);
 		
 		this.setTitle(title);
 		
@@ -112,7 +114,7 @@ public class GameWindow extends JFrame
 		this.setVisible(true);
 		
 		// Adds listener(s) to the window
-		this.gamepanel.addMouseListener(new BasicMouseListener());
+		this.mainPanel.addMouseListener(new BasicMouseListener());
 		addKeyListener(new BasicKeyListener());
 		
 		// Creates and initializes important handlers
@@ -143,6 +145,17 @@ public class GameWindow extends JFrame
 	}
 	
 	
+	// GETTERS & SETTERS	-------------------------
+	
+	/**
+	 * @return The main panel that holds all the game panels
+	 */
+	public MainPanel getMainPanel()
+	{
+		return this.mainPanel;
+	}
+	
+	
 	// OTHER METHODS	 ---------------------------------------------------
 	
 	private void formatWindow()
@@ -155,48 +168,7 @@ public class GameWindow extends JFrame
 		this.setSize(this.width, this.height);
 		// Also sets other stats
 		setResizable(false);
-		this.gamepanel = new JPanel();
-		this.gamepanel.setVisible(true);
-		this.gamepanel.setLayout(new BorderLayout());
-		add(this.gamepanel, BorderLayout.CENTER);
-		//setLocationRelativeTo(null);
 		getContentPane().setBackground(Color.BLACK);
-	}
-	
-	/**
-	 * Adds a new GamePanel to the given direction.
-	 * 
-	 * @param newPanel	The GamePanel you want to add to the window.
-	 * @param direction	The direction where you want to place the panel. (For
-	 * example Borderlayout.NORTH)
-	 * @see BorderLayout
-	 */
-	public void addGamePanel(GamePanel newPanel, String direction)
-	{
-		// Checks the arguments
-		if (newPanel == null || direction == null)
-			return;
-		
-		this.gamepanel.add(newPanel, direction);
-		this.panels.add(newPanel);
-	}
-	
-	/**
-	 * Removes a gamepanel from the window
-	 *
-	 * @param p The panel to be removed
-	 * @param killContent Should the objects drawn in the panel be killed
-	 */
-	public void removePanel(GamePanel p, boolean killContent)
-	{
-		if (!this.panels.contains(p))
-			return;
-		remove(p);
-		this.panels.remove(p);
-		
-		// Kills the content of the panel if needed
-		if (killContent)
-			p.getDrawer().getIsDeadStateOperator().setState(true);
 	}
 	
 	/**
@@ -289,10 +261,8 @@ public class GameWindow extends JFrame
 			}
 		}
 		// Scales the panels
-		for (int i = 0; i < this.panels.size(); i++)
-		{
-			this.panels.get(i).scale(xscale, yscale);
-		}
+		this.mainPanel.scale(new Vector2D(xscale, yscale));
+		
 		// Updates scale values
 		this.xscale *= xscale;
 		this.yscale *= yscale;
@@ -304,10 +274,8 @@ public class GameWindow extends JFrame
 	public void resetScaling()
 	{
 		// Changes the panels' scaling
-		for (int i = 0; i < this.panels.size(); i++)
-		{
-			this.panels.get(i).setScale(1, 1);
-		}
+		this.mainPanel.setScale(new Vector2D(1, 1));
+		
 		// Changes the window's size
 		setSize(this.width, this.height);
 		// Resets the scale values
