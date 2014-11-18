@@ -1,7 +1,6 @@
 package genesis_graphic;
 
 import genesis_util.GenesisHandlerType;
-import genesis_util.Handled;
 import genesis_util.Handler;
 import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
@@ -18,7 +17,7 @@ import java.util.Stack;
  * @author Mikko Hilpinen.
  * @since 27.11.2012.
  */
-public class DrawableHandler extends Handler implements Drawable
+public class DrawableHandler extends Handler<Drawable> implements Drawable
 {	
 	// ATTRIBUTES	------------------------------------------------------
 	
@@ -51,10 +50,13 @@ public class DrawableHandler extends Handler implements Drawable
 	public DrawableHandler(boolean autodeath, boolean usesDepth, int depth, 
 			int depthSortLayers, DrawableHandler superhandler)
 	{
-		super(autodeath, superhandler);
+		super(autodeath);
 		
 		// Initializes attributes
 		initialize(usesDepth, depth, depthSortLayers);
+		
+		if (superhandler != null)
+			superhandler.add(this);
 	}
 	
 	/**
@@ -137,14 +139,8 @@ public class DrawableHandler extends Handler implements Drawable
 	}
 	
 	@Override
-	protected void addHandled(Handled h)
+	public void add(Drawable d)
 	{
-		// Can only add drawables
-		if (!(h instanceof Drawable))
-			return;
-		
-		Drawable d = (Drawable) h;
-		
 		// Checks if depth causes additional issues
 		if (this.usesDepth && !(d instanceof SubDrawer))
 		{
@@ -170,7 +166,7 @@ public class DrawableHandler extends Handler implements Drawable
 					if (this.subDrawers[i].depthIsWithinRange(drawableDepth))
 					{
 						spotFound = true;
-						this.subDrawers[i].addDrawable(d);
+						this.subDrawers[i].add(d);
 						break;
 					}
 				}
@@ -182,7 +178,7 @@ public class DrawableHandler extends Handler implements Drawable
 							+ "for an object with depth " + drawableDepth + 
 							", please use depth within depthConstants' range");
 					this.needsSorting = true;
-					super.addHandled(d);
+					super.add(d);
 				}
 			}
 			// If the handler uses depth sorting but not subDrawers, the 
@@ -190,19 +186,17 @@ public class DrawableHandler extends Handler implements Drawable
 			else
 			{
 				this.needsSorting = true;
-				super.addHandled(d);
+				super.add(d);
 			}
 		}
 		// Otherwise simply adds the handled and is done with it
 		else
-			super.addHandled(d);
+			super.add(d);
 	}
 	
 	@Override
-	protected boolean handleObject(Handled h)
+	protected boolean handleObject(Drawable d)
 	{
-		Drawable d = (Drawable) h;
-		
 		// Draws the visible object
 		if (d.getIsVisibleStateOperator().getState())
 			d.drawSelf(this.lastg2d);
@@ -229,16 +223,6 @@ public class DrawableHandler extends Handler implements Drawable
 	
 	
 	// OTHER METHODS	---------------------------------------------------
-	
-	/**
-	 *Adds the given drawable to the handled drawables
-	 *
-	 * @param d The drawable to be added
-	 */
-	public void addDrawable(Drawable d)
-	{
-		addHandled(d);
-	}
 	
 	private void initialize(boolean usesDepth, int depth, int depthSortLayers)
 	{
@@ -279,7 +263,7 @@ public class DrawableHandler extends Handler implements Drawable
 			// Adds all 1000 drawables that wanted to be added before the 
 			// subDrawers could be initialized
 			while (this.drawablesWaitingDepthSorting.size() > 0)
-				addDrawable(this.drawablesWaitingDepthSorting.pop());
+				add(this.drawablesWaitingDepthSorting.pop());
 		}
 		else
 		{
@@ -291,19 +275,13 @@ public class DrawableHandler extends Handler implements Drawable
 	
 	// SUBCLASSES	------------------------------------------------------
 	
-	private class DepthSorter implements Comparator<Handled>
+	private class DepthSorter implements Comparator<Drawable>
 	{
 		@Override
-		public int compare(Handled h1, Handled h2)
+		public int compare(Drawable d1, Drawable d2)
 		{
-			// Actually only works with drawables but is used in "handled" list
-			if (h1 instanceof Drawable && h2 instanceof Drawable)
-			{
-				// Drawables with more depth are put to the front of the list
-				return ((Drawable) h2).getDepth() - ((Drawable) h1).getDepth();
-			}
-			
-			return 0;
+			// Drawables with more depth are put to the front of the list
+			return d2.getDepth() - d1.getDepth();
 		}	
 	}
 	
@@ -320,21 +298,21 @@ public class DrawableHandler extends Handler implements Drawable
 		// IMPLEMENTED METHODS	---------------------------
 
 		@Override
-		protected void changeHandledState(Handled h, boolean newState)
+		protected void changeHandledState(Drawable d, boolean newState)
 		{
-			((Drawable) h).getIsVisibleStateOperator().setState(newState);
+			d.getIsVisibleStateOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(Handled h)
+		protected boolean getHandledState(Drawable d)
 		{
-			return ((Drawable) h).getIsVisibleStateOperator().getState();
+			return d.getIsVisibleStateOperator().getState();
 		}
 	}
 	
 	// Subdrawers handle drawables from certain depth ranges. The handleds 
 	// are re-added to the superhandler if their depth changes too much
-	private class SubDrawer extends DrawableHandler
+	private static class SubDrawer extends DrawableHandler
 	{
 		// ATTRIBUTES	------------------------------------------------
 		
@@ -358,21 +336,18 @@ public class DrawableHandler extends Handler implements Drawable
 		// IMPLEMENTED METHODS	----------------------------------------
 		
 		@Override
-		protected boolean handleObject(Handled h)
+		protected boolean handleObject(Drawable d)
 		{
 			// Also checks if the object is out of the depth range
-			
-			Drawable d = (Drawable) h;
-			
 			if (d.getDepth() < this.minDepth || d.getDepth() > this.maxDepth)
 			{
 				// Removes the drawable from this depth range and requests a 
 				// repositioning
-				removeHandled(h);
-				this.superHandler.addDrawable(d);
+				removeHandled(d);
+				this.superHandler.add(d);
 			}	
 			
-			return super.handleObject(h);
+			return super.handleObject(d);
 		}
 		
 		// OTHER METHODS	------------------------------------------------

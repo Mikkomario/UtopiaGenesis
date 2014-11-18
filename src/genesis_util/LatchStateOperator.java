@@ -25,7 +25,7 @@ public class LatchStateOperator extends StateOperator implements StateOperatorLi
 		
 		// Initializes attributes
 		this.isDeadStateOperator = new StateOperator(false, false);
-		getListenerHandler().addStateListener(this);
+		getListenerHandler().add(this);
 	}
 	
 	

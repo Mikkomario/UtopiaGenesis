@@ -1,7 +1,6 @@
 package genesis_logic;
 
 import genesis_util.GenesisHandlerType;
-import genesis_util.Handled;
 import genesis_util.Handler;
 import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
@@ -13,7 +12,7 @@ import genesis_util.StateOperator;
  * @author Mikko Hilpinen.
  * @since 14.12.2012.
  */
-public class KeyListenerHandler extends Handler implements 
+public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements 
 		AdvancedKeyListener
 {
 	// ATTRIBUTES	---------------------------------
@@ -34,10 +33,13 @@ public class KeyListenerHandler extends Handler implements
 	 */
 	public KeyListenerHandler(boolean autodeath, KeyListenerHandler superhandler)
 	{
-		super(autodeath, superhandler);
+		super(autodeath);
 		
 		// Initializes attributes
 		initialize();
+		
+		if (superhandler != null)
+			superhandler.add(this);
 	}
 	
 	/**
@@ -96,11 +98,9 @@ public class KeyListenerHandler extends Handler implements
 	}
 	
 	@Override
-	protected boolean handleObject(Handled h)
+	protected boolean handleObject(AdvancedKeyListener l)
 	{
 		// Only informs active listeners
-		AdvancedKeyListener l = (AdvancedKeyListener) h;
-		
 		if (!l.getListensToKeyEventsOperator().getState())
 			return true;
 		
@@ -111,16 +111,6 @@ public class KeyListenerHandler extends Handler implements
 	
 	
 	// OTHER METHODS	---------------------------------------------------
-	
-	/**
-	 * Adds a new listener to the informed listeners
-	 *
-	 * @param k The KeyListener added
-	 */
-	public void addKeyListener(AdvancedKeyListener k)
-	{
-		addHandled(k);
-	}
 	
 	private void initialize()
 	{
@@ -160,15 +150,15 @@ public class KeyListenerHandler extends Handler implements
 		// IMPLEMENTED METHODS	------------------------------
 		
 		@Override
-		protected void changeHandledState(Handled h, boolean newState)
+		protected void changeHandledState(AdvancedKeyListener l, boolean newState)
 		{
-			((AdvancedKeyListener) h).getListensToKeyEventsOperator().setState(newState);
+			l.getListensToKeyEventsOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(Handled h)
+		protected boolean getHandledState(AdvancedKeyListener l)
 		{
-			return ((AdvancedKeyListener) h).getListensToKeyEventsOperator().getState();
+			return l.getListensToKeyEventsOperator().getState();
 		}
 	}
 }

@@ -1,7 +1,6 @@
 package genesis_logic;
 
 import genesis_util.GenesisHandlerType;
-import genesis_util.Handled;
 import genesis_util.Handler;
 import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
@@ -14,7 +13,7 @@ import genesis_util.StateOperator;
  * @author Mikko Hilpinen.
  * @since 27.11.2012.
  */
-public class ActorHandler extends Handler implements Actor
+public class ActorHandler extends Handler<Actor> implements Actor
 {
 	// ATTRIBUTES	------------------------------------------------------
 	
@@ -32,10 +31,13 @@ public class ActorHandler extends Handler implements Actor
 	 */
 	public ActorHandler(boolean autodeath, ActorHandler superhandler)
 	{
-		super(autodeath, superhandler);
+		super(autodeath);
 		
 		// Initializes attributes
 		initialize();
+		
+		if (superhandler != null)
+			superhandler.add(this);
 	}
 	
 	/**
@@ -87,11 +89,9 @@ public class ActorHandler extends Handler implements Actor
 	}
 	
 	@Override
-	protected boolean handleObject(Handled h)
+	protected boolean handleObject(Actor a)
 	{
-		// Calls the act method of active handleds
-		Actor a = (Actor) h;
-		
+		// Calls the act method of active handleds		
 		if (a.getIsActiveStateOperator().getState())
 			a.act(this.laststeplength);
 		
@@ -100,16 +100,6 @@ public class ActorHandler extends Handler implements Actor
 	
 	
 	// OTHER METHODS	---------------------------------------------------
-	
-	/**
-	 * Adds a new actor to the handled actors
-	 *
-	 * @param a The actor to be added
-	 */
-	public void addActor(Actor a)
-	{
-		addHandled(a);
-	}
 	
 	private void initialize()
 	{
@@ -134,15 +124,15 @@ public class ActorHandler extends Handler implements Actor
 		// IMPLEMENTED METHODS	------------------------
 
 		@Override
-		protected void changeHandledState(Handled h, boolean newState)
+		protected void changeHandledState(Actor a, boolean newState)
 		{
-			((Actor) h).getIsActiveStateOperator().setState(newState);
+			a.getIsActiveStateOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(Handled h)
+		protected boolean getHandledState(Actor a)
 		{
-			return ((Actor) h).getIsActiveStateOperator().getState();
+			return a.getIsActiveStateOperator().getState();
 		}
 	}
 }

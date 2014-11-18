@@ -1,6 +1,7 @@
 package genesis_util;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * HandlerRelays keep track of different types of Handlers and provides access to them.
@@ -12,7 +13,7 @@ public class HandlerRelay
 {
 	// ATTRIBUTES	---------------------------------------------
 	
-	private HashMap<HandlerType, Handler> handlers;
+	private Map<HandlerType, Handler<? extends Handled>> handlers;
 	
 	
 	// CONSTRUCTOR	---------------------------------------------
@@ -23,7 +24,7 @@ public class HandlerRelay
 	public HandlerRelay()
 	{
 		// Initializes attributes
-		this.handlers = new HashMap<HandlerType, Handler>();
+		this.handlers = new HashMap<>();
 	}
 	
 	
@@ -33,23 +34,19 @@ public class HandlerRelay
 	 * Adds the given handler to the relay
 	 * 
 	 * @param h The handler that will be added to the relay
-	 * @param transferPreviousContent If there is already a handler of that type in the relay, 
-	 * will its contents be moved into the new one
 	 * @param killPrevious If there is already a handler of that type in the relay, will it 
 	 * be killed in the process
 	 */
-	public void addHandler(Handler h, boolean transferPreviousContent, boolean killPrevious)
+	public void addHandler(Handler<? extends Handled> h, 
+			boolean killPrevious)
 	{
 		HandlerType type = h.getHandlerType();
 		
 		// If there already is a handler of the given type, things get more complicated
 		if (containsHandlerOfType(type))
 		{
-			Handler other = this.handlers.get(type);
+			Handler<? extends Handled> other = getHandler(type);
 			
-			// If the previous handleds need to be moved, does that
-			if (transferPreviousContent)
-				h.transferHandledsFrom(other);
 			// Kills the previous handler if necessary
 			if (killPrevious)
 				other.getIsDeadStateOperator().setState(true);
@@ -64,9 +61,9 @@ public class HandlerRelay
 	 * 
 	 * @param newHandler The hadler that will be added to the relay
 	 */
-	public void replaceHandler(Handler newHandler)
+	public void replaceHandler(Handler<? extends Handled> newHandler)
 	{
-		addHandler(newHandler, true, true);
+		addHandler(newHandler, true);
 	}
 	
 	/**
@@ -75,9 +72,9 @@ public class HandlerRelay
 	 * the relay).
 	 * @param h The handler that will be added to the relay.
 	 */
-	public void addHandler(Handler h)
+	public void addHandler(Handler<? extends Handled> h)
 	{
-		addHandler(h, false, false);
+		addHandler(h, false);
 	}
 	
 	/**
@@ -99,7 +96,7 @@ public class HandlerRelay
 		for (HandlerType type : this.handlers.keySet())
 		{
 			if (type.getSupportedHandledClass().isInstance(h))
-				this.handlers.get(type).addHandled(h);
+				this.handlers.get(type).volatileAdd(h);
 		}
 	}
 	
@@ -122,7 +119,7 @@ public class HandlerRelay
 	 * @return a handler with the given type or null if the relay doesn't contain a handler 
 	 * of the given type.
 	 */
-	public Handler getHandler(HandlerType type)
+	public Handler<? extends Handled> getHandler(HandlerType type)
 	{
 		return this.handlers.get(type);
 	}

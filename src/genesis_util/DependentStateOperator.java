@@ -29,7 +29,7 @@ public class DependentStateOperator extends StateOperator implements
 		
 		// Adds the object to the handler
 		if (parent != null)
-			parent.getListenerHandler().addStateListener(this);
+			parent.getListenerHandler().add(this);
 	}
 	
 	/**
@@ -47,7 +47,7 @@ public class DependentStateOperator extends StateOperator implements
 		this.isDeadOperator = new LatchStateOperator(false);
 		
 		if (parent != null)
-			parent.addStateListener(this);
+			parent.add(this);
 	}
 	
 	

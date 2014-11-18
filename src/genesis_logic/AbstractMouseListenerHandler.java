@@ -5,7 +5,6 @@ import genesis_logic.AdvancedMouseEvent.MouseButtonEventScale;
 import genesis_logic.AdvancedMouseEvent.MouseButtonEventType;
 import genesis_logic.AdvancedMouseEvent.MouseMovementEventType;
 import genesis_util.GenesisHandlerType;
-import genesis_util.Handled;
 import genesis_util.Handler;
 import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
@@ -23,7 +22,7 @@ import java.util.List;
  * @author Mikko Hilpinen.
  * @since 28.12.2012.
  */
-public abstract class AbstractMouseListenerHandler extends Handler implements Actor
+public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouseListener> implements Actor
 {
 	// ATTRIBUTES	-------------------------------------------------------
 	
@@ -47,10 +46,13 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	 */
 	public AbstractMouseListenerHandler(boolean autodeath, ActorHandler actorhandler)
 	{
-		super(autodeath, actorhandler);
+		super(autodeath);
 		
 		// Initializes attributes
 		initialize();
+		
+		if (actorhandler != null)
+			actorhandler.add(this);
 	}
 	
 	/**
@@ -104,11 +106,9 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	}
 	
 	@Override
-	protected boolean handleObject(Handled h)
+	protected boolean handleObject(AdvancedMouseListener l)
 	{
 		// Handles mouse move event
-		
-		AdvancedMouseListener l = (AdvancedMouseListener) h;
 		
 		// Checks if informing is needed
 		if (!l.getListensToMouseEventsOperator().getState())
@@ -194,16 +194,6 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 	
 	
 	// OTHER METHODS	---------------------------------------------------
-	
-	/**
-	 * Adds a new listener to the informed listeners
-	 *
-	 * @param m The MouseListener added
-	 */
-	public void addMouseListener(AdvancedMouseListener m)
-	{
-		addHandled(m);
-	}
 	
 	private void informObjectsAboutMouseEnterExit(AdvancedMouseEvent baseEvent)
 	{
@@ -304,15 +294,15 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 		// IMPLEMENTED METHODS	-------------------------------
 
 		@Override
-		protected void changeHandledState(Handled h, boolean newState)
+		protected void changeHandledState(AdvancedMouseListener l, boolean newState)
 		{
-			((AdvancedMouseListener) h).getListensToMouseEventsOperator().setState(newState);
+			l.getListensToMouseEventsOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(Handled h)
+		protected boolean getHandledState(AdvancedMouseListener l)
 		{
-			return ((AdvancedMouseListener) h).getListensToMouseEventsOperator().getState();
+			return l.getListensToMouseEventsOperator().getState();
 		}
 	}
 	
@@ -352,10 +342,8 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 		// IMPLEMENTED METHODS	-------------------------------
 		
 		@Override
-		protected boolean handleObject(Handled h)
+		protected boolean handleObject(AdvancedMouseListener l)
 		{
-			AdvancedMouseListener l = (AdvancedMouseListener) h;
-			
 			// Checks if informing is needed
 			if (!l.getListensToMouseEventsOperator().getState())
 				return true;
@@ -387,10 +375,8 @@ public abstract class AbstractMouseListenerHandler extends Handler implements Ac
 		// IMPLEMENTED METHODS	--------------------------------
 
 		@Override
-		protected boolean handleObject(Handled h)
+		protected boolean handleObject(AdvancedMouseListener l)
 		{
-			AdvancedMouseListener l = (AdvancedMouseListener) h;
-			
 			// Checks if informing is needed
 			if (!l.getListensToMouseEventsOperator().getState())
 				return true;

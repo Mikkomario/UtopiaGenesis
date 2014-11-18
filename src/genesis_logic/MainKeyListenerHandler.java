@@ -2,7 +2,6 @@ package genesis_logic;
 
 import genesis_logic.AdvancedKeyEvent.ContentType;
 import genesis_logic.AdvancedKeyEvent.KeyEventType;
-import genesis_util.Handled;
 import genesis_util.StateOperator;
 
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 		initialize();
 		
 		if (actorhandler != null)
-			actorhandler.addActor(this);
+			actorhandler.add(this);
 	}
 	
 	/**
@@ -175,11 +174,9 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 		// IMPLEMENTED METHODS	----------------------------------
 		
 		@Override
-		protected boolean handleObject(Handled h)
+		protected boolean handleObject(AdvancedKeyListener listener)
 		{
 			// Informs the object about the current event(s)
-			AdvancedKeyListener listener = (AdvancedKeyListener) h;
-			
 			// Only informs active objects
 			if (!listener.getListensToKeyEventsOperator().getState())
 				return true;

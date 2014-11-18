@@ -42,7 +42,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 		
 		// Tries to add the object to the second handler
 		if (superhandler != null)
-			superhandler.addMouseListener(this);
+			superhandler.add(this);
 	}
 	
 	/**

@@ -14,9 +14,4 @@ public interface HandlerType
 	 * @return Which type of handled this type of handler supports?
 	 */
 	public Class<?> getSupportedHandledClass();
-	
-	/**
-	 * @return Which handlerClass represents this handlerType
-	 */
-	//public Class<?> getHandlerClass();
 }

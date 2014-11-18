@@ -6,7 +6,7 @@ package genesis_util;
  * @author Mikko Hilpinen
  * @since 16.11.2014
  */
-public class StateOperatorListenerHandler extends Handler implements StateOperatorListener
+public class StateOperatorListenerHandler extends Handler<StateOperatorListener> implements StateOperatorListener
 {
 	// ATTRIBUTES	------------------------------------
 	
@@ -25,7 +25,10 @@ public class StateOperatorListenerHandler extends Handler implements StateOperat
 	public StateOperatorListenerHandler(boolean autodeath, 
 			StateOperatorListenerHandler superhandler)
 	{
-		super(autodeath, superhandler);
+		super(autodeath);
+		
+		if (superhandler != null)
+			superhandler.add(this);
 	}
 	
 	/**
@@ -59,10 +62,10 @@ public class StateOperatorListenerHandler extends Handler implements StateOperat
 	}
 
 	@Override
-	protected boolean handleObject(Handled h)
+	protected boolean handleObject(StateOperatorListener l)
 	{
 		// Informs the object about the stateChange
-		((StateOperatorListener) h).onStateChange(this.lastSource, this.lastState);
+		l.onStateChange(this.lastSource, this.lastState);
 		
 		return true;
 	}
@@ -77,18 +80,5 @@ public class StateOperatorListenerHandler extends Handler implements StateOperat
 		handleObjects();
 		
 		this.lastSource = null;
-	}
-	
-	
-	// OTHER METHODS	-----------------------------------
-	
-	/**
-	 * Adds a stateListener to the informed listeners
-	 * 
-	 * @param s the stateListener that will be added to the informed listeners
-	 */
-	public void addStateListener(StateOperatorListener s)
-	{
-		addHandled(s);
 	}
 }

@@ -14,13 +14,14 @@ import java.util.concurrent.locks.ReentrantLock;
  * inform its subobjects and can be handled itself.
  *
  * @author Mikko Hilpinen.
+ * @param <T> The type of the handled held in this handler
  * @since 8.12.2012.
  */
-public abstract class Handler implements Handled, StateOperatorListener
+public abstract class Handler<T extends Handled> implements Handled, StateOperatorListener
 {
 	// ATTRIBUTES	-----------------------------------------------------
 	
-	private LinkedList<Handled> handleds;
+	private LinkedList<T> handleds;
 	private ArrayList<Handled> handledstoberemoved, handledstobeadded;
 	private boolean disabled; // Has the handler been temporarily disabled
 	private StateOperator isDeadOperator;
@@ -39,7 +40,8 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 * @param autodeath Will the handler die automatically when it becomes empty
 	 * @param superhandler The handler that will handle the object (optional)
 	 */
-	public Handler(boolean autodeath, Handler superhandler)
+	/*
+	public Handler(boolean autodeath, Handler<Handled> superhandler)
 	{
 		// Initializes attributes
 		initialize(autodeath);
@@ -48,6 +50,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 		if (superhandler != null)
 			superhandler.addHandled(this);
 	}
+	*/
 	
 	/**
 	 * Creates a new Handler and adds it as a handled to the applicable handlers in the given 
@@ -87,11 +90,11 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 * That something should be done in this method. The method is called as 
 	 * a part of the handleObjects method.
 	 *
-	 * @param h The handler that may need handling
+	 * @param h The handled that may need handling
 	 * @return Should object handling be continued (true) or skipped for the 
 	 * remaining handleds (false)
 	 */
-	protected abstract boolean handleObject(Handled h);
+	protected abstract boolean handleObject(T h);
 	
 	
 	// IMPLEMENTED METHODS	-----------------------------------------------
@@ -125,23 +128,16 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 * 
 	 * @param other The handler from which the Handleds are moved from. 
 	 * Must be of the same HandlerType with this handler.
-	 * @throws HandledTypeException If the given handler is not of the same type with 
-	 * this handler
 	 */
-	protected void transferHandledsFrom(Handler other) throws HandledTypeException
+	public void transferHandledsFrom(Handler<T> other)
 	{
-		// Checks that the given handler is of the right type
-		if (other.getHandlerType() != getHandlerType())
-			throw new HandledTypeException("Cannot accept elements from handler of type " + 
-					other.getHandlerType());
-		
 		// Transfers the handleds
-		List<Handled> handledsToBeTransferred = new ArrayList<Handled>();
+		List<T> handledsToBeTransferred = new ArrayList<T>();
 		handledsToBeTransferred.addAll(other.handleds);
 		
-		for (Handled h : handledsToBeTransferred)
+		for (T h : handledsToBeTransferred)
 		{
-			addHandled(h);
+			add(h);
 			other.removeHandled(h);
 		}
 		
@@ -172,7 +168,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 
 		try
 		{
-			Iterator<Handled> iterator = this.handleds.iterator();
+			Iterator<T> iterator = this.handleds.iterator();
 			
 			while (iterator.hasNext())
 			{
@@ -180,7 +176,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 				if (this.killed)
 					break;
 				*/
-				Handled h = iterator.next();
+				T h = iterator.next();
 				
 				if (!h.getIsDeadStateOperator().getState())
 				{	
@@ -225,7 +221,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 * @warning This method is not very safe and should not be used if 
 	 * handleObjects() can be used instead
 	 */
-	protected Iterator<Handled> getIterator()
+	protected Iterator<T> getIterator()
 	{
 		return this.handleds.iterator();
 	}
@@ -235,16 +231,8 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 *
 	 * @param h The object to be handled
 	 */
-	protected void addHandled(Handled h)
-	{
-		// Handled must be of the supported class
-		if (!getHandlerType().getSupportedHandledClass().isInstance(h))
-		{
-			System.err.println(getClass().getName() + 
-					" does not support given object's class");
-			return;
-		}
-		
+	public void add(T h)
+	{	
 		// Performs necessary checks
 		if (h != this && !this.handleds.contains(h) && 
 				!this.handledstobeadded.contains(h))
@@ -252,8 +240,6 @@ public abstract class Handler implements Handled, StateOperatorListener
 			// Adds the handled to the queue
 			addToOperationList(HandlingOperation.ADD, h);
 			this.started = true;
-			//System.out.println(this + " adds a handled to queue (now " + 
-			//			this.handledstobeadded.size() + ")");
 		}
 	}
 	
@@ -279,7 +265,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 		this.locks.get(HandlingOperation.HANDLE).lock();
 		try
 		{
-			Iterator<Handled> iter = getIterator();
+			Iterator<T> iter = getIterator();
 			
 			while (iter.hasNext())
 			{
@@ -329,10 +315,29 @@ public abstract class Handler implements Handled, StateOperatorListener
 		System.out.println(getHandledNumber());
 	}
 	
+	
+	/**
+	 * Adds a handled to this Handler. This only works if the handled is of type allowed 
+	 * by the Handler's handlerType.
+	 * 
+	 * @param h The handled that may be added to the Handler
+	 * @throws IllegalArgumentException If the Handled is not of the correct type
+	 */
+	@SuppressWarnings("unchecked")
+	protected void volatileAdd(Handled h) throws IllegalArgumentException
+	{
+		// Checks the type
+		if (getHandlerType().getSupportedHandledClass().isInstance(h))
+			add((T) h);
+		else
+			throw new IllegalArgumentException("Handled " + h + 
+					" ins't allowed in this handler");
+	}
+	
 	/**
 	 * @return The first handled in the list of handleds
 	 */
-	protected Handled getFirstHandled()
+	protected T getFirstHandled()
 	{
 		return this.handleds.getFirst();
 	}
@@ -348,7 +353,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 * @see #getIterator()
 	 * @see #handleObject(Handled)
 	 */
-	protected Handled getHandled(int index)
+	protected T getHandled(int index)
 	{
 		if (index < 0 || index >= getHandledNumber())
 			return null;
@@ -377,7 +382,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 	 *
 	 * @param c The comparator used to sort the handleds
 	 */
-	protected void sortHandleds(Comparator<Handled> c)
+	protected void sortHandleds(Comparator<T> c)
 	{
 		Collections.sort(this.handleds, c);
 	}
@@ -456,6 +461,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 	}
 	
 	// Thread safely adds an handled to an operation list
+	@SuppressWarnings("unchecked")
 	private void addToOperationList(HandlingOperation o, Handled h)
 	{
 		// Checks the argument
@@ -469,7 +475,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 		{
 			switch (o)
 			{
-				case HANDLE: this.handleds.add(h); break;
+				case HANDLE: this.handleds.add((T) h); break;
 				case ADD: this.handledstobeadded.add(h); break;
 				case REMOVE: this.handledstoberemoved.add(h); break;
 			}
@@ -507,9 +513,9 @@ public abstract class Handler implements Handled, StateOperatorListener
 	
 	private void initialize(boolean autoDeath)
 	{
-		this.handleds = new LinkedList<Handled>();
-		this.handledstobeadded = new ArrayList<Handled>();
-		this.handledstoberemoved = new ArrayList<Handled>();
+		this.handleds = new LinkedList<T>();
+		this.handledstobeadded = new ArrayList<>();
+		this.handledstoberemoved = new ArrayList<>();
 		this.disabled = false;
 		this.started = false;
 		this.locks = new HashMap<HandlingOperation, ReentrantLock>();
@@ -521,7 +527,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 			this.isDeadOperator = new HandledDependentAutodeathOperator();
 		else
 			this.isDeadOperator = new LatchStateOperator(false);
-		this.isDeadOperator.getListenerHandler().addStateListener(this);
+		this.isDeadOperator.getListenerHandler().add(this);
 	}
 	
 	
@@ -534,35 +540,6 @@ public abstract class Handler implements Handled, StateOperatorListener
 	
 	
 	// SUBCLASSES	-------------------------------------------------------
-	
-	/**
-	 * HandledTypeExceptions are thrown when unsupported handled classes or handler types 
-	 * are used. This can be considered fatal programming errors.
-	 * 
-	 * @author Mikko Hilpinen
-	 * @since 16.11.2014
-	 */
-	public static class HandledTypeException extends RuntimeException
-	{
-		private static final long serialVersionUID = 272001470257069786L;
-
-		/**
-		 * Creates a new exception with the given message
-		 * @param message The message that will be sent along with the exception
-		 */
-		public HandledTypeException(String message)
-		{
-			super(message);
-		}
-		
-		/**
-		 * Creates a new exception without a message
-		 */
-		public HandledTypeException()
-		{
-			super();
-		}
-	}
 	
 	/**
 	 * HandlingOperator is a function object that does a specific operation 
@@ -584,7 +561,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 		 * @param h The handled that needs to be done something with
 		 * @return Should the operation be done for the remaining handleds as well
 		 */
-		protected abstract boolean handleObject(Handled h);
+		protected abstract boolean handleObject(T h);
 	}
 	
 	private abstract class IterativeStateOperator extends StateOperator implements 
@@ -603,7 +580,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 			
 			// Initializes attributes
 			this.isDeadOperator = new StateOperator(false, false);
-			getListenerHandler().addStateListener(this);
+			getListenerHandler().add(this);
 		}
 		
 		// ABSTRACT METHODS	----------------------------------
@@ -613,14 +590,14 @@ public abstract class Handler implements Handled, StateOperatorListener
 		 * @param h the handled that will be modified
 		 * @param newState The new state the handled should receive
 		 */
-		protected abstract void changeHandledState(Handled h, boolean newState);
+		protected abstract void changeHandledState(T h, boolean newState);
 		
 		/**
 		 * Checks a state of a handled
 		 * @param h The handled that will be checked
 		 * @return The state of the handled
 		 */
-		protected abstract boolean getHandledState(Handled h);
+		protected abstract boolean getHandledState(T h);
 		
 		
 		// IMPLEMENTED METHODS	------------------------------
@@ -661,7 +638,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 			// IMPLEMENTED METHODS	-----------------------------
 			
 			@Override
-			protected boolean handleObject(Handled h)
+			protected boolean handleObject(T h)
 			{
 				changeHandledState(h, this.newState);
 				return true;
@@ -688,7 +665,7 @@ public abstract class Handler implements Handled, StateOperatorListener
 			// IMPLEMENTED METHODS	----------------------------
 			
 			@Override
-			protected boolean handleObject(Handled h)
+			protected boolean handleObject(T h)
 			{
 				if (getHandledState(h) == this.searchedState)
 				{
@@ -794,13 +771,13 @@ public abstract class Handler implements Handled, StateOperatorListener
 		// IMPLEMENTED METHODS	--------------------------------
 
 		@Override
-		protected void changeHandledState(Handled h, boolean newState)
+		protected void changeHandledState(T h, boolean newState)
 		{
 			h.getIsDeadStateOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(Handled h)
+		protected boolean getHandledState(T h)
 		{
 			return h.getIsDeadStateOperator().getState();
 		}
