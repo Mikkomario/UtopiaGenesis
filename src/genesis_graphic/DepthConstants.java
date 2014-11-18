@@ -4,7 +4,7 @@ package genesis_graphic;
  * This static class offers constants used in defining object's depth
  *
  * @author Mikko Hilpinen.
- *         Created 1.7.2013.
+ * @since 1.7.2013.
  */
 public class DepthConstants
 {

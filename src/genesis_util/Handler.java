@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -21,9 +22,11 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 {
 	// ATTRIBUTES	-----------------------------------------------------
 	
-	private LinkedList<T> handleds;
-	private ArrayList<Handled> handledstoberemoved, handledstobeadded;
-	private boolean disabled; // Has the handler been temporarily disabled
+	private static final int ADD = 1;
+	private static final int REMOVE = 2;
+	private static final int CLEAR = 3;
+	
+	private Map<HandlingOperation, List<T>> operationLists;
 	private StateOperator isDeadOperator;
 	private boolean started;
 	
@@ -91,12 +94,10 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		// If the Handler was killed, clears the remaining operation lists
 		if (newState && source == this.isDeadOperator)
 		{
-			// Safely clears the handleds
-			clearOperationList(HandlingOperation.HANDLE);
-			// Safely clears the added handleds
-			clearOperationList(HandlingOperation.ADD);
-			// And finally clears the removed handleds
-			clearOperationList(HandlingOperation.REMOVE);
+			for (HandlingOperation operation : HandlingOperation.values())
+			{
+				modifyOperationList(operation, CLEAR, null);
+			}
 		}
 	}
 	
@@ -113,7 +114,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	{
 		// Transfers the handleds
 		List<T> handledsToBeTransferred = new ArrayList<T>();
-		handledsToBeTransferred.addAll(other.handleds);
+		handledsToBeTransferred.addAll(other.operationLists.get(HandlingOperation.HANDLE));
 		
 		for (T h : handledsToBeTransferred)
 		{
@@ -138,17 +139,13 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	{	
 		updateStatus();
 		
-		// Disabled handlers don't handle objects until reactivated
-		if (this.disabled)
-			return;
-		
 		// Goes through all the handleds
 		boolean handlingskipped = false;
 		this.locks.get(HandlingOperation.HANDLE).lock();
 
 		try
 		{
-			Iterator<T> iterator = this.handleds.iterator();
+			Iterator<T> iterator = this.operationLists.get(HandlingOperation.HANDLE).iterator();
 			
 			while (iterator.hasNext())
 			{
@@ -196,17 +193,6 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	}
 	
 	/**
-	 * @return The iterator of the handled list
-	 * @see #handleObjects()
-	 * @warning This method is not very safe and should not be used if 
-	 * handleObjects() can be used instead
-	 */
-	protected Iterator<T> getIterator()
-	{
-		return this.handleds.iterator();
-	}
-	
-	/**
 	 * Adds a new object to the handled objects
 	 *
 	 * @param h The object to be handled
@@ -214,11 +200,11 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	public void add(T h)
 	{	
 		// Performs necessary checks
-		if (h != this && !this.handleds.contains(h) && 
-				!this.handledstobeadded.contains(h))
+		if (h != this && !this.operationLists.get(HandlingOperation.HANDLE).contains(h) && 
+				!this.operationLists.get(HandlingOperation.ADD).contains(h))
 		{
 			// Adds the handled to the queue
-			addToOperationList(HandlingOperation.ADD, h);
+			modifyOperationList(HandlingOperation.ADD, ADD, h);
 			this.started = true;
 		}
 	}
@@ -230,11 +216,9 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 */
 	public void removeHandled(Handled h)
 	{
-		if (h != null && !this.handledstoberemoved.contains(h) && 
-				this.handleds.contains(h))
-		{
-			addToOperationList(HandlingOperation.REMOVE, h);
-		}
+		if (h != null && !this.operationLists.get(HandlingOperation.REMOVE).contains(h) && 
+				this.operationLists.get(HandlingOperation.HANDLE).contains(h))
+			modifyOperationList(HandlingOperation.REMOVE, ADD, h);
 	}
 	
 	/**
@@ -245,7 +229,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		this.locks.get(HandlingOperation.HANDLE).lock();
 		try
 		{
-			Iterator<T> iter = getIterator();
+			Iterator<T> iter = this.operationLists.get(HandlingOperation.HANDLE).iterator();
 			
 			while (iter.hasNext())
 			{
@@ -255,27 +239,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		finally { this.locks.get(HandlingOperation.HANDLE).unlock(); }
 		
 		// Also cancels the adding of new handleds
-		clearOperationList(HandlingOperation.ADD);
-	}
-	
-	/**
-	 * Temporarily disables the handler. This can be used to block certain 
-	 * functions for a while. The disable should be ended with endDisable().
-	 * 
-	 * @see #endDisable()
-	 */
-	public void disable()
-	{
-		this.disabled = true;
-	}
-	
-	/**
-	 * Ends a temporary disable put on the handler, making it function normally 
-	 * again
-	 */
-	public void endDisable()
-	{
-		this.disabled = false;
+		modifyOperationList(HandlingOperation.ADD, CLEAR, null);
 	}
 	
 	/**
@@ -283,18 +247,8 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 */
 	protected int getHandledNumber()
 	{
-		return this.handleds.size();
+		return this.operationLists.get(HandlingOperation.HANDLE).size();
 	}
-	
-	/**
-	 * Prints the amount of handleds the handler currently contains. This 
-	 * should be used for testing purposes only.
-	 */
-	public void printHandledNumber()
-	{
-		System.out.println(getHandledNumber());
-	}
-	
 	
 	/**
 	 * Adds a handled to this Handler. This only works if the handled is of type allowed 
@@ -312,32 +266,6 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		else
 			throw new IllegalArgumentException("Handled " + h + 
 					" ins't allowed in this handler");
-	}
-	
-	/**
-	 * @return The first handled in the list of handleds
-	 */
-	protected T getFirstHandled()
-	{
-		return this.handleds.getFirst();
-	}
-	
-	/**
-	 * Returns a certain handled form the list
-	 *
-	 * @param index The index from which the handled is taken
-	 * @return The handled from the given index or null if no such index exists
-	 * @warning Normally it is adviced to use the iterator to go through the 
-	 * handleds but if the caller modifies the list during the iteration, this 
-	 * method should be used instead
-	 * @see #getIterator()
-	 * @see #handleObject(Handled)
-	 */
-	protected T getHandled(int index)
-	{
-		if (index < 0 || index >= getHandledNumber())
-			return null;
-		return this.handleds.get(index);
 	}
 	
 	/**
@@ -364,13 +292,13 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 */
 	protected void sortHandleds(Comparator<T> c)
 	{
-		Collections.sort(this.handleds, c);
+		Collections.sort(this.operationLists.get(HandlingOperation.HANDLE), c);
 	}
 	
 	// This should be called at the end of the iteration
 	private void clearRemovedHandleds()
 	{
-		if (this.handledstoberemoved.isEmpty())
+		if (this.operationLists.get(HandlingOperation.REMOVE).isEmpty())
 			return;
 		
 		this.locks.get(HandlingOperation.REMOVE).lock();
@@ -378,15 +306,14 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		{
 			// Removes all removed handleds from handleds or added or 
 			// inserted handleds
-			for (Handled h : this.handledstoberemoved)
+			for (Handled h : this.operationLists.get(HandlingOperation.REMOVE))
 			{
-				if (this.handleds.contains(h))
-					removeFromOperationList(HandlingOperation.HANDLE, h);
+				if (this.operationLists.get(HandlingOperation.HANDLE).contains(h))
+					modifyOperationList(HandlingOperation.HANDLE, REMOVE, h);
 			}
 			
 			// Empties the removing list
-			// TODO: One might want to change these into clearoperationList(...)
-			this.handledstoberemoved.clear();
+			modifyOperationList(HandlingOperation.REMOVE, CLEAR, null);
 		}
 		finally { this.locks.get(HandlingOperation.REMOVE).unlock(); }
 	}
@@ -394,109 +321,59 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	private void addNewHandleds()
 	{
 		// If the handler has no handleds to be added, does nothing
-		if (this.handledstobeadded.isEmpty())
+		if (this.operationLists.get(HandlingOperation.ADD).isEmpty())
 			return;
 		
 		this.locks.get(HandlingOperation.ADD).lock();
 		try
 		{
 			// Adds all handleds from the addlist to the handleds
-			for (Handled h : this.handledstobeadded)
+			for (Handled h : this.operationLists.get(HandlingOperation.ADD))
 			{
-				addToOperationList(HandlingOperation.HANDLE, h);
+				modifyOperationList(HandlingOperation.HANDLE, ADD, h);
 			}
 			
 			// Clears the addlist
-			this.handledstobeadded.clear();
+			modifyOperationList(HandlingOperation.ADD, CLEAR, null);
 		}
 		finally { this.locks.get(HandlingOperation.ADD).unlock(); }
 	}
 	
-	// Thread-safely clears a data structure used with the given operation type
-	// TODO: Try to figure out a way to make this without copy-paste, though 
-	// it might be difficult since there are no function pointers in java
-	private void clearOperationList(HandlingOperation o)
-	{
-		// Checks the argument
-		if (o == null)
-			return;
-		
-		// Locks the correct lock
-		this.locks.get(o).lock();
-		
-		try
-		{
-			switch (o)
-			{
-				// I really wish I had function pointers in use now...
-				case HANDLE: this.handleds.clear(); break;
-				case ADD: this.handledstobeadded.clear(); break;
-				case REMOVE: this.handledstoberemoved.clear(); break;
-			}
-		}
-		finally
-		{
-			this.locks.get(o).unlock();
-		}
-	}
-	
-	// Thread safely adds an handled to an operation list
 	@SuppressWarnings("unchecked")
-	private void addToOperationList(HandlingOperation o, Handled h)
+	private void modifyOperationList(HandlingOperation targetOperation, int job, Handled target)
 	{
-		// Checks the argument
-		if (o == null || h == null)
-			return;
-		
 		// Locks the correct lock
-		this.locks.get(o).lock();
+		Handler.this.locks.get(targetOperation).lock();
 		
 		try
 		{
-			switch (o)
+			List<T> targetList = Handler.this.operationLists.get(targetOperation);
+			
+			switch (job)
 			{
-				case HANDLE: this.handleds.add((T) h); break;
-				case ADD: this.handledstobeadded.add(h); break;
-				case REMOVE: this.handledstoberemoved.add(h); break;
+				case ADD: targetList.add((T) target); break;
+				case REMOVE: targetList.remove(target); break;
+				case CLEAR: targetList.clear(); break;
 			}
 		}
 		finally
 		{
-			this.locks.get(o).unlock();
-		}
+			Handler.this.locks.get(targetOperation).unlock();
+		}	
 	}
 	
-	// Thread safely removes an handled from an operation list
-	private void removeFromOperationList(HandlingOperation o, Handled h)
-	{
-		// Checks the argument
-		if (o == null || h == null)
-			return;
-		
-		// Locks the correct lock
-		this.locks.get(o).lock();
-		
-		try
-		{
-			switch (o)
-			{
-				case HANDLE: this.handleds.remove(h); break;
-				case ADD: this.handledstobeadded.remove(h); break;
-				case REMOVE: this.handledstoberemoved.remove(h); break;
-			}
-		}
-		finally
-		{
-			this.locks.get(o).unlock();
-		}
-	}
 	
 	private void initialize(boolean autoDeath)
 	{
-		this.handleds = new LinkedList<T>();
-		this.handledstobeadded = new ArrayList<>();
-		this.handledstoberemoved = new ArrayList<>();
-		this.disabled = false;
+		this.operationLists = new HashMap<>();
+		for (HandlingOperation operation : HandlingOperation.values())
+		{
+			if (operation == HandlingOperation.HANDLE)
+				this.operationLists.put(operation, new LinkedList<T>());
+			else
+				this.operationLists.put(operation, new ArrayList<T>());
+		}
+		
 		this.started = false;
 		this.locks = new HashMap<HandlingOperation, ReentrantLock>();
 		this.locks.put(HandlingOperation.HANDLE, new ReentrantLock());
