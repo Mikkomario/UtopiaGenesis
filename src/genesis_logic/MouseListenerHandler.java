@@ -19,7 +19,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 {
 	// ATTRIBUTES	---------------------------------------
 	
-	private MultiEventSelector selector;
+	private MultiEventSelector<AdvancedMouseEvent> selector;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -89,7 +89,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	}
 
 	@Override
-	public EventSelector getMouseEventSelector()
+	public EventSelector<AdvancedMouseEvent> getMouseEventSelector()
 	{
 		return this.selector;
 	}
@@ -113,9 +113,9 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	private void initialize()
 	{
 		// The handler accepts the mouse move event as well as global mouse button events
-		this.selector = new MultiEventSelector();
+		this.selector = new MultiEventSelector<AdvancedMouseEvent>();
 		
-		StrictEventSelector globalButtonSelector = 
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> globalButtonSelector = 
 				AdvancedMouseEvent.createButtonStateChangeSelector();
 		globalButtonSelector.addRequiredFeature(MouseButtonEventScale.GLOBAL);
 		this.selector.addOption(globalButtonSelector);

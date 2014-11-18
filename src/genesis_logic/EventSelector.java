@@ -5,9 +5,10 @@ package genesis_logic;
  * Selectors can be used for picking the events that interest the user.
  * 
  * @author Mikko Hilpinen
+ * @param <T> The type of event this selector selects
  * @since 18.11.2014
  */
-public interface EventSelector
+public interface EventSelector<T extends Event>
 {
 	/**
 	 * Tells whether this selector would select the given event / does the given element 
@@ -16,5 +17,5 @@ public interface EventSelector
 	 * @param event The event that is tested
 	 * @return Would the selector select the event
 	 */
-	public boolean selects(Event event);
+	public boolean selects(T event);
 }

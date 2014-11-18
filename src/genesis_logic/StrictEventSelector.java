@@ -8,13 +8,15 @@ import java.util.List;
  * Selectors can be used for picking the events that interest the user.
  * 
  * @author Mikko Hilpinen
+ * @param <T> The type of event this selector selects
+ * @param <FeatureType> The type of the features selected by this selector
  * @since 17.11.2014
  */
-public class StrictEventSelector implements EventSelector
+public class StrictEventSelector<T extends Event, FeatureType extends Event.Feature> implements EventSelector<T>
 {
 	// ATTRIBUTES	-------------------------------------
 	
-	private final List<Event.Feature> requiredFeatures, unnacceptableFeatures;
+	private final List<FeatureType> requiredFeatures, unnacceptableFeatures;
 	
 	
 	// CONSTRUCTOR	-------------------------------------
@@ -25,8 +27,8 @@ public class StrictEventSelector implements EventSelector
 	public StrictEventSelector()
 	{
 		// Initializes attributes
-		this.requiredFeatures = new ArrayList<Event.Feature>();
-		this.unnacceptableFeatures = new ArrayList<Event.Feature>();
+		this.requiredFeatures = new ArrayList<FeatureType>();
+		this.unnacceptableFeatures = new ArrayList<FeatureType>();
 	}
 
 	
@@ -38,7 +40,7 @@ public class StrictEventSelector implements EventSelector
 	 * 
 	 * @param feature The feature the event must have in order to be selected
 	 */
-	public void addRequiredFeature(Event.Feature feature)
+	public void addRequiredFeature(FeatureType feature)
 	{
 		if (feature != null && !this.requiredFeatures.contains(feature) && 
 				!this.unnacceptableFeatures.contains(feature))
@@ -49,7 +51,7 @@ public class StrictEventSelector implements EventSelector
 	 * Adds a new feature to the features that are not acceptable for selection.
 	 * @param feature The feature which makes an event unacceptable.
 	 */
-	public void addUnacceptableFeature(Event.Feature feature)
+	public void addUnacceptableFeature(FeatureType feature)
 	{
 		if (feature != null && !this.unnacceptableFeatures.contains(feature) && 
 				!this.requiredFeatures.contains(feature))
@@ -57,18 +59,18 @@ public class StrictEventSelector implements EventSelector
 	}
 	
 	@Override
-	public boolean selects(Event event)
+	public boolean selects(T event)
 	{
 		// Checks if the event has all the required features
 		List<Event.Feature> features = event.getFeatures();
 		
-		for (Event.Feature requirement : this.requiredFeatures)
+		for (FeatureType requirement : this.requiredFeatures)
 		{
 			if (!features.contains(requirement))
 				return false;
 		}
 		
-		for (Event.Feature unacceptable : this.unnacceptableFeatures)
+		for (FeatureType unacceptable : this.unnacceptableFeatures)
 		{
 			if (features.contains(unacceptable))
 				return false;
@@ -83,8 +85,8 @@ public class StrictEventSelector implements EventSelector
 	/**
 	 * @return A selector that accepts all mouse events
 	 */
-	public static StrictEventSelector createAllAcceptingSelector()
+	public static StrictEventSelector<Event, Event.Feature> createAllAcceptingSelector()
 	{
-		return new StrictEventSelector();
+		return new StrictEventSelector<Event, Event.Feature>();
 	}
 }

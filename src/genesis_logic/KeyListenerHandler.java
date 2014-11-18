@@ -19,6 +19,9 @@ public class KeyListenerHandler extends Handler implements
 	// ATTRIBUTES	---------------------------------
 	
 	private StateOperator listensToKeysOperator;
+	private EventSelector<AdvancedKeyEvent> selector;
+	
+	private AdvancedKeyEvent lastEvent;
 	
 	
 	// CONSTRUCTOR	-----------------------------------------------------
@@ -66,30 +69,24 @@ public class KeyListenerHandler extends Handler implements
 	// IMPLEMENTED METHODS	---------------------------------------------
 
 	@Override
-	public StateOperator getListensToKeyEventsOperator()
+	public void onKeyEvent(genesis_logic.AdvancedKeyEvent event)
 	{
-		return this.listensToKeysOperator;
+		// Inform the listeners about the event
+		this.lastEvent = event;
+		handleObjects();
+		this.lastEvent = null;
+	}
+
+	@Override
+	public EventSelector<genesis_logic.AdvancedKeyEvent> getKeyEventSelector()
+	{
+		return this.selector;
 	}
 	
 	@Override
-	public void onKeyDown(char key, int keyCode, boolean coded, double steps)
+	public StateOperator getListensToKeyEventsOperator()
 	{
-		handleObjects(new AdvancedKeyEventOperator(AdvancedKeyEvent.KEYDOWN, 
-				key, keyCode, coded, steps));
-	}
-
-	@Override
-	public void onKeyPressed(char key, int keyCode, boolean coded)
-	{
-		handleObjects(new AdvancedKeyEventOperator(AdvancedKeyEvent.KEYPRESSED, 
-				key, keyCode, coded, 0));
-	}
-
-	@Override
-	public void onKeyReleased(char key, int keyCode, boolean coded)
-	{
-		handleObjects(new AdvancedKeyEventOperator(AdvancedKeyEvent.KEYRELEASED, 
-				key, keyCode, coded, 0));
+		return this.listensToKeysOperator;
 	}
 	
 	@Override
@@ -101,8 +98,15 @@ public class KeyListenerHandler extends Handler implements
 	@Override
 	protected boolean handleObject(Handled h)
 	{
-		// Handling is done via operators
-		return false;
+		// Only informs active listeners
+		AdvancedKeyListener l = (AdvancedKeyListener) h;
+		
+		if (!l.getListensToKeyEventsOperator().getState())
+			return true;
+		
+		informListenerAboutKeyEvent(l, this.lastEvent);
+		
+		return true;
 	}
 	
 	
@@ -122,68 +126,26 @@ public class KeyListenerHandler extends Handler implements
 	{
 		// Initializes attributes
 		this.listensToKeysOperator = new AnyHandledListensKeyEventsOperator();
+		// The handler listens to all keyboard events
+		this.selector = new StrictEventSelector<AdvancedKeyEvent, AdvancedKeyEvent.Feature>();
+		
+		this.lastEvent = null;
 	}
 	
-	
-	// ENUMERATIONS	-------------------------------------------------------
-	
-	private enum AdvancedKeyEvent
+	/**
+	 * Informs a listener about a keyEvent, but only if the listener listens to such events
+	 * 
+	 * @param listener The listener that might be interested in the event
+	 * @param event The event that the listener may be informed about
+	 */
+	protected static void informListenerAboutKeyEvent(AdvancedKeyListener listener, AdvancedKeyEvent event)
 	{
-		KEYDOWN, KEYPRESSED, KEYRELEASED;
+		if (listener.getKeyEventSelector().selects(event))
+			listener.onKeyEvent(event);
 	}
 	
 	
 	// SUBCLASSES	-------------------------------------------------------
-	
-	private class AdvancedKeyEventOperator extends HandlingOperator
-	{
-		// ATTRIBUTES	---------------------------------------------------
-		
-		private char key;
-		private int keycode;
-		private boolean coded;
-		private AdvancedKeyEvent event;
-		private double duration;
-		
-		
-		// CONSTRUCTOR	---------------------------------------------------
-		
-		public AdvancedKeyEventOperator(AdvancedKeyEvent event, char key, 
-				int keycode, boolean coded, double duration)
-		{
-			this.key = key;
-			this.keycode = keycode;
-			this.coded = coded;
-			this.event = event;
-			this.duration = duration;
-		}
-		
-		
-		// IMPLEMENTED METHODS	-------------------------------------------
-		
-		@Override
-		protected boolean handleObject(Handled h)
-		{
-			AdvancedKeyListener l = (AdvancedKeyListener) h;
-			
-			// Only informs active handleds
-			if (!l.getListensToKeyEventsOperator().getState())
-				return true;
-			
-			// Calls an event for the handled
-			switch (this.event)
-			{
-				case KEYDOWN: l.onKeyDown(this.key, this.keycode, this.coded, 
-						this.duration); break;
-				case KEYPRESSED: l.onKeyPressed(this.key, this.keycode, 
-						this.coded); break;
-				case KEYRELEASED: l.onKeyReleased(this.key, this.keycode, 
-						this.coded); break;
-			}
-			
-			return true;
-		}
-	}
 	
 	private class AnyHandledListensKeyEventsOperator extends ForAnyHandledsOperator
 	{

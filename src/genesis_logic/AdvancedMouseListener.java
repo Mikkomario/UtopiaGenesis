@@ -26,7 +26,7 @@ public interface AdvancedMouseListener extends Handled
 	 * @return A mouseEventSelector that determines which mouse events the listener is 
 	 * interested in
 	 */
-	public EventSelector getMouseEventSelector();
+	public EventSelector<AdvancedMouseEvent> getMouseEventSelector();
 	
 	/**
 	 * Tell's whether the given position is in the object's special area of interest

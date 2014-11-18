@@ -1,9 +1,13 @@
 package genesis_logic;
 
+import genesis_logic.AdvancedKeyEvent.ContentType;
+import genesis_logic.AdvancedKeyEvent.KeyEventType;
 import genesis_util.Handled;
 import genesis_util.StateOperator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class unites the actor and keyListening interfaces so that keyevents are 
@@ -17,13 +21,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 {
 	// ATTRIBUTES	------------------------------------------------------
 	
-	private ArrayList<Character> keysDown;
-	private ArrayList<Integer> codesDown;
-	private ArrayList<Character> keysPressed;
-	private ArrayList<Integer> codesPressed;
-	private ArrayList<Character> keysReleased;
-	private ArrayList<Integer> codesReleased;
-	private double lastkeyduration;
+	private HashMap<KeyEventType, HashMap<ContentType, List<Integer>>> keyStates;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -67,73 +65,22 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	
 	@Override
 	public void act(double steps)
-	{
-		// Collects necessary information
-		this.lastkeyduration = steps;
-		
+	{	
 		// Informs the objects
-		handleObjects();
+		handleObjects(new MainKeyOperator(steps));
 		
 		// Negates some of the changes (pressed & released)
-		this.keysPressed.clear();
-		this.keysReleased.clear();
-		this.codesPressed.clear();
-		this.codesReleased.clear();
+		for (KeyEventType eventType : this.keyStates.keySet())
+		{
+			if (eventType != KeyEventType.DOWN)
+			{
+				for (ContentType contentType : this.keyStates.get(eventType).keySet())
+				{
+					this.keyStates.get(eventType).get(contentType).clear();
+				}
+			}
+		}
 	}
-	
-	@Override
-	protected boolean handleObject(Handled h)
-	{
-		// Informs the object about the current event(s)
-		AdvancedKeyListener listener = (AdvancedKeyListener) h;
-		
-		// Only informs active objects
-		if (!listener.getListensToKeyEventsOperator().getState())
-			return true;
-		
-		// Informs if a key was pressed
-		for (int ik = 0; ik < this.keysPressed.size(); ik++)
-		{
-			listener.onKeyPressed(this.keysPressed.get(ik), 0, false);
-		}
-		
-		// Informs if a coded key was pressed
-		for (int ik = 0; ik < this.codesPressed.size(); ik++)
-		{
-			listener.onKeyPressed((char) 0, this.codesPressed.get(ik), true);
-		}
-		
-		// Informs if a key was released
-		for (int ik = 0; ik < this.keysReleased.size(); ik++)
-		{
-			listener.onKeyReleased(this.keysReleased.get(ik), 0, false);
-		}
-		
-		// Informs if a coded key was released
-		for (int ik = 0; ik < this.codesReleased.size(); ik++)
-		{
-			listener.onKeyReleased((char) 0, this.codesReleased.get(ik), true);
-		}
-		
-		// Informs if a key is down
-		for (int ikd = 0; ikd < this.keysDown.size(); ikd++)
-		{
-			listener.onKeyDown(this.keysDown.get(ikd), 0, false, 
-					this.lastkeyduration);
-		}
-		
-		// Informs if a coded key is down
-		for (int icd = 0; icd < this.codesDown.size(); icd++)
-		{
-			// For some reason, this check is needed...?
-			if (icd < this.codesDown.size())
-				listener.onKeyDown((char) 0, this.codesDown.get(icd), true, 
-						this.lastkeyduration);
-		}
-		
-		return true;
-	}
-	
 	
 	// OTHER METHODS	--------------------------------------------------
 	
@@ -144,31 +91,25 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	 * @param code The key's keycode
 	 * @param coded Does the key use its keycode
 	 */
-	@Override
 	public void onKeyPressed(char key, int code, boolean coded)
 	{
+		ContentType contentType = ContentType.KEY;
+		int content = key;
 		if (coded)
 		{
-			// Checks whether the key was just pressed instead of being already down
-			if (!this.codesDown.contains(code))
-			{
-				// If so, marks the key as pressed
-				if (!this.codesPressed.contains(code))
-					this.codesPressed.add(code);
-			
-				// Sets the key down
-				this.codesDown.add(code);
-			}
+			contentType = ContentType.KEYCODE;
+			content = code;
 		}
-		else
+		
+		// Checks whether the key was just pressed instead of being already down
+		if (!this.keyStates.get(KeyEventType.DOWN).get(contentType).contains(content))
 		{
-			if (!this.keysDown.contains(key))
-			{
-				if (!this.keysPressed.contains(key))
-					this.keysPressed.add(key);
-				
-				this.keysDown.add(key);
-			}
+			// If so, marks the key as pressed
+			if (!this.keyStates.get(KeyEventType.PRESSED).get(contentType).contains(content))
+				this.keyStates.get(KeyEventType.PRESSED).get(contentType).add(content);
+		
+			// And sets the key down
+			this.keyStates.get(KeyEventType.DOWN).get(contentType).add(content);
 		}
 	}
 	
@@ -179,38 +120,88 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	 * @param code The key's keycode
 	 * @param coded Does the key use its keycode
 	 */
-	@Override
 	public void onKeyReleased(char key, int code, boolean coded)
 	{
+		ContentType contentType = ContentType.KEY;
+		int content = key;
 		if (coded)
 		{
-			// Marks the key as released
-			if (!this.codesReleased.contains(code))
-				this.codesReleased.add(code);
-			
-			// Sets the key up (= not down)
-			if(this.codesDown.contains(code))
-				this.codesDown.remove(this.codesDown.indexOf(code));
+			contentType = ContentType.KEYCODE;
+			content = code;
 		}
-		else
-		{
-			if (!this.keysReleased.contains(key))
-				this.keysReleased.add(key);
-			
-			if (this.keysDown.contains(key))
-				this.keysDown.remove(this.keysDown.indexOf(key));
-		}
+		
+		// Marks the key as released
+		if (!this.keyStates.get(KeyEventType.RELEASED).get(contentType).contains(content))
+			this.keyStates.get(KeyEventType.RELEASED).get(contentType).add(content);
+		
+		// Sets the key up (= not down)
+		List<Integer> keysDownList = this.keyStates.get(KeyEventType.DOWN).get(contentType);
+		if (keysDownList.contains(content))
+			keysDownList.remove(keysDownList.indexOf(content));
 	}
 	
 	private void initialize()
 	{
 		// Initializes the attributes
-		this.keysDown = new ArrayList<Character>();
-		this.codesDown = new ArrayList<Integer>();
-		this.keysPressed = new ArrayList<Character>();
-		this.keysReleased = new ArrayList<Character>();
-		this.codesPressed = new ArrayList<Integer>();
-		this.codesReleased = new ArrayList<Integer>();
-		this.lastkeyduration = 0;
+		this.keyStates = new HashMap<KeyEventType, HashMap<ContentType, List<Integer>>>();
+		for (KeyEventType keyEvent : KeyEventType.values())
+		{
+			this.keyStates.put(keyEvent, new HashMap<ContentType, List<Integer>>());
+			for (ContentType contentType : ContentType.values())
+			{
+				this.keyStates.get(keyEvent).put(contentType, new ArrayList<Integer>());
+			}
+		}
+	}
+	
+	
+	// SUBCLASSES	----------------------------------------------
+	
+	private class MainKeyOperator extends HandlingOperator
+	{
+		// ATTRIBUTES	------------------------------------------
+		
+		private double eventDuration;
+		
+		
+		// CONSTRUCTOR	------------------------------------------
+		
+		public MainKeyOperator(double eventDuration)
+		{
+			this.eventDuration = eventDuration;
+		}
+		
+		
+		// IMPLEMENTED METHODS	----------------------------------
+		
+		@Override
+		protected boolean handleObject(Handled h)
+		{
+			// Informs the object about the current event(s)
+			AdvancedKeyListener listener = (AdvancedKeyListener) h;
+			
+			// Only informs active objects
+			if (!listener.getListensToKeyEventsOperator().getState())
+				return true;
+			
+			for (KeyEventType eventType : MainKeyListenerHandler.this.keyStates.keySet())
+			{
+				for (ContentType contentType : 
+						MainKeyListenerHandler.this.keyStates.get(eventType).keySet())
+				{
+					List<Integer> keys = 
+							MainKeyListenerHandler.this.keyStates.get(eventType).get(contentType);
+					
+					for (int i = 0; i < keys.size(); i++)
+					{
+						informListenerAboutKeyEvent(listener, 
+								new AdvancedKeyEvent(keys.get(i), eventType, contentType, 
+								this.eventDuration));
+					}
+				}
+			}
+			
+			return true;
+		}	
 	}
 }

@@ -15,32 +15,17 @@ import genesis_util.StateOperator;
 public interface AdvancedKeyListener extends Handled
 {
 	/**
-	 * This method is called at each step when a key is down
-	 *
-	 * @param key The key that is currently pressed
-	 * @param keyCode The key's keycode (used for some keys)
-	 * @param coded Is the pressed key coded
-	 * @param steps How many steps has the key been pressed since the last event
+	 * This method is called when a desired event occurs. Only Key events selected by the 
+	 * listener's selector should be informed.
+	 * @param event The event that occurred
 	 */
-	public void onKeyDown(char key, int keyCode, boolean coded, double steps);
+	public void onKeyEvent(AdvancedKeyEvent event);
 	
 	/**
-	 * This method is called once when a key is pressed
-	 *
-	 * @param key The key that is currently pressed
-	 * @param keyCode The key's keycode (used for some keys)
-	 * @param coded Is the pressed key coded
+	 * @return A keyEventSelector that determines whether the listener is interested in certain 
+	 * events.
 	 */
-	public void onKeyPressed(char key, int keyCode, boolean coded);
-	
-	/**
-	 * This method is called when a key is released
-	 *
-	 * @param key The key that is currently pressed
-	 * @param keyCode The key's keycode (used for some keys)
-	 * @param coded Is the pressed key coded
-	 */
-	public void onKeyReleased(char key, int keyCode, boolean coded);
+	public EventSelector<AdvancedKeyEvent> getKeyEventSelector();
 	
 	/**
 	 * @return A stateOperator that determines whether the listener is currently interested 
