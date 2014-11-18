@@ -33,26 +33,6 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	// CONSTRUCTOR	-----------------------------------------------------
 	
 	/**
-	 * Creates a new handler that is still empty. Handled objects must be added 
-	 * manually later. If autodeath is set on, the handled will be destroyed as 
-	 * soon as it becomes empty.
-	 *
-	 * @param autodeath Will the handler die automatically when it becomes empty
-	 * @param superhandler The handler that will handle the object (optional)
-	 */
-	/*
-	public Handler(boolean autodeath, Handler<Handled> superhandler)
-	{
-		// Initializes attributes
-		initialize(autodeath);
-		
-		// Tries to add itself to the superhandler
-		if (superhandler != null)
-			superhandler.addHandled(this);
-	}
-	*/
-	
-	/**
 	 * Creates a new Handler and adds it as a handled to the applicable handlers in the given 
 	 * relay.
 	 * @param autoDeath Will the handler die once it becomes empty again
