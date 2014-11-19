@@ -77,6 +77,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 		// Updates mouse status
 		setMousePosition(event.getPosition());
 		
+		// Listens to button releases & presses as well
 		if (event.getType() == MouseEventType.BUTTON)
 		{
 			boolean newState = false;
@@ -112,7 +113,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	private void initialize()
 	{
 		// The handler accepts the mouse move event as well as global mouse button events
-		this.selector = new MultiEventSelector<AdvancedMouseEvent>();
+		this.selector = new MultiEventSelector<>();
 		
 		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> globalButtonSelector = 
 				AdvancedMouseEvent.createButtonStateChangeSelector();

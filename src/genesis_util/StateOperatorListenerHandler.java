@@ -73,7 +73,9 @@ public class StateOperatorListenerHandler extends Handler<StateOperatorListener>
 	@Override
 	public void onStateChange(StateOperator source, boolean newState)
 	{
-		// Informs the objects about the stateChange
+		super.onStateChange(source, newState);
+		
+		// Also Informs the objects about the stateChange
 		this.lastSource = source;
 		this.lastState = newState;
 		

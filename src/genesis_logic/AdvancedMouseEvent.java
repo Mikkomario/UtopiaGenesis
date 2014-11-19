@@ -197,7 +197,7 @@ public class AdvancedMouseEvent implements Event
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createButtonEventSelector()
 	{
 		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
-				new StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature>();
+				new StrictEventSelector<>();
 		selector.addRequiredFeature(MouseEventType.BUTTON);
 		return selector;
 	}
@@ -207,7 +207,8 @@ public class AdvancedMouseEvent implements Event
 	 */
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createMovementEventSelector()
 	{
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = new StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature>();
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
+				new StrictEventSelector<>();
 		selector.addRequiredFeature(MouseEventType.MOVEMENT);
 		return selector;
 	}
@@ -217,7 +218,8 @@ public class AdvancedMouseEvent implements Event
 	 */
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createButtonStateChangeSelector()
 	{
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = createButtonEventSelector();
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
+				createButtonEventSelector();
 		selector.addUnacceptableFeature(MouseButtonEventType.DOWN);
 		return selector;
 	}
@@ -228,7 +230,8 @@ public class AdvancedMouseEvent implements Event
 	 */
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createLocalButtonStateChangeSelector()
 	{
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = createButtonStateChangeSelector();
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
+				createButtonStateChangeSelector();
 		selector.addRequiredFeature(MouseButtonEventScale.LOCAL);
 		return selector;
 	}
@@ -238,7 +241,8 @@ public class AdvancedMouseEvent implements Event
 	 */
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createEnterExitSelector()
 	{
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = createMovementEventSelector();
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
+				createMovementEventSelector();
 		selector.addUnacceptableFeature(MouseMovementEventType.MOVE);
 		return selector;
 	}
@@ -248,7 +252,8 @@ public class AdvancedMouseEvent implements Event
 	 */
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createMouseMoveSelector()
 	{
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = createMovementEventSelector();
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
+				createMovementEventSelector();
 		selector.addRequiredFeature(MouseMovementEventType.MOVE);
 		return selector;
 	}
@@ -259,7 +264,8 @@ public class AdvancedMouseEvent implements Event
 	 */
 	public static StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> createMouseButtonSelector(MouseButton requiredButton)
 	{
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = createButtonEventSelector();
+		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> selector = 
+				createButtonEventSelector();
 		selector.addRequiredFeature(requiredButton);
 		return selector;
 	}

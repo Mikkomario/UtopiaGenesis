@@ -12,7 +12,8 @@ import java.util.List;
  * @param <FeatureType> The type of the features selected by this selector
  * @since 17.11.2014
  */
-public class StrictEventSelector<T extends Event, FeatureType extends Event.Feature> implements EventSelector<T>
+public class StrictEventSelector<T extends Event, FeatureType extends Event.Feature> 
+		implements EventSelector<T>
 {
 	// ATTRIBUTES	-------------------------------------
 	

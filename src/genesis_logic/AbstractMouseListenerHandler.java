@@ -130,7 +130,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 			this.movementEventTargets.get(MouseMovementEventType.EXIT).add(l);
 		}
 		
-		// Informs the listener about the move-event as well
+		// Informs the listener about the move event
 		informObjectAboutMouseEvent(l, new AdvancedMouseEvent(getMousePosition(), 
 				this.lastStepDuration).withMovementType(MouseMovementEventType.MOVE));
 		

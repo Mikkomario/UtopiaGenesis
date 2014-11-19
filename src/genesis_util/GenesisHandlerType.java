@@ -53,6 +53,7 @@ public enum GenesisHandlerType implements HandlerType
 			case KEYHANDLER: return AdvancedKeyListener.class;
 			case DRAWABLEHANDLER: return Drawable.class;
 			case ACTORHANDLER: return Actor.class;
+			case STATEHANDLER: return StateOperatorListener.class;
 			
 			default: return null;
 		}

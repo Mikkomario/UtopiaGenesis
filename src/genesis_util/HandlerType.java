@@ -11,7 +11,7 @@ package genesis_util;
 public interface HandlerType
 {
 	/**
-	 * @return Which type of handled this type of handler supports?
+	 * @return Which type of handled this type of handler supports
 	 */
 	public Class<?> getSupportedHandledClass();
 }

@@ -72,5 +72,3 @@ public class StateOperator
 		this.mutable = mutable;
 	}
 }
-
-

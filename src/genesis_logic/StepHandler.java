@@ -105,7 +105,8 @@ public class StepHandler extends ActorHandler implements Runnable
 		if (!getIsDeadStateOperator().getState())
 		{
 			// Calculates the step length that is informed for the objects
-			double steps = (System.currentTimeMillis() - this.lastactmillis) / 
+			long thisActStartedAt = System.currentTimeMillis();
+			double steps = (thisActStartedAt - this.lastactmillis) / 
 					(double) STEPLENGTH;
 			
 			// Sometimes the true amount of steps can't be informed and a 
@@ -121,11 +122,12 @@ public class StepHandler extends ActorHandler implements Runnable
 			this.window.callMousePositionUpdate();
 			
 			// Updates the stepmillis
-			this.lastactmillis = System.currentTimeMillis();
+			//this.lastactmillis = System.currentTimeMillis();
+			this.lastactmillis = thisActStartedAt;
 		}
 		// Stops running if dies
 		else
-			this.running = false;
+			stop();
 		
 		// If there is time, the thread will wait until another step is needed
 		if (System.currentTimeMillis() < this.nextupdatemillis)
@@ -134,7 +136,7 @@ public class StepHandler extends ActorHandler implements Runnable
 			{
 				try
 				{
-					// TODO: Apparently this can become negative under very 
+					// Apparently this can become negative under very 
 					// rare circumstances (added the second check, hope it helps)
 					if (System.currentTimeMillis() < this.nextupdatemillis)
 						wait(this.nextupdatemillis - System.currentTimeMillis());
@@ -322,8 +324,6 @@ public class StepHandler extends ActorHandler implements Runnable
 		private void goToBreak()
 		{
 			// Updates the stephandler's action modifier
-			//StepHandler.this.actionmodifier = this.optimalaps / 
-			//		(double) this.aps;
 			
 			this.onbreak = true;
 			this.checkphase = 0;

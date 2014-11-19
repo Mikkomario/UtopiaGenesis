@@ -7,6 +7,7 @@ import genesis_util.StateOperator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This class unites the actor and keyListening interfaces so that keyevents are 
@@ -20,7 +21,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 {
 	// ATTRIBUTES	------------------------------------------------------
 	
-	private HashMap<KeyEventType, HashMap<ContentType, List<Integer>>> keyStates;
+	private Map<KeyEventType, Map<ContentType, List<Integer>>> keyStates;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -142,7 +143,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	private void initialize()
 	{
 		// Initializes the attributes
-		this.keyStates = new HashMap<KeyEventType, HashMap<ContentType, List<Integer>>>();
+		this.keyStates = new HashMap<KeyEventType, Map<ContentType, List<Integer>>>();
 		for (KeyEventType keyEvent : KeyEventType.values())
 		{
 			this.keyStates.put(keyEvent, new HashMap<ContentType, List<Integer>>());

@@ -30,7 +30,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	private StateOperator isDeadOperator;
 	private boolean started;
 	
-	private HashMap<HandlingOperation, ReentrantLock> locks;
+	private Map<HandlingOperation, ReentrantLock> locks;
 	
 	
 	// CONSTRUCTOR	-----------------------------------------------------
@@ -134,7 +134,6 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 * @see #handleObject(Handled)
 	 * @see HandlingOperator
 	 */
-	// TODO: Add boolean parameter performUpdate is needed
 	protected void handleObjects(HandlingOperator operator)
 	{	
 		updateStatus();
@@ -469,8 +468,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		public void onStateChange(StateOperator source, boolean newState)
 		{
 			// Tries to change the state of all the handleds
-			HandlingOperator operator = new StateAdjustMentOperator(newState);
-			handleObjects(operator);
+			handleObjects(new StateAdjustMentOperator(newState));
 		}
 		
 		

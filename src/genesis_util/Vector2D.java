@@ -13,8 +13,6 @@ import java.awt.geom.Point2D;
  */
 public class Vector2D
 {
-	// TODO: Add dot product, cross product, length, direction
-	
 	// ATTRIBUTES	------------------------------------------
 	
 	private final double first, second;
@@ -84,8 +82,139 @@ public class Vector2D
 		return this.second;
 	}
 	
+	/**
+	 * @return The direction of the vector (in degrees)
+	 */
+	public double getDirection()
+	{
+		return HelpMath.getVectorDirection(getFirst(), getSecond());
+	}
+	
+	/**
+	 * @return The length of the vector
+	 */
+	public double getLength()
+	{
+		return Math.sqrt(this.dotProduct(this));
+	}
+	
 	
 	// OTHER METHODS	--------------------------------------
+	
+	/**
+	 * @param other The other vector
+	 * @return Are the two vectors paraller to each other
+	 */
+	public boolean isParallerWith(Vector2D other)
+	{
+		return areApproximatelyEqual(getDirection(), other.getDirection());
+	}
+	
+	/**
+	 * @param other The other vector
+	 * @return How much the 
+	 */
+	public double getSeparatingAngle(Vector2D other)
+	{
+		return HelpMath.getAngleDifference180(getDirection(), other.getDirection());
+	}
+	
+	/**
+	 * @param other The other vector
+	 * @return Is this vector perpendicular to the other vector
+	 */
+	public boolean isPerpendicularTo(Vector2D other)
+	{
+		return areApproximatelyEqual(this.dotProduct(other), 0);
+	}
+	
+	/**
+	 * Calculates the dot product of the two vectors
+	 * @param other The other vector
+	 * @return The dot product of the two vectors
+	 */
+	public double dotProduct(Vector2D other)
+	{
+		Vector2D multiplication = this.times(other);
+		return multiplication.getFirst() + multiplication.getSecond();
+	}
+	
+	/**
+	 * @param other The other vector
+	 * @return The scalar projection of this vector to the other vector
+	 */
+	public double scalarProjection(Vector2D other)
+	{
+		return this.dotProduct(other) / other.getLength();
+	}
+	
+	/**
+	 * @param other The other vector
+	 * @return the vector projection of this vector over the other vector
+	 */
+	public Vector2D vectorProjection(Vector2D other)
+	{
+		return other.times(this.dotProduct(other) / other.dotProduct(other));
+	}
+	
+	/**
+	 * Calculates the length of the cross product of the two vectors
+	 * @param other The other vector
+	 * @return The length of the cross product of these two vectors
+	 */
+	public double crossProductLength(Vector2D other)
+	{
+		// = |a||b|sin(a, b)e, |e| = 1 (can't use e in 2D space)
+		return getLength() * other.getLength() * Math.sin(Math.toRadians(
+				this.getSeparatingAngle(other)));
+	}
+	
+	/**
+	 * @param direction The direction of the new vector
+	 * @return A vector with the given direction but the same length as this one
+	 */
+	public Vector2D withDirection(double direction)
+	{
+		double x = 0, y = 0;
+		double length = getLength();
+		
+		if (length > 0)
+		{
+			x = HelpMath.lendirX(length, direction);
+			y = HelpMath.lendirY(length, direction);
+		}
+		
+		return new Vector2D(x, y);
+	}
+	
+	/**
+	 * @return Returns a version of this version that has unit length
+	 */
+	public Vector2D asUnitVector()
+	{
+		return this.dividedBy(getLength());
+	}
+	
+	/**
+	 * @param length The length of the new vector
+	 * @return a version of this vector that has the given length
+	 */
+	public Vector2D withLength(double length)
+	{
+		return this.asUnitVector().times(length);
+	}
+	
+	/**
+	 * Projects the vector to the given axis / direction
+	 * @param direction The direction the vector is projected to
+	 * @return The projection of this vector to the given axis
+	 */
+	public Vector2D getProjection(double direction)
+	{
+		double newLength = HelpMath.getDirectionalForce(getDirection(), 
+				getLength(), direction);
+		return this.withDirection(direction).withLength(newLength);
+	}
 	
 	/**
 	 * @param other The other vector
@@ -165,8 +294,8 @@ public class Vector2D
 	 */
 	public boolean equalsApproximately(Vector2D other)
 	{
-		return (int) (getFirst() * 1000) == (int) (other.getFirst() * 1000) && 
-				(int) (getSecond() * 1000) == (int) (other.getSecond() * 1000);
+		return areApproximatelyEqual(getFirst(), other.getFirst()) && 
+				areApproximatelyEqual(getSecond(), other.getSecond());
 	}
 	
 	/**
@@ -191,5 +320,35 @@ public class Vector2D
 	public static Vector2D identityVector()
 	{
 		return new Vector2D(1, 1);
+	}
+	
+	/**
+	 * @return A vector with zero length
+	 */
+	public static Vector2D zeroVector()
+	{
+		return new Vector2D(0, 0);
+	}
+	
+	/**
+	 * @return A unit vector that has direction of 0
+	 */
+	public static Vector2D unitVector()
+	{
+		return new Vector2D(1, 0);
+	}
+	
+	/**
+	 * @param direction The direction the unit vector will be facing (in degrees)
+	 * @return A unit vector with the given direction
+	 */
+	public static Vector2D unitVector(double direction)
+	{
+		return unitVector().withDirection(direction);
+	}
+	
+	private static boolean areApproximatelyEqual(double first, double second)
+	{
+		return (int) (first * 1000) == (int) (second * 1000);
 	}
 }

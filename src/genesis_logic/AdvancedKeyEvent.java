@@ -42,12 +42,12 @@ public class AdvancedKeyEvent implements Event
 	@Override
 	public List<Event.Feature> getFeatures()
 	{
-		List<Feature> features = new ArrayList<Feature>();
+		List<Event.Feature> features = new ArrayList<Event.Feature>();
 		
 		features.add(getEventType());
 		features.add(getContentType());
 		
-		return null;
+		return features;
 	}
 	
 	
