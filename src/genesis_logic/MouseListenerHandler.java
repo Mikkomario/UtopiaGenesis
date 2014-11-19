@@ -5,8 +5,7 @@ import genesis_logic.AdvancedMouseEvent.MouseButtonEventType;
 import genesis_logic.AdvancedMouseEvent.MouseEventType;
 import genesis_util.HandlerRelay;
 import genesis_util.StateOperator;
-
-import java.awt.geom.Point2D;
+import genesis_util.Vector2D;
 
 /**
  * Informs multiple mouselisteners about the mouse's movements and button status
@@ -101,7 +100,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	}
 
 	@Override
-	public boolean isInAreaOfInterest(Point2D.Double testedPosition)
+	public boolean isInAreaOfInterest(Vector2D testedPosition)
 	{
 		// Handlers are interested in all areas
 		return true;

@@ -2,9 +2,9 @@ package genesis_logic;
 
 import genesis_logic.AdvancedMouseEvent.MouseButton;
 import genesis_util.HandlerRelay;
+import genesis_util.Vector2D;
 
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
 
 /**
  * This class takes input straight from the gamewindow and informs all 
@@ -57,7 +57,7 @@ public class MainMouseListenerHandler extends AbstractMouseListenerHandler
 	 * @param mousePressed Is a mouse button pressed
 	 * @param mouseButton Which mouse button is pressed
 	 */
-	public void setMouseStatus(Point2D.Double mousePosition, 
+	public void setMouseStatus(Vector2D mousePosition, 
 			boolean mousePressed, int mouseButton)
 	{
 		setMousePosition(mousePosition);

@@ -9,8 +9,8 @@ import genesis_util.Handler;
 import genesis_util.HandlerRelay;
 import genesis_util.HandlerType;
 import genesis_util.StateOperator;
+import genesis_util.Vector2D;
 
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,7 +26,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 {
 	// ATTRIBUTES	-------------------------------------------------------
 	
-	private Point2D.Double currentMousePosition;
+	private Vector2D currentMousePosition;
 	private HashMap<MouseButtonEventType, HashMap<MouseButton, Boolean>> mouseButtonStates;
 	private HashMap<MouseMovementEventType, List<AdvancedMouseListener>> movementEventTargets;
 	
@@ -143,7 +143,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	/**
 	 * @return The current position of the mouse
 	 */
-	public Point2D.Double getMousePosition()
+	public Vector2D getMousePosition()
 	{
 		return this.currentMousePosition;
 	}
@@ -181,11 +181,11 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	 *
 	 * @param newMousePosition the new mouse position to be set
 	 */
-	public void setMousePosition(Point2D.Double newMousePosition)
+	public void setMousePosition(Vector2D newMousePosition)
 	{		
 		if (!getMousePosition().equals(newMousePosition))
 		{
-			this.currentMousePosition = (Point2D.Double) newMousePosition.clone();
+			this.currentMousePosition = newMousePosition;
 			
 			// Informs the objects
 			handleObjects();
@@ -239,7 +239,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	private void initialize()
 	{
 		// Initializes attributes
-		this.currentMousePosition = new Point2D.Double(0, 0);
+		this.currentMousePosition = new Vector2D(0, 0);
 		this.lastStepDuration = 0;
 		
 		this.isActiveOperator = new AnyHandledListensMouseOperator(false);

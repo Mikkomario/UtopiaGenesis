@@ -39,7 +39,7 @@ public class MainPanel extends JPanel
 	{
 		// Initializes attributes
 		this.dimensions = dimensions;
-		this.scaling = new Vector2D(1, 1);
+		this.scaling = Vector2D.identityVector();
 		this.gamePanels = new ArrayList<GamePanel>();
 		this.split = split;
 		
@@ -102,8 +102,7 @@ public class MainPanel extends JPanel
 		if (getGamePanelAmount() >= 4)
 			return null;
 		
-		GamePanel newPanel = new GamePanel((int) this.dimensions.getFirst(), 
-				(int) this.dimensions.getSecond());
+		GamePanel newPanel = new GamePanel(this.dimensions);
 		addGamePanel(newPanel);
 		
 		return newPanel;
@@ -146,7 +145,7 @@ public class MainPanel extends JPanel
 	{
 		// Calculates the main panel size
 		Vector2D newSizes = this.dimensions.times(this.scaling);
-		setSize((int) newSizes.getFirst(), (int) newSizes.getSecond());
+		setSize(newSizes.toDimension());
 		
 		// Updates the GamePanel sizes
 		for (int i = 0; i < this.gamePanels.size(); i++)
@@ -163,7 +162,7 @@ public class MainPanel extends JPanel
 					panelSize = new Vector2D(panelSize.getFirst(), panelSize.getSecond() * 0.5);
 			}
 			
-			getGamePanel(i).setSizes((int) panelSize.getFirst(), (int) panelSize.getSecond());
+			getGamePanel(i).setSizes(panelSize);
 		}
 	}
 	

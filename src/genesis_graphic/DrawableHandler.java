@@ -34,7 +34,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	// CONSTRUCTOR	------------------------------------------------------
 	
 	/**
-	 * Creates a new drawablehandler. Drawables must be added later manually.
+	 * Creates a new drawableHandler. Drawables must be added later manually.
 	 *
 	 * @param autodeath Will the handler die if it has no living drawables to handle
 	 * @param usesDepth Will the handler draw the objects in a depth-specific order
@@ -132,10 +132,9 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	}
 	
 	@Override
-	public boolean setDepth(int depth)
+	public void setDepth(int depth)
 	{
 		this.depth = depth;
-		return true;
 	}
 	
 	@Override
@@ -161,8 +160,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 					
 				for (int i = 0; i < this.subDrawers.length; i++)
 				{
-					//System.out.println(this.subDrawers[i]);
-					
 					if (this.subDrawers[i].depthIsWithinRange(drawableDepth))
 					{
 						spotFound = true;
@@ -204,6 +201,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		// Also checks if the depths are still ok
 		if (d.getDepth() > this.lastDrawableDepth)
 			this.needsSorting = true;
+		this.lastDrawableDepth = d.getDepth();
 		
 		return true;
 	}
@@ -255,11 +253,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 			}
 			
 			this.subDrawersAreReady = true;
-			/*
-			System.out.println("SubDrawers created with " + 
-					this.drawablesWaitingDepthSorting.size() + " drawables waiting");
-			*/
-			
+		
 			// Adds all 1000 drawables that wanted to be added before the 
 			// subDrawers could be initialized
 			while (this.drawablesWaitingDepthSorting.size() > 0)

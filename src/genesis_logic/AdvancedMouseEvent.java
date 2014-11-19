@@ -1,6 +1,7 @@
 package genesis_logic;
 
-import java.awt.geom.Point2D;
+import genesis_util.Vector2D;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class AdvancedMouseEvent implements Event
 	private final MouseMovementEventType movementType;
 	private final MouseButtonEventScale scale;
 	
-	private final Point2D.Double position;
+	private final Vector2D position;
 	private final double duration;
 	
 	
@@ -35,7 +36,7 @@ public class AdvancedMouseEvent implements Event
 	 * @param duration How many steps the event lasted
 	 */
 	public AdvancedMouseEvent(MouseButtonEventType type, MouseButton button, 
-			Point2D.Double position, double duration)
+			Vector2D position, double duration)
 	{
 		// Initializes attributes
 		this.button = button;
@@ -53,7 +54,7 @@ public class AdvancedMouseEvent implements Event
 	 * @param position The mouse position when the event occurred
 	 * @param duration How many steps the event lasted
 	 */
-	public AdvancedMouseEvent(Point2D.Double position, double duration)
+	public AdvancedMouseEvent(Vector2D position, double duration)
 	{
 		// Initializes attributes
 		this.button = MouseButton.NONE;
@@ -150,7 +151,7 @@ public class AdvancedMouseEvent implements Event
 	/**
 	 * @return The mouse's position when the event was originated
 	 */
-	public final Point2D.Double getPosition()
+	public final Vector2D getPosition()
 	{
 		return this.position;
 	}

@@ -1,5 +1,7 @@
 package genesis_graphic;
 
+import genesis_util.Vector2D;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -20,10 +22,8 @@ public class GamePanel extends JPanel
 {
 	// ATTRIBUTES ---------------------------------------------------------
 	
-	private int width;
-	private int height;
+	private Vector2D dimensions, scaling;
 	private DrawableHandler drawer;
-	private double xscale, yscale;
 	private boolean clearPrevious;
 	
 	/**
@@ -35,28 +35,20 @@ public class GamePanel extends JPanel
 	// CONSTRUCTOR ---------------------------------------------------------
 	
 	/**
-	 * Creates a new panel with default color being white
-	 * 
-	 * @param width	Panel's width (in pixels)
-	 * @param height Panel's height (in pixels)
+	 * Creates a new panel
+	 * @param dimensions How large the panel is by default scaling of 1
 	 */
-	public GamePanel(int width, int height)
+	public GamePanel(Vector2D dimensions)
 	{
 		// Initializes attributes
-		this.xscale = 1;
-		this.yscale = 1;
-		this.width = width;
-		this.height = height;
+		this.scaling = Vector2D.identityVector();
+		this.dimensions = dimensions;
 		this.clearPrevious = true;
 		
-		// TODO: Check that 5 is good
 		this.drawer = new DrawableHandler(false, true, DepthConstants.NORMAL, 5);
 		
 		//Let's format our panel
 		this.formatPanel();
-		
-		//And make it visible
-		this.setVisible(true);
 	}
 	
 	
@@ -69,12 +61,13 @@ public class GamePanel extends JPanel
 		Graphics2D g2d = (Graphics2D) g;
 		
 		// Scales the area of drawing
-		if (this.xscale != 1 || this.yscale != 1)
-			g2d.scale(this.xscale, this.yscale);
+		if (!this.scaling.equalsApproximately(Vector2D.identityVector()))
+			g2d.scale(this.scaling.getFirst(), this.scaling.getSecond());
 		
 		// Clears the former drawings
 		if (!clearDisabled && this.clearPrevious)
-			g2d.clearRect(0, 0, this.width, this.height);
+			g2d.clearRect(0, 0, (int) this.dimensions.getFirst(), 
+					(int) this.dimensions.getSecond());
 		
 		this.drawer.drawSelf(g2d);
 	}
@@ -85,10 +78,9 @@ public class GamePanel extends JPanel
 	private void formatPanel()
 	{
 		//Let's set the panel's size...
-		this.setSizes(this.width, this.height);
-		//...And color
-		//this.setBackground(new Color(0,50,150));
-		//setBackgroundColor(255, 255, 255);
+		this.setSizes(this.dimensions);
+		//And make it visible
+		this.setVisible(true);
 	}
 	
 	
@@ -114,14 +106,12 @@ public class GamePanel extends JPanel
 	
 	/**
 	 * Changes the size of the game panel.
-	 * 
-	 * @param width	Panel's new width (in pixels)
-	 * @param height Panel's new height (in pixels)
+	 * @param dimensions The new sizes of the panel (in pixels)
 	 */
-	public void setSizes(int width, int height)
+	public void setSizes(Vector2D dimensions)
 	{
-		this.setSize(width, height);
-		Dimension preferred = new Dimension(width, height);
+		this.setSize(dimensions.toDimension());
+		Dimension preferred = dimensions.toDimension();
 		this.setPreferredSize(preferred);
 		this.setMinimumSize(preferred);
 		this.setMaximumSize(preferred);
@@ -166,33 +156,25 @@ public class GamePanel extends JPanel
 	/**
 	 * Scales the panel, keeping the same resolution but changing the size 
 	 * of the area. The scaling is relative to the former scaling of the panel
-	 *
-	 * @param xscale How much the panel is scaled horizontally (1 = no scaling) 
-	 * @param yscale How much the panel is scaled vertically (1 = no scaling)
+	 * @param scaling How much the panel is scaled
 	 */
-	protected void scale(double xscale, double yscale)
+	protected void scale(Vector2D scaling)
 	{
 		// The scaling is relative to the former scaling
-		setScale(xscale * this.xscale, yscale * this.yscale);
+		setScale(this.scaling.times(scaling));
 	}
 	
 	/**
 	 * Scales the panel, keeping the same resolution but changing the size 
 	 * of the area
-	 *
-	 * @param xscale How much the panel is scaled horizontally (1 = no scaling) 
-	 * @param yscale How much the panel is scaled vertically (1 = no scaling)
+	 * @param newScaling The panel's new scaling
 	 */
-	protected void setScale(double xscale, double yscale)
+	protected void setScale(Vector2D newScaling)
 	{
-		//System.out.println("Sets scaling to " + xscale + ", " + yscale);
-		
 		// Remembers the scaling
-		this.xscale = xscale;
-		this.yscale = yscale;
+		this.scaling = newScaling;
 		
 		// Resizes the panel
-		setSizes((int) (this.width * this.xscale), 
-				(int) (this.height * this.yscale));
+		setSizes(this.dimensions.times(this.scaling));
 	}
 }

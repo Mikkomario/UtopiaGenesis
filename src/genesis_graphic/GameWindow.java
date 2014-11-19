@@ -20,7 +20,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -38,10 +37,7 @@ public class GameWindow extends JFrame
 {	
 	// ATTRIBUTES ---------------------------------------------------------
 	
-	private int width;
-	private int height;
-	private double xscale, yscale;
-	private int toppaddingheight, leftpaddingwidth;
+	private Vector2D dimensions, scaling, leftTopPaddings;
 	
 	private MainMouseListenerHandler mainmousehandler;
 	private MainKeyListenerHandler mainKeyHandler;
@@ -63,8 +59,7 @@ public class GameWindow extends JFrame
 	/**
 	 * Creates a new window frame with given width and height.
 	 * 
-	 * @param width	Window's width (in pixels).
-	 * @param height Window's height (in pixels).
+	 * @param dimensions The size of the window (in pixels)
 	 * @param title The title shown in the window's border
 	 * @param hastoolbar Should the window have an toolbar (usually false if 
 	 * fullscreen is used)
@@ -82,7 +77,7 @@ public class GameWindow extends JFrame
 	 * optimal value. Usually this is unnecessary but may counter the 
 	 * computer's attempts to limit the Aps
 	 */
-	public GameWindow(int width, int height, String title, boolean hastoolbar, 
+	public GameWindow(Vector2D dimensions, String title, boolean hastoolbar, 
 			int maxfpslimit, int minimumsupportedfps, ScreenSplit split, boolean optimizeAps)
 	{
 		// Sets the decorations off if needed
@@ -90,28 +85,20 @@ public class GameWindow extends JFrame
 			setUndecorated(true);
 		
 		// Initializes attributes
-		this.width = width;
-		this.height = height;
-		this.xscale = 1;
-		this.yscale = 1;
+		this.dimensions = dimensions;
+		this.scaling = Vector2D.identityVector();
 		this.paddings = new ArrayList<JPanel>();
-		this.toppaddingheight = 0;
-		this.leftpaddingwidth = 0;
-		this.mainPanel = new MainPanel(new Vector2D(width, height), split);
+		this.leftTopPaddings = new Vector2D(0, 0);
+		this.mainPanel = new MainPanel(this.dimensions, split);
 		
 		this.setTitle(title);
 		
 		// Takes the toolbar into account with height calculations
 		if (hastoolbar)
-		{
-			//System.out.println("Heightens the window");
-			this.height += BORDERHEIGHT;
-		}
+			this.dimensions = this.dimensions.plus(new Vector2D(0, BORDERHEIGHT));
 		
 		//Let's format our window
 		this.formatWindow();
-		//And make it visible
-		this.setVisible(true);
 		
 		// Adds listener(s) to the window
 		this.mainPanel.addMouseListener(new BasicMouseListener());
@@ -165,10 +152,12 @@ public class GameWindow extends JFrame
 		//Let's make sure our window closes properly
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//Let's set our window's size
-		this.setSize(this.width, this.height);
+		this.setSize(this.dimensions.toDimension());
 		// Also sets other stats
 		setResizable(false);
 		getContentPane().setBackground(Color.BLACK);
+		//And make it visible
+		this.setVisible(true);
 	}
 	
 	/**
@@ -183,7 +172,7 @@ public class GameWindow extends JFrame
 		Point mousePointOnScreen = MouseInfo.getPointerInfo().getLocation();
 		
 		this.mainmousehandler.setMousePosition(
-				getMousePositionOnGamePanels(mousePointOnScreen));
+				getMousePositionOnGamePanels(new Vector2D(mousePointOnScreen)));
 	}
 	
 	/**
@@ -193,8 +182,6 @@ public class GameWindow extends JFrame
 	{
 		// Updates the screen drawer
 		this.screendrawer.callUpdate();
-		//if (this.screendrawer.isRunning())
-		//	this.screendrawer.notify();
 	}
 	
 	/**
@@ -209,63 +196,68 @@ public class GameWindow extends JFrame
 	 * Scales the window to fill the given size. Panels should already be 
 	 * added to the window or they won't be scaled. The resolution of the 
 	 * window stays the same.
-	 *
-	 * @param width The new width of the window
-	 * @param height The new height of the window
+	 * 
+	 * @param newDimensions The new size of the window
 	 * @param keepaspectratio Should the ratio between x- and yscaling stay 
 	 * the same through the process
 	 * @param allowpadding Should the screen get the given size even if 
 	 * aspect ratio is kept (will cause empty areas to appear on the screen)
 	 */
-	public void scaleToSize(int width, int height, boolean keepaspectratio, 
+	public void scaleToSize(Vector2D newDimensions, boolean keepaspectratio, 
 			boolean allowpadding)
 	{
 		// Removes old padding
 		removePaddings();
 		// Remembers the former dimensions
-		int lastwidth = getWidth();
-		int lastheight = getHeight();
+		Vector2D lastDimensions = this.dimensions;
 		// Calculates the needed scaling
-		double xscale = width / (double) lastwidth;
-		double yscale = height / (double) lastheight;
+		Vector2D scale = newDimensions.dividedBy(lastDimensions);
+
 		// Changes the window's size if it doesn't need any more fixing
 		if (!keepaspectratio || allowpadding)
-			setSize(width, height);
+			setSize(newDimensions.toDimension());
 		// The program may need to update the scaling so the ratio stays the same
 		if (keepaspectratio)
 		{
-			xscale = Math.min(xscale, yscale);
-			yscale = Math.min(xscale, yscale);
-			int newwidth = (int) (lastwidth * xscale);
-			int newheight = (int) (lastheight * yscale);
+			double smallerScale = Math.min(scale.getFirst(), scale.getSecond());
+			scale = new Vector2D(smallerScale, smallerScale);
+			Vector2D newSizes = lastDimensions.times(scale);
+			
 			// Changes the window's size accordingly
 			if (!allowpadding)
-				setSize(newwidth, newheight);
+				setSize(newSizes.toDimension());
 			// Or adds padding
 			else
 			{
 				// If new width is not the same as the intended, adds vertical 
 				// padding
-				if (newwidth < width)
+				if (newSizes.getFirst() < newDimensions.getFirst())
 				{
-					this.leftpaddingwidth = (width - newwidth)/2;
-					addPadding(this.leftpaddingwidth, height, BorderLayout.WEST);
-					addPadding(this.leftpaddingwidth, height, BorderLayout.EAST);
+					this.leftTopPaddings = new Vector2D((newDimensions.getFirst() - 
+							newSizes.getFirst()) / 2, 0);
+
+					addPadding(new Vector2D(this.leftTopPaddings.getFirst(), 
+							newDimensions.getSecond()), BorderLayout.WEST);
+					addPadding(new Vector2D(this.leftTopPaddings.getFirst(), 
+							newDimensions.getSecond()), BorderLayout.EAST);
 				}
-				else if (newheight < height)
+				else if (newSizes.getSecond() < newDimensions.getSecond())
 				{
-					this.toppaddingheight = (height - newheight)/2;
-					addPadding(width, this.toppaddingheight, BorderLayout.NORTH);
-					addPadding(width, this.toppaddingheight, BorderLayout.SOUTH);
+					this.leftTopPaddings = new Vector2D(0, (newDimensions.getSecond() - 
+							newSizes.getSecond()) / 2);
+
+					addPadding(new Vector2D(newDimensions.getFirst(), 
+							this.leftTopPaddings.getSecond()), BorderLayout.NORTH);
+					addPadding(new Vector2D(newDimensions.getFirst(), 
+							this.leftTopPaddings.getSecond()), BorderLayout.SOUTH);
 				}
 			}
 		}
 		// Scales the panels
-		this.mainPanel.scale(new Vector2D(xscale, yscale));
+		this.mainPanel.scale(scale);
 		
 		// Updates scale values
-		this.xscale *= xscale;
-		this.yscale *= yscale;
+		this.scaling = this.scaling.times(scale);
 	}
 	
 	/**
@@ -277,10 +269,9 @@ public class GameWindow extends JFrame
 		this.mainPanel.setScale(new Vector2D(1, 1));
 		
 		// Changes the window's size
-		setSize(this.width, this.height);
+		setSize(this.dimensions.toDimension());
 		// Resets the scale values
-		this.xscale = 1;
-		this.yscale = 1;
+		this.scaling = Vector2D.identityVector();
 		// Removes the padding
 		removePaddings();
 	}
@@ -292,24 +283,17 @@ public class GameWindow extends JFrame
 	 */
 	public void setFullScreen(boolean keepaspectratio)
 	{
-		// TODO: Set so that the screen ratio remains (if needs to)
-		// -> xscale = yscale (min scale) in the panel(s)
-		// Problem is that even though the panel might be smaller than the 
-		// frame it may want to resize itself (swing "()#(¤ )
-		
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		double screenwidth = screenSize.getWidth();
-		double screenheight = screenSize.getHeight();
-		
-		scaleToSize((int) screenwidth, (int) screenheight, keepaspectratio, 
-				true);
+
+		scaleToSize(new Vector2D(screenSize.getWidth(), screenSize.getHeight()), 
+				keepaspectratio, true);
 	}
 	
-	private void addPadding(int w, int h, String direction)
+	private void addPadding(Vector2D dimensions, String direction)
 	{
 		//System.out.println("Adds padding");
 		JPanel padding = new JPanel();
-		Dimension size = new Dimension(w, h);
+		Dimension size = dimensions.toDimension();
 		padding.setSize(size);
 		padding.setPreferredSize(size);
 		padding.setMaximumSize(size);
@@ -327,25 +311,21 @@ public class GameWindow extends JFrame
 		{
 			remove(this.paddings.get(i));
 		}
-		this.leftpaddingwidth = 0;
-		this.toppaddingheight = 0;
+		this.leftTopPaddings = new Vector2D(0, 0);
 	}
 	
 	// Adds padding, screen position, scaling & borders to mouse position calculation
-	private Point2D.Double getMousePositionOnGamePanels(Point mousePositionOnScreen)
+	private Vector2D getMousePositionOnGamePanels(Vector2D mousePositionOnScreen)
 	{
-		int mousex = (int) ((mousePositionOnScreen.x - this.leftpaddingwidth - 
-				getInsets().left) / this.xscale) - getX();
-		int mousey = (int) ((mousePositionOnScreen.y - this.toppaddingheight - 
-				getInsets().top) / this.yscale) - getY();
-		
-		return new Point2D.Double(mousex, mousey);
+		return mousePositionOnScreen.minus(this.leftTopPaddings).minus(
+				new Vector2D(getInsets().left, getInsets().top)).dividedBy(
+				this.scaling).minus(new Vector2D(getX(), getY()));
 	}
 	
 	// Takes (only) screen scaling into account in coordinate calculations
-	private Point2D.Double getScaledPoint(Point p)
+	private Vector2D getScaledPoint(Vector2D p)
 	{
-		return new Point2D.Double(p.getX() / this.xscale, p.getY() / this.yscale);
+		return p.dividedBy(this.scaling);
 	}
 	
 	
@@ -380,21 +360,21 @@ public class GameWindow extends JFrame
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
-			Point mousePoint = e.getPoint();
+			Vector2D mousePosition = new Vector2D(e.getPoint());
 			
 			// Informs the mouse status (scaling affects the mouse coordinates)
 			GameWindow.this.mainmousehandler.setMouseStatus(
-					getScaledPoint(mousePoint), true, e.getButton());
+					getScaledPoint(mousePosition), true, e.getButton());
 		}
 
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
-			Point mousePoint = e.getPoint();
+			Vector2D mousePosition = new Vector2D(e.getPoint());
 			
 			// Informs the mouse status (scaling affects the mouse coordinates)
 			GameWindow.this.mainmousehandler.setMouseStatus(
-					getScaledPoint(mousePoint), false, e.getButton());
+					getScaledPoint(mousePosition), false, e.getButton());
 		}
 	}
 	

@@ -51,7 +51,6 @@ public class ScreenDrawer implements Runnable
 	 */
 	public void callUpdate()
 	{
-		//this.needsupdating = true;
 		synchronized (this)
 		{
 			notify();

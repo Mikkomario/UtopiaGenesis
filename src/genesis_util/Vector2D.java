@@ -1,5 +1,7 @@
 package genesis_util;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.geom.Point2D;
 
 /**
@@ -11,6 +13,8 @@ import java.awt.geom.Point2D;
  */
 public class Vector2D
 {
+	// TODO: Add dot product, cross product, length, direction
+	
 	// ATTRIBUTES	------------------------------------------
 	
 	private final double first, second;
@@ -46,6 +50,16 @@ public class Vector2D
 	 * @param point The point that is copied into vector
 	 */
 	public Vector2D(final Point2D.Double point)
+	{
+		this.first = point.x;
+		this.second = point.y;
+	}
+	
+	/**
+	 * Creates a new vector by copying the information from a point
+	 * @param point The point that is copied into vector
+	 */
+	public Vector2D(final Point point)
 	{
 		this.first = point.x;
 		this.second = point.y;
@@ -161,5 +175,21 @@ public class Vector2D
 	public Point2D.Double toPoint()
 	{
 		return new Point2D.Double(getFirst(), getSecond());
+	}
+	
+	/**
+	 * @return A dimension created from this vector
+	 */
+	public Dimension toDimension()
+	{
+		return new Dimension((int) getFirst(), (int) getSecond());
+	}
+	
+	/**
+	 * @return An identity vector (1, 1)
+	 */
+	public static Vector2D identityVector()
+	{
+		return new Vector2D(1, 1);
 	}
 }

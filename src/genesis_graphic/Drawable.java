@@ -38,8 +38,7 @@ public interface Drawable extends Handled
 	 * Tries to change the objects depth
 	 * 
 	 * @param depth The object's new depth (negative = top, positive = bottom)
-	 * @return Was the object's depth successfully changed
 	 * @see genesis_graphic.DepthConstants
 	 */
-	public boolean setDepth(int depth);
+	public void setDepth(int depth);
 }

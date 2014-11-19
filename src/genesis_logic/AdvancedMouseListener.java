@@ -2,8 +2,7 @@ package genesis_logic;
 
 import genesis_util.Handled;
 import genesis_util.StateOperator;
-
-import java.awt.geom.Point2D;
+import genesis_util.Vector2D;
 
 /**
  * Mouselisteners are interested in the mouse's movements and button presses.<br>
@@ -34,7 +33,7 @@ public interface AdvancedMouseListener extends Handled
 	 * @param position The position that is being tested for being special
 	 * @return Is the position in the object's area of special interest (if applicable)
 	 */
-	public boolean isInAreaOfInterest(Point2D.Double position);
+	public boolean isInAreaOfInterest(Vector2D position);
 	
 	/**
 	 * @return The stateOperator that determines whether the object is interested in 
