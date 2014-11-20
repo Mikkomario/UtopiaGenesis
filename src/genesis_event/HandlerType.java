@@ -1,4 +1,4 @@
-package genesis_util;
+package genesis_event;
 
 /**
  * HandlerType represents a single type of handler. Each handler handles a class. HandlerType 

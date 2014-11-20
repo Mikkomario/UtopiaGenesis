@@ -1,5 +1,7 @@
 package genesis_util;
 
+import genesis_event.Handled;
+
 /**
  * StateListeners are interested in changes happening in stateOperators.
  * 

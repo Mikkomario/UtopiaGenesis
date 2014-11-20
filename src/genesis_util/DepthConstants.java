@@ -1,4 +1,4 @@
-package genesis_graphic;
+package genesis_util;
 
 /**
  * This static class offers constants used in defining object's depth

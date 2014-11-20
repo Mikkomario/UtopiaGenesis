@@ -1,9 +1,8 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_logic.AdvancedMouseEvent.MouseButtonEventScale;
-import genesis_logic.AdvancedMouseEvent.MouseButtonEventType;
-import genesis_logic.AdvancedMouseEvent.MouseEventType;
-import genesis_util.HandlerRelay;
+import genesis_event.AdvancedMouseEvent.MouseButtonEventScale;
+import genesis_event.AdvancedMouseEvent.MouseButtonEventType;
+import genesis_event.AdvancedMouseEvent.MouseEventType;
 import genesis_util.StateOperator;
 import genesis_util.Vector2D;
 

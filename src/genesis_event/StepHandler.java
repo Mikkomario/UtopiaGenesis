@@ -1,8 +1,8 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_graphic.GameWindow;
 import genesis_util.LatchStateOperator;
 import genesis_util.StateOperator;
+import genesis_video.GameWindow;
 
 /**
  * This class calculates millisconds and calls all actors when a certain number 

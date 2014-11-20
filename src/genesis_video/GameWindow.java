@@ -1,14 +1,14 @@
-package genesis_graphic;
+package genesis_video;
 
-import genesis_graphic.MainPanel.ScreenSplit;
-import genesis_logic.ActorHandler;
-import genesis_logic.KeyListenerHandler;
-import genesis_logic.MainKeyListenerHandler;
-import genesis_logic.MainMouseListenerHandler;
-import genesis_logic.MouseListenerHandler;
-import genesis_logic.StepHandler;
-import genesis_util.HandlerRelay;
+import genesis_event.ActorHandler;
+import genesis_event.HandlerRelay;
+import genesis_event.KeyListenerHandler;
+import genesis_event.MainKeyListenerHandler;
+import genesis_event.MainMouseListenerHandler;
+import genesis_event.MouseListenerHandler;
+import genesis_event.StepHandler;
 import genesis_util.Vector2D;
+import genesis_video.MainPanel.ScreenSplit;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

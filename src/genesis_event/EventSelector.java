@@ -1,4 +1,4 @@
-package genesis_logic;
+package genesis_event;
 
 /**
  * MouseEventSelectors select only certain MouseEvents they receive, based on their attributes. 

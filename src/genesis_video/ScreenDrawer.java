@@ -1,4 +1,4 @@
-package genesis_graphic;
+package genesis_video;
 
 /**
  * Screendrawer redraws the screen when needed and it works in its own thread.

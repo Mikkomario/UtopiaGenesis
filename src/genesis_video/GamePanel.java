@@ -1,5 +1,6 @@
-package genesis_graphic;
+package genesis_video;
 
+import genesis_util.DepthConstants;
 import genesis_util.Vector2D;
 
 import java.awt.Color;

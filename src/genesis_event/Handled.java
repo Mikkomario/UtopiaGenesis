@@ -1,4 +1,6 @@
-package genesis_util;
+package genesis_event;
+
+import genesis_util.StateOperator;
 
 /**
  * This is the superinterface for all of the objects that can be handled

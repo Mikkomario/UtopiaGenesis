@@ -1,4 +1,4 @@
-package genesis_util;
+package genesis_event;
 
 import java.util.HashMap;
 import java.util.Map;

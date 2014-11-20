@@ -1,4 +1,4 @@
-package genesis_logic;
+package genesis_event;
 
 import java.util.ArrayList;
 import java.util.List;

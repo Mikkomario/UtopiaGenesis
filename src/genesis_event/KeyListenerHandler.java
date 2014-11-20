@@ -1,9 +1,5 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_util.GenesisHandlerType;
-import genesis_util.Handler;
-import genesis_util.HandlerRelay;
-import genesis_util.HandlerType;
 import genesis_util.StateOperator;
 
 /**
@@ -71,7 +67,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 	// IMPLEMENTED METHODS	---------------------------------------------
 
 	@Override
-	public void onKeyEvent(genesis_logic.AdvancedKeyEvent event)
+	public void onKeyEvent(genesis_event.AdvancedKeyEvent event)
 	{
 		// Inform the listeners about the event
 		this.lastEvent = event;
@@ -80,7 +76,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 	}
 
 	@Override
-	public EventSelector<genesis_logic.AdvancedKeyEvent> getKeyEventSelector()
+	public EventSelector<genesis_event.AdvancedKeyEvent> getKeyEventSelector()
 	{
 		return this.selector;
 	}

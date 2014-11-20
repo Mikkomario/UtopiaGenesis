@@ -1,4 +1,4 @@
-package genesis_graphic;
+package genesis_video;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

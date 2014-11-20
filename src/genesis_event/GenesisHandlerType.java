@@ -1,10 +1,8 @@
-package genesis_util;
+package genesis_event;
 
-import genesis_graphic.Drawable;
-import genesis_graphic.DrawableHandler;
-import genesis_logic.Actor;
-import genesis_logic.AdvancedKeyListener;
-import genesis_logic.AdvancedMouseListener;
+import genesis_util.StateOperatorListener;
+import genesis_video.Drawable;
+import genesis_video.DrawableHandler;
 
 /**
  * GenesisHandlerType contains all the different HandlerTypes used in Utopia Genesis module.
@@ -16,12 +14,12 @@ public enum GenesisHandlerType implements HandlerType
 {
 	/**
 	 * MouseHandler handles mouseListeners and informs them about mouse events
-	 * @see genesis_logic.MouseListenerHandler
+	 * @see MouseListenerHandler
 	 */
 	MOUSEHANDLER,
 	/**
 	 * KeyHandler handles keyListeners and informs them about keyboard events
-	 * @see genesis_logic.KeyListenerHandler
+	 * @see KeyListenerHandler
 	 */
 	KEYHANDLER,
 	/**
@@ -31,13 +29,13 @@ public enum GenesisHandlerType implements HandlerType
 	DRAWABLEHANDLER,
 	/**
 	 * ActorHandler handles Actors and informs them about step events
-	 * @see genesis_logic.ActorHandler
+	 * @see ActorHandler
 	 */
 	ACTORHANDLER,
 	/**
 	 * StateHandler handles StateListeners and informs them about stateOperator changes.
 	 * @see StateOperatorListener
-	 * @see StateOperator
+	 * @see genesis_util.StateOperator
 	 */
 	STATEHANDLER;
 

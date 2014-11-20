@@ -1,5 +1,10 @@
 package genesis_util;
 
+import genesis_event.GenesisHandlerType;
+import genesis_event.Handler;
+import genesis_event.HandlerRelay;
+import genesis_event.HandlerType;
+
 /**
  * StateListenerHandler informs multiple stateListeners about state information it receives.
  * 

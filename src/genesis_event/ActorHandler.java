@@ -1,9 +1,5 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_util.GenesisHandlerType;
-import genesis_util.Handler;
-import genesis_util.HandlerRelay;
-import genesis_util.HandlerType;
 import genesis_util.StateOperator;
 
 /**

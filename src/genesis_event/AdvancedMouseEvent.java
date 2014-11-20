@@ -1,4 +1,4 @@
-package genesis_logic;
+package genesis_event;
 
 import genesis_util.Vector2D;
 

@@ -1,7 +1,7 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_logic.AdvancedKeyEvent.ContentType;
-import genesis_logic.AdvancedKeyEvent.KeyEventType;
+import genesis_event.AdvancedKeyEvent.ContentType;
+import genesis_event.AdvancedKeyEvent.KeyEventType;
 import genesis_util.StateOperator;
 
 import java.util.ArrayList;

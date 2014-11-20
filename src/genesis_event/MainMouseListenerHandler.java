@@ -1,7 +1,6 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_logic.AdvancedMouseEvent.MouseButton;
-import genesis_util.HandlerRelay;
+import genesis_event.AdvancedMouseEvent.MouseButton;
 import genesis_util.Vector2D;
 
 import java.awt.event.MouseEvent;
@@ -13,7 +12,7 @@ import java.awt.event.MouseEvent;
  *
  * @author Mikko Hilpinen.
  * @since 29.12.2012.
- * @see genesis_graphic.GameWindow
+ * @see genesis_video.GameWindow
  */
 public class MainMouseListenerHandler extends AbstractMouseListenerHandler
 {	

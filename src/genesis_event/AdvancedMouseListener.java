@@ -1,6 +1,5 @@
-package genesis_logic;
+package genesis_event;
 
-import genesis_util.Handled;
 import genesis_util.StateOperator;
 import genesis_util.Vector2D;
 

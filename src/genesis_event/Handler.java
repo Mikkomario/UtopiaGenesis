@@ -1,4 +1,8 @@
-package genesis_util;
+package genesis_event;
+
+import genesis_util.LatchStateOperator;
+import genesis_util.StateOperator;
+import genesis_util.StateOperatorListener;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -1,6 +1,6 @@
-package genesis_graphic;
+package genesis_event;
 
-import genesis_util.Handled;
+
 import genesis_util.StateOperator;
 
 import java.awt.Graphics2D;
@@ -30,7 +30,7 @@ public interface Drawable extends Handled
 	/**
 	 * @return How deep should the object be drawn (object with positive depth 
 	 * are drawn to the bottom, objects with negative depth are drawn to the top)
-	 * @see genesis_graphic.DepthConstants
+	 * @see genesis_util.DepthConstants
 	 */
 	public int getDepth();
 	
@@ -38,7 +38,7 @@ public interface Drawable extends Handled
 	 * Tries to change the objects depth
 	 * 
 	 * @param depth The object's new depth (negative = top, positive = bottom)
-	 * @see genesis_graphic.DepthConstants
+	 * @see genesis_util.DepthConstants
 	 */
 	public void setDepth(int depth);
 }
