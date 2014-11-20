@@ -32,7 +32,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	
 	private Map<HandlingOperation, List<T>> operationLists;
 	private StateOperator isDeadOperator;
-	private boolean started;
+	private boolean started, autoDeath;
 	
 	private Map<HandlingOperation, ReentrantLock> locks;
 	
@@ -89,6 +89,15 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	@Override
 	public StateOperator getIsDeadStateOperator()
 	{
+		// Initializes the operator only if necessary
+		if (this.isDeadOperator == null)
+		{
+			if (this.autoDeath)
+				this.isDeadOperator = new HandledDependentAutodeathOperator();
+			else
+				this.isDeadOperator = new LatchStateOperator(false);
+			this.isDeadOperator.getListenerHandler().add(this);
+		}
 		return this.isDeadOperator;
 	}
 	
@@ -383,11 +392,9 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		this.locks.put(HandlingOperation.ADD, new ReentrantLock());
 		this.locks.put(HandlingOperation.REMOVE, new ReentrantLock());
 		
-		if (autoDeath)
-			this.isDeadOperator = new HandledDependentAutodeathOperator();
-		else
-			this.isDeadOperator = new LatchStateOperator(false);
-		this.isDeadOperator.getListenerHandler().add(this);
+		// TODO: Handlers can't use stateOperators that use handlers. StackOverFlow
+		this.autoDeath = autoDeath;
+		this.isDeadOperator = null;
 	}
 	
 	

@@ -1,6 +1,5 @@
 package genesis_event;
 
-import genesis_event.AdvancedMouseEvent.MouseButtonEventScale;
 import genesis_event.AdvancedMouseEvent.MouseButtonEventType;
 import genesis_event.AdvancedMouseEvent.MouseEventType;
 import genesis_util.StateOperator;
@@ -102,8 +101,8 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	@Override
 	public boolean isInAreaOfInterest(Vector2D testedPosition)
 	{
-		// Handlers are interested in all areas
-		return true;
+		// Handlers aren't interested in special areas
+		return false;
 	}
 	
 	
@@ -114,10 +113,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 		// The handler accepts the mouse move event as well as global mouse button events
 		this.selector = new MultiEventSelector<>();
 		
-		StrictEventSelector<AdvancedMouseEvent, AdvancedMouseEvent.Feature> globalButtonSelector = 
-				AdvancedMouseEvent.createButtonStateChangeSelector();
-		globalButtonSelector.addRequiredFeature(MouseButtonEventScale.GLOBAL);
-		this.selector.addOption(globalButtonSelector);
+		this.selector.addOption(AdvancedMouseEvent.createButtonStateChangeSelector());
 		this.selector.addOption(AdvancedMouseEvent.createMouseMoveSelector());
 	}
 }

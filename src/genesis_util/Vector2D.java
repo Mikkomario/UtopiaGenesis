@@ -75,11 +75,27 @@ public class Vector2D
 	}
 	
 	/**
+	 * @return The first value in the vector in int format
+	 */
+	public int getFirstInt()
+	{
+		return (int) getFirst();
+	}
+	
+	/**
 	 * @return The second value in the vector
 	 */
 	public double getSecond()
 	{
 		return this.second;
+	}
+	
+	/**
+	 * @return The second value in the vector in int format
+	 */
+	public int getSecondInt()
+	{
+		return (int) getSecond();
 	}
 	
 	/**
@@ -311,7 +327,7 @@ public class Vector2D
 	 */
 	public Dimension toDimension()
 	{
-		return new Dimension((int) getFirst(), (int) getSecond());
+		return new Dimension(getFirstInt(), getSecondInt());
 	}
 	
 	/**

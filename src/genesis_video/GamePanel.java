@@ -1,5 +1,6 @@
 package genesis_video;
 
+import genesis_event.DrawableHandler;
 import genesis_util.DepthConstants;
 import genesis_util.Vector2D;
 
@@ -58,6 +59,8 @@ public class GamePanel extends JPanel
 	@Override
 	public void paintComponent(Graphics g)
 	{
+		super.paintComponent(g);
+		
 		// The panel draws all stuff inside it
 		Graphics2D g2d = (Graphics2D) g;
 		
@@ -69,6 +72,10 @@ public class GamePanel extends JPanel
 		if (!clearDisabled && this.clearPrevious)
 			g2d.clearRect(0, 0, (int) this.dimensions.getFirst(), 
 					(int) this.dimensions.getSecond());
+		
+		// Draws the background
+		g.setColor(getBackground());
+		g.fillRect(0, 0, getWidth(), getHeight());
 		
 		this.drawer.drawSelf(g2d);
 	}

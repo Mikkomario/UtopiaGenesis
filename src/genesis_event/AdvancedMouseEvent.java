@@ -13,6 +13,8 @@ import java.util.List;
  */
 public class AdvancedMouseEvent implements Event
 {
+	// TODO: Add mouse wheel events (if possible)
+	
 	// ATTRIBUTES	---------------------------------------
 	
 	private final MouseButton button;
@@ -101,6 +103,7 @@ public class AdvancedMouseEvent implements Event
 		information.add(getType());
 		information.add(getButtonEventType());
 		information.add(getMovementEventType());
+		information.add(getButtonEventScale());
 		
 		return information;
 	}

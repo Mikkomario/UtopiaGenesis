@@ -251,7 +251,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 			
 			for (MouseButton button : MouseButton.values())
 			{
-				this.mouseButtonStates.get(button).put(button, false);
+				this.mouseButtonStates.get(type).put(button, false);
 			}
 		}
 		

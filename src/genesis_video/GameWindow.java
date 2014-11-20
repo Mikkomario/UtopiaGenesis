@@ -100,6 +100,9 @@ public class GameWindow extends JFrame
 		//Let's format our window
 		this.formatWindow();
 		
+		// Adds the panel
+		add(this.mainPanel, BorderLayout.CENTER);
+		
 		// Adds listener(s) to the window
 		this.mainPanel.addMouseListener(new BasicMouseListener());
 		addKeyListener(new BasicKeyListener());
@@ -122,6 +125,7 @@ public class GameWindow extends JFrame
 		
 		this.mainmousehandler.add(mouseHandler);
 		
+		this.handlerRelay = new HandlerRelay();
 		this.handlerRelay.addHandler(stepHandler);
 		this.handlerRelay.addHandler(keyHandler);
 		this.handlerRelay.addHandler(mouseHandler);

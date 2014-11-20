@@ -1,8 +1,6 @@
 package genesis_event;
 
 import genesis_util.StateOperatorListener;
-import genesis_video.Drawable;
-import genesis_video.DrawableHandler;
 
 /**
  * GenesisHandlerType contains all the different HandlerTypes used in Utopia Genesis module.
