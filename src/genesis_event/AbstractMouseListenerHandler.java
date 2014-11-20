@@ -188,6 +188,20 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		}
 	}
 	
+	/**
+	 * Informs the handler (and the active listeners) about a mouse wheel turning
+	 * @param wheelTurn How much the wheel turned
+	 * @param wheelTurnInt How much the wheel turned in complete notches
+	 */
+	public void informMouseWheelTurn(double wheelTurn, int wheelTurnInt)
+	{
+		if (wheelTurn == 0 && wheelTurnInt == 0)
+			return;
+		
+		handleObjects(new MouseWheelEventOperator(new AdvancedMouseEvent(wheelTurn, 
+				wheelTurnInt, this.currentMousePosition, this.lastStepDuration)));
+	}
+	
 	
 	// OTHER METHODS	---------------------------------------------------
 	
@@ -228,7 +242,8 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 			AdvancedMouseEvent event)
 	{
 		// Checks if the event should be given to the listener
-		if (listener.getMouseEventSelector().selects(event))
+		if (listener.getListensToMouseEventsOperator().getState() && 
+				listener.getMouseEventSelector().selects(event))
 			listener.onMouseEvent(event);
 	}
 	
@@ -396,7 +411,27 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 			}
 			
 			return true;
+		}	
+	}
+	
+	private class MouseWheelEventOperator extends MouseEventOperator
+	{
+		// CONSTRUCTOR	-----------------------------
+		
+		public MouseWheelEventOperator(AdvancedMouseEvent baseEvent)
+		{
+			super(baseEvent);
 		}
 		
+		
+		// IMPLEMENTED METHODS	-----------------------
+
+		@Override
+		protected boolean handleObject(AdvancedMouseListener h)
+		{
+			// Informs the object about the base event
+			informObjectAboutMouseEvent(h, getBaseEvent());
+			return true;
+		}
 	}
 }

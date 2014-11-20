@@ -13,8 +13,6 @@ import java.util.List;
  */
 public class AdvancedMouseEvent implements Event
 {
-	// TODO: Add mouse wheel events (if possible)
-	
 	// ATTRIBUTES	---------------------------------------
 	
 	private final MouseButton button;
@@ -24,7 +22,8 @@ public class AdvancedMouseEvent implements Event
 	private final MouseButtonEventScale scale;
 	
 	private final Vector2D position;
-	private final double duration;
+	private final double duration, wheelTurn;
+	private final int wheelTurnInt;
 	
 	
 	// CONSTRUCTOR	---------------------------------------
@@ -48,6 +47,8 @@ public class AdvancedMouseEvent implements Event
 		this.position = position;
 		this.duration = duration;
 		this.scale = MouseButtonEventScale.NONE;
+		this.wheelTurn = 0;
+		this.wheelTurnInt = 0;
 	}
 	
 	/**
@@ -66,6 +67,30 @@ public class AdvancedMouseEvent implements Event
 		this.position = position;
 		this.duration = duration;
 		this.scale = MouseButtonEventScale.NONE;
+		this.wheelTurn = 0;
+		this.wheelTurnInt = 0;
+	}
+	
+	/**
+	 * Creates a new MouseWheelEvent with the given information
+	 * @param wheelTurn How much the mouse wheel turned
+	 * @param wheelTurnInt How much the mouse wheel turned (in complete notches)
+	 * @param position Where the mouse was when the wheel turned
+	 * @param duration How many steps the event lasted
+	 */
+	public AdvancedMouseEvent(double wheelTurn, int wheelTurnInt, Vector2D position, 
+			double duration)
+	{
+		// Initializes attributes
+		this.button = MouseButton.NONE;
+		this.type = MouseEventType.WHEEL;
+		this.buttonEvent = MouseButtonEventType.NONE;
+		this.movementType = MouseMovementEventType.NONE;
+		this.position = position;
+		this.duration = duration;
+		this.scale = MouseButtonEventScale.NONE;
+		this.wheelTurn = wheelTurn;
+		this.wheelTurnInt = wheelTurnInt;
 	}
 	
 	private AdvancedMouseEvent(AdvancedMouseEvent other, MouseButtonEventScale scale)
@@ -77,6 +102,8 @@ public class AdvancedMouseEvent implements Event
 		this.position = other.getPosition();
 		this.duration = other.getDuration();
 		this.scale = scale;
+		this.wheelTurn = other.getWheelTurn();
+		this.wheelTurnInt = other.getWheelTurnInt();
 	}
 	
 	private AdvancedMouseEvent(AdvancedMouseEvent other, MouseMovementEventType movementType)
@@ -88,6 +115,8 @@ public class AdvancedMouseEvent implements Event
 		this.position = other.getPosition();
 		this.duration = other.getDuration();
 		this.scale = other.getButtonEventScale();
+		this.wheelTurn = other.getWheelTurn();
+		this.wheelTurnInt = other.getWheelTurnInt();
 	}
 	
 	
@@ -110,6 +139,22 @@ public class AdvancedMouseEvent implements Event
 	
 	
 	// GETTERS & SETTERS	-------------------------------
+	
+	/**
+	 * @return How much the mouse wheel turned
+	 */
+	public final double getWheelTurn()
+	{
+		return this.wheelTurn;
+	}
+	
+	/**
+	 * @return How much the mouse wheel turned (in complete notches)
+	 */
+	public final int getWheelTurnInt()
+	{
+		return this.wheelTurnInt;
+	}
 	
 	/**
 	 * @return The mouse button that originated the event
@@ -273,6 +318,16 @@ public class AdvancedMouseEvent implements Event
 		return selector;
 	}
 	
+	/**
+	 * @return A mouseEventSelector that only selects mouse wheel events
+	 */
+	public static StrictEventSelector<AdvancedMouseEvent, Feature> createMouseWheelSelector()
+	{
+		StrictEventSelector<AdvancedMouseEvent, Feature> selector = new StrictEventSelector<>();
+		selector.addRequiredFeature(MouseEventType.WHEEL);
+		return selector;
+	}
+	
 	
 	// SUBCLASSES	---------------------------------------
 	
@@ -331,7 +386,11 @@ public class AdvancedMouseEvent implements Event
 		/**
 		 * The event was originated by mouse movement
 		 */
-		MOVEMENT;
+		MOVEMENT,
+		/**
+		 * The event was originated by the mouse wheel scrolling
+		 */
+		WHEEL;
 	}
 	
 	/**

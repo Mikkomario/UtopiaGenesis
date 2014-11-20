@@ -17,6 +17,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	// ATTRIBUTES	---------------------------------------
 	
 	private MultiEventSelector<AdvancedMouseEvent> selector;
+	private StateOperator listensToMouseOperator;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -84,6 +85,10 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 			
 			setButtonState(event.getButton(), newState);
 		}
+		
+		// As well as mouse wheel turning
+		if (event.getType() == MouseEventType.WHEEL)
+			informMouseWheelTurn(event.getWheelTurn(), event.getWheelTurnInt());
 	}
 
 	@Override
@@ -95,7 +100,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	@Override
 	public StateOperator getListensToMouseEventsOperator()
 	{
-		return getIsActiveStateOperator();
+		return this.listensToMouseOperator;
 	}
 
 	@Override
@@ -110,10 +115,14 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	
 	private void initialize()
 	{
-		// The handler accepts the mouse move event as well as global mouse button events
+		this.listensToMouseOperator = new AnyHandledListensMouseOperator(true);
+		
+		// The handler accepts the mouse move event as well as mouse button events and mouse 
+		// wheel events
 		this.selector = new MultiEventSelector<>();
 		
 		this.selector.addOption(AdvancedMouseEvent.createButtonStateChangeSelector());
 		this.selector.addOption(AdvancedMouseEvent.createMouseMoveSelector());
+		this.selector.addOption(AdvancedMouseEvent.createMouseWheelSelector());
 	}
 }

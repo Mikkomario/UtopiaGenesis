@@ -20,6 +20,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -104,7 +106,10 @@ public class GameWindow extends JFrame
 		add(this.mainPanel, BorderLayout.CENTER);
 		
 		// Adds listener(s) to the window
-		this.mainPanel.addMouseListener(new BasicMouseListener());
+		BasicMouseListener basicMouseListener = new BasicMouseListener();
+		this.mainPanel.addMouseListener(basicMouseListener);
+		this.mainPanel.addMouseWheelListener(basicMouseListener);
+		
 		addKeyListener(new BasicKeyListener());
 		
 		// Creates and initializes important handlers
@@ -341,7 +346,7 @@ public class GameWindow extends JFrame
 	 * @author Unto Solala.
 	 * @since 8.8.2013
 	 */
-	private class BasicMouseListener implements MouseListener
+	private class BasicMouseListener implements MouseListener, MouseWheelListener
 	{
 		@Override
 		public void mouseClicked(MouseEvent e)
@@ -379,6 +384,15 @@ public class GameWindow extends JFrame
 			// Informs the mouse status (scaling affects the mouse coordinates)
 			GameWindow.this.mainmousehandler.setMouseStatus(
 					getScaledPoint(mousePosition), false, e.getButton());
+		}
+
+		@Override
+		public void mouseWheelMoved(MouseWheelEvent e)
+		{
+			GameWindow.this.mainmousehandler.setMousePosition(getScaledPoint(
+					new Vector2D(e.getPoint())));
+			GameWindow.this.mainmousehandler.informMouseWheelTurn(e.getPreciseWheelRotation(), 
+					e.getWheelRotation());
 		}
 	}
 	

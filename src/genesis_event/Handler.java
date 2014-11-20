@@ -1,6 +1,5 @@
 package genesis_event;
 
-import genesis_util.LatchStateOperator;
 import genesis_util.StateOperator;
 import genesis_util.StateOperatorListener;
 
@@ -95,7 +94,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 			if (this.autoDeath)
 				this.isDeadOperator = new HandledDependentAutodeathOperator();
 			else
-				this.isDeadOperator = new LatchStateOperator(false);
+				this.isDeadOperator = new IndependentDeathOperator();
 			this.isDeadOperator.getListenerHandler().add(this);
 		}
 		return this.isDeadOperator;
@@ -443,7 +442,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 				
 		public IterativeStateOperator(boolean mutable)
 		{
-			super(true, mutable);
+			super(false, mutable);
 			
 			// Initializes attributes
 			this.isDeadOperator = new StateOperator(false, false);
@@ -676,6 +675,41 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 				return super.getState();
 			else
 				return super.getState() || this.allHandledsAreDeadOperator.getState();
+		}
+		
+		@Override
+		public void setState(boolean newState)
+		{
+			super.setState(newState);
+			// Also sets the state for the handleds
+			this.allHandledsAreDeadOperator.setState(newState);
+		}
+	}
+	
+	// Handleds are killed on death, but own state isn't dependent on handleds
+	private class IndependentDeathOperator extends IterativeStateOperator
+	{
+		// CONSTRUCTOR	--------------------------------------
+		
+		public IndependentDeathOperator()
+		{
+			super(true);
+		}
+		
+		
+		// IMPLEMENTED METHODS	------------------------------
+
+		@Override
+		protected void changeHandledState(T h, boolean newState)
+		{
+			h.getIsDeadStateOperator().setState(newState);
+		}
+
+		@Override
+		protected boolean getHandledState(T h)
+		{
+			// Isn't required but here it is anyway
+			return h.getIsDeadStateOperator().getState();
 		}
 	}
 }

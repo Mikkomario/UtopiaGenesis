@@ -62,6 +62,14 @@ public class AdvancedKeyEvent implements Event
 	}
 	
 	/**
+	 * @return The key that originated the event. Represented as a character
+	 */
+	public char getKeyChar()
+	{
+		return (char) this.key;
+	}
+	
+	/**
 	 * @return The type of action that originated the event
 	 */
 	public KeyEventType getEventType()
@@ -83,6 +91,31 @@ public class AdvancedKeyEvent implements Event
 	public double getDuration()
 	{
 		return this.duration;
+	}
+	
+	
+	// OTHER METHODS	-------------------------------------
+	
+	/**
+	 * Creates a selector that only selects events of the given type
+	 * @param eventType The type of event the selector accepts
+	 * @return A selector that only accepts button events of the given type
+	 */
+	public static StrictEventSelector<AdvancedKeyEvent, Feature> createEventTypeSelector(KeyEventType eventType)
+	{
+		StrictEventSelector<AdvancedKeyEvent, Feature> selector = new StrictEventSelector<>();
+		selector.addRequiredFeature(eventType);
+		return selector;
+	}
+	
+	/**
+	 * @return A selector that accepts button presses as well as button releases
+	 */
+	public static StrictEventSelector<AdvancedKeyEvent, Feature> createButtonStateChangeSelector()
+	{
+		StrictEventSelector<AdvancedKeyEvent, Feature> selector = new StrictEventSelector<>();
+		selector.addUnacceptableFeature(KeyEventType.DOWN);
+		return selector;
 	}
 	
 	

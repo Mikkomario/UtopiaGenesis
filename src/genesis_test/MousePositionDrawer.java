@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import genesis_event.AdvancedMouseEvent;
 import genesis_event.AdvancedMouseEvent.MouseButtonEventType;
+import genesis_event.AdvancedMouseEvent.MouseEventType;
 import genesis_event.AdvancedMouseListener;
 import genesis_event.Drawable;
 import genesis_event.EventSelector;
@@ -27,8 +28,9 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 	
 	private Vector2D lastPressPosition, lastMousePosition;
 	private boolean mouseIsDown;
-	private StateOperator isDeadOperator, isActiveOperator;
+	private StateOperator isDeadOperator, isActiveOperator, isVisibleOperator;
 	private MultiEventSelector<AdvancedMouseEvent> selector;
+	private double wheelTurn;
 	
 	
 	// CONSTRUCTOR	-------------------------------------
@@ -42,14 +44,17 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 		this.lastPressPosition = Vector2D.zeroVector();
 		this.lastMousePosition = Vector2D.zeroVector();
 		this.mouseIsDown = false;
+		this.wheelTurn = 0;
 		
 		this.isDeadOperator = new LatchStateOperator(false);
 		this.isActiveOperator = new StateOperator(true, true);
+		this.isVisibleOperator = new StateOperator(true, true);
 		
 		// Listens to mouse presses & releases as well as mouse move
 		this.selector = new MultiEventSelector<>();
 		this.selector.addOption(AdvancedMouseEvent.createButtonStateChangeSelector());
 		this.selector.addOption(AdvancedMouseEvent.createMouseMoveSelector());
+		this.selector.addOption(AdvancedMouseEvent.createMouseWheelSelector());
 		
 		handlers.addHandled(this);
 	}
@@ -77,6 +82,9 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 		}
 		else if (event.getButtonEventType() == MouseButtonEventType.RELEASED)
 			this.mouseIsDown = false;
+		
+		if (event.getType() == MouseEventType.WHEEL)
+			this.wheelTurn += event.getWheelTurn();
 	}
 
 	@Override
@@ -113,13 +121,13 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 		// Otherwise draws a circle around the mouse
 		else
 			g2d.drawOval(this.lastMousePosition.getFirstInt() - 10, 
-					this.lastMousePosition.getSecondInt() - 10, 20, 20);
+					this.lastMousePosition.getSecondInt() - 10 - (int) this.wheelTurn * 10, 20, 20);
 	}
 
 	@Override
 	public StateOperator getIsVisibleStateOperator()
 	{
-		return this.isActiveOperator;
+		return this.isVisibleOperator;
 	}
 
 	@Override
