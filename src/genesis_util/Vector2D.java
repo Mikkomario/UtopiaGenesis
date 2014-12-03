@@ -123,7 +123,7 @@ public class Vector2D
 	 */
 	public boolean isParallerWith(Vector2D other)
 	{
-		return areApproximatelyEqual(getDirection(), other.getDirection());
+		return HelpMath.areApproximatelyEqual(getDirection(), other.getDirection());
 	}
 	
 	/**
@@ -141,7 +141,7 @@ public class Vector2D
 	 */
 	public boolean isPerpendicularTo(Vector2D other)
 	{
-		return areApproximatelyEqual(this.dotProduct(other), 0);
+		return HelpMath.areApproximatelyEqual(this.dotProduct(other), 0);
 	}
 	
 	/**
@@ -297,21 +297,12 @@ public class Vector2D
 	
 	/**
 	 * @param other The other vector
-	 * @return Are the two vectors equal
+	 * @return Are the two vectors approximately the same
 	 */
 	public boolean equals(Vector2D other)
 	{
-		return getFirst() == other.getFirst() && getSecond() == other.getSecond();
-	}
-	
-	/**
-	 * @param other The other vector
-	 * @return Are the two vectors approximately the same
-	 */
-	public boolean equalsApproximately(Vector2D other)
-	{
-		return areApproximatelyEqual(getFirst(), other.getFirst()) && 
-				areApproximatelyEqual(getSecond(), other.getSecond());
+		return HelpMath.areApproximatelyEqual(getFirst(), other.getFirst()) && 
+				HelpMath.areApproximatelyEqual(getSecond(), other.getSecond());
 	}
 	
 	/**
@@ -361,10 +352,5 @@ public class Vector2D
 	public static Vector2D unitVector(double direction)
 	{
 		return unitVector().withDirection(direction);
-	}
-	
-	private static boolean areApproximatelyEqual(double first, double second)
-	{
-		return (int) (first * 1000) == (int) (second * 1000);
 	}
 }

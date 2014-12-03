@@ -334,4 +334,15 @@ public class HelpMath
 		
 		return p;
 	}
+	
+	/**
+	 * Checks if two double numbers are approximately equal to each other
+	 * @param first The first number
+	 * @param second The second number
+	 * @return Are the two numbers pretty much equal
+	 */
+	public static boolean areApproximatelyEqual(double first, double second)
+	{
+		return (int) (first * 1000) == (int) (second * 1000);
+	}
 }

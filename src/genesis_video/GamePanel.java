@@ -65,7 +65,7 @@ public class GamePanel extends JPanel
 		Graphics2D g2d = (Graphics2D) g;
 		
 		// Scales the area of drawing
-		if (!this.scaling.equalsApproximately(Vector2D.identityVector()))
+		if (!this.scaling.equals(Vector2D.identityVector()))
 			g2d.scale(this.scaling.getFirst(), this.scaling.getSecond());
 		
 		// Clears the former drawings
