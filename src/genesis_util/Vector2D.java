@@ -62,6 +62,16 @@ public class Vector2D
 		this.first = point.x;
 		this.second = point.y;
 	}
+	
+	/**
+	 * Creates a new vector by copying the information from a point
+	 * @param point The point that is copied into vector
+	 */
+	public Vector2D(Point2D point)
+	{
+		this.first = point.getX();
+		this.second = point.getY();
+	}
 
 	
 	// GETTERS & SETTERS	----------------------------------
