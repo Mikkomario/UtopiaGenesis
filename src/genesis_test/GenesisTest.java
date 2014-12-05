@@ -8,7 +8,6 @@ import genesis_event.MouseListenerHandler;
 import genesis_util.Vector2D;
 import genesis_video.GamePanel;
 import genesis_video.GameWindow;
-import genesis_video.MainPanel.ScreenSplit;
 
 /**
  * MouseListenerTest tests the capabilities of AdvancedMouseListener and related features
@@ -31,8 +30,7 @@ public class GenesisTest
 	 */
 	public GenesisTest()
 	{
-		this.window = new GameWindow(new Vector2D(800, 600), "Test", true, 120, 20, 
-				ScreenSplit.HORIZONTAL, false);
+		this.window = new GameWindow(new Vector2D(800, 600), "Test", true, 120, 20);
 		
 		// Uses mouseHandler and DrawableHandler by default (drawer is available after the 
 		// panel has been created)

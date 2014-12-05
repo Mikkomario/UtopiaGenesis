@@ -363,4 +363,27 @@ public class Vector2D
 	{
 		return unitVector().withDirection(direction);
 	}
+	
+	/**
+	 * Parses a vector from a string.
+	 * @param s The string that is parsed into vector format. "1.0,2" will be interpreted as 
+	 * (1.0, 2.0) as will "1.0, 2". "1.0" will be interpreted as (1.0, 0) while "" will be 
+	 * interpreted as (0, 0)
+	 * @return A vector parsed from the string
+	 * @throws NumberFormatException If the contents of the string cannot be parsed into numbers
+	 */
+	public static Vector2D parseFromString(String s) throws NumberFormatException
+	{
+		String[] arguments = s.split(",");
+		
+		double first = 0;
+		double second = 0;
+		
+		if (arguments.length >= 1)
+			first = Double.parseDouble(arguments[0].trim());
+		if (arguments.length >= 2)
+			second = Double.parseDouble(arguments[1].trim());
+		
+		return new Vector2D(first, second);
+	}
 }

@@ -82,62 +82,28 @@ public class GameWindow extends JFrame
 	public GameWindow(Vector2D dimensions, String title, boolean hastoolbar, 
 			int maxfpslimit, int minimumsupportedfps, ScreenSplit split, boolean optimizeAps)
 	{
-		// Sets the decorations off if needed
-		if (!hastoolbar)
-			setUndecorated(true);
-		
-		// Initializes attributes
-		this.dimensions = dimensions;
-		this.scaling = Vector2D.identityVector();
-		this.paddings = new ArrayList<JPanel>();
-		this.leftTopPaddings = new Vector2D(0, 0);
-		this.mainPanel = new MainPanel(this.dimensions, split);
-		
-		this.setTitle(title);
-		
-		// Takes the toolbar into account with height calculations
-		if (hastoolbar)
-			this.dimensions = this.dimensions.plus(new Vector2D(0, BORDERHEIGHT));
-		
-		//Let's format our window
-		this.formatWindow();
-		
-		// Adds the panel
-		add(this.mainPanel, BorderLayout.CENTER);
-		
-		// Adds listener(s) to the window
-		BasicMouseListener basicMouseListener = new BasicMouseListener();
-		this.mainPanel.addMouseListener(basicMouseListener);
-		this.mainPanel.addMouseWheelListener(basicMouseListener);
-		
-		addKeyListener(new BasicKeyListener());
-		
-		// Creates and initializes important handlers
-		StepHandler stepHandler = new StepHandler(1000 / maxfpslimit, 
-				(int) Math.round((1000.0 / minimumsupportedfps) / 
-				StepHandler.STEPLENGTH), this, optimizeAps);
-		
-		// And the screen drawer
-		this.screendrawer = new ScreenDrawer(this);
-		
-		ActorHandler listenerActorHandler = new ActorHandler(false, stepHandler);
-		this.mainKeyHandler = new MainKeyListenerHandler(listenerActorHandler);
-		this.mainmousehandler = new MainMouseListenerHandler(listenerActorHandler);
-		
-		KeyListenerHandler keyHandler = new KeyListenerHandler(false, this.mainKeyHandler);
-		MouseListenerHandler mouseHandler = new MouseListenerHandler(false, 
-				listenerActorHandler, null);
-		
-		this.mainmousehandler.add(mouseHandler);
-		
-		this.handlerRelay = new HandlerRelay();
-		this.handlerRelay.addHandler(stepHandler);
-		this.handlerRelay.addHandler(keyHandler);
-		this.handlerRelay.addHandler(mouseHandler);
-		
-		// Starts the game
-		new Thread(stepHandler).start();
-		new Thread(this.screendrawer).start();
+		initialize(dimensions, title, hastoolbar, maxfpslimit, minimumsupportedfps, split, 
+				optimizeAps);
+	}
+	
+	/**
+	 * Creates a new window
+	 * 
+	 * @param dimensions The size of the window
+	 * @param title The title shown in the window
+	 * @param hasToolbar Does the window have a tool bar
+	 * @param maxFpsLimit How many frames / actions per second the program takes at maximum 
+	 * performance. The higher the value, the higher the CPU-usage. At least 60 is recommended. 
+	 * (> 0)
+	 * @param minimumSupportedFps What is the smallest possible amount of frames / actions per 
+	 * second the program supports without slowing the simulation down. A low value has better 
+	 * usability at the cost of stability (> 0).
+	 */
+	public GameWindow(Vector2D dimensions, String title, boolean hasToolbar, int maxFpsLimit, 
+			int minimumSupportedFps)
+	{
+		initialize(dimensions, title, hasToolbar, maxFpsLimit, minimumSupportedFps, 
+				ScreenSplit.HORIZONTAL, false);
 	}
 	
 	
@@ -296,6 +262,67 @@ public class GameWindow extends JFrame
 
 		scaleToSize(new Vector2D(screenSize.getWidth(), screenSize.getHeight()), 
 				keepaspectratio, true);
+	}
+	
+	private void initialize(Vector2D dimensions, String title, boolean hastoolbar, 
+			int maxfpslimit, int minimumsupportedfps, ScreenSplit split, boolean optimizeAps)
+	{
+		// Sets the decorations off if needed
+		if (!hastoolbar)
+			setUndecorated(true);
+		
+		// Initializes attributes
+		this.dimensions = dimensions;
+		this.scaling = Vector2D.identityVector();
+		this.paddings = new ArrayList<JPanel>();
+		this.leftTopPaddings = new Vector2D(0, 0);
+		this.mainPanel = new MainPanel(this.dimensions, split);
+		
+		this.setTitle(title);
+		
+		// Takes the toolbar into account with height calculations
+		if (hastoolbar)
+			this.dimensions = this.dimensions.plus(new Vector2D(0, BORDERHEIGHT));
+		
+		//Let's format our window
+		this.formatWindow();
+		
+		// Adds the panel
+		add(this.mainPanel, BorderLayout.CENTER);
+		
+		// Adds listener(s) to the window
+		BasicMouseListener basicMouseListener = new BasicMouseListener();
+		this.mainPanel.addMouseListener(basicMouseListener);
+		this.mainPanel.addMouseWheelListener(basicMouseListener);
+		
+		addKeyListener(new BasicKeyListener());
+		
+		// Creates and initializes important handlers
+		StepHandler stepHandler = new StepHandler(1000 / maxfpslimit, 
+				(int) Math.round((1000.0 / minimumsupportedfps) / 
+				StepHandler.STEPLENGTH), this, optimizeAps);
+		
+		// And the screen drawer
+		this.screendrawer = new ScreenDrawer(this);
+		
+		ActorHandler listenerActorHandler = new ActorHandler(false, stepHandler);
+		this.mainKeyHandler = new MainKeyListenerHandler(listenerActorHandler);
+		this.mainmousehandler = new MainMouseListenerHandler(listenerActorHandler);
+		
+		KeyListenerHandler keyHandler = new KeyListenerHandler(false, this.mainKeyHandler);
+		MouseListenerHandler mouseHandler = new MouseListenerHandler(false, 
+				listenerActorHandler, null);
+		
+		this.mainmousehandler.add(mouseHandler);
+		
+		this.handlerRelay = new HandlerRelay();
+		this.handlerRelay.addHandler(stepHandler);
+		this.handlerRelay.addHandler(keyHandler);
+		this.handlerRelay.addHandler(mouseHandler);
+		
+		// Starts the game
+		new Thread(stepHandler).start();
+		new Thread(this.screendrawer).start();
 	}
 	
 	private void addPadding(Vector2D dimensions, String direction)
