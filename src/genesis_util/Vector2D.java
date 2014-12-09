@@ -72,6 +72,15 @@ public class Vector2D
 		this.first = point.getX();
 		this.second = point.getY();
 	}
+	
+	
+	// IMPLEMENTED METHODS	----------------------------------
+	
+	@Override
+	public String toString()
+	{
+		return getFirst() + "," + getSecond();
+	}
 
 	
 	// GETTERS & SETTERS	----------------------------------
@@ -133,12 +142,13 @@ public class Vector2D
 	 */
 	public boolean isParallerWith(Vector2D other)
 	{
-		return HelpMath.areApproximatelyEqual(getDirection(), other.getDirection());
+		//return HelpMath.areApproximatelyEqual(getDirection(), other.getDirection());
+		return HelpMath.areApproximatelyEqual(this.crossProductLength(other), 0);
 	}
 	
 	/**
 	 * @param other The other vector
-	 * @return How much the 
+	 * @return How much the directions of the two vectors differ [0, 180]
 	 */
 	public double getSeparatingAngle(Vector2D other)
 	{
@@ -172,6 +182,17 @@ public class Vector2D
 	public double scalarProjection(Vector2D other)
 	{
 		return this.dotProduct(other) / other.getLength();
+	}
+	
+	/**
+	 * @return A vector that is perpendicular to this vector
+	 */
+	public Vector2D normal()
+	{
+		if (getFirst() != 0)
+			return this.times(new Vector2D(-1, 1)).normalized();
+		else
+			return this.times(new Vector2D(1, -1)).normalized();
 	}
 	
 	/**
@@ -219,6 +240,16 @@ public class Vector2D
 	public Vector2D asUnitVector()
 	{
 		return this.dividedBy(getLength());
+	}
+	
+	/**
+	 * @return Returns a version of this version that has unit length. Works just like another 
+	 * method
+	 * @see #asUnitVector()
+	 */
+	public Vector2D normalized()
+	{
+		return this.asUnitVector();
 	}
 	
 	/**
