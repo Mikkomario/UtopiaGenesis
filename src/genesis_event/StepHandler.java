@@ -1,7 +1,8 @@
 package genesis_event;
 
-import genesis_util.LatchStateOperator;
-import genesis_util.StateOperator;
+import java.util.ArrayList;
+import java.util.List;
+
 import genesis_video.GameWindow;
 
 /**
@@ -26,6 +27,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	private long nextupdatemillis, lastactmillis;
 	private boolean running;
 	private GameWindow window;
+	private List<PerformanceMonitor> monitors;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -37,7 +39,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * 
 	 * @param callInterval How many milliseconds will there at least be between 
 	 * update calls? This also defines the maximum frame rate / action rate 
-	 * for the program. No more than 20 milliseconds is adviced. All computers 
+	 * for the program. No more than 20 milliseconds is advised. All computers 
 	 * may be unable to update the program in less than 10 milliseconds though. 
 	 * (>0)
 	 * @param maxStepsPerCall How many steps can be "skipped" or simulated 
@@ -48,13 +50,9 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * down. The adviced value is from 2 to 3 but it can be 
 	 * different depending on the nature of the software. (> 0)
 	 * @param window The which which created the stepHandler
-	 * @param optimizesteplength Should Aps optimization be activated. The 
-	 * optimization tries to increase / decrease the Aps to the optimal value. 
-	 * Usually this is unnecessary but may counter the computer's tries to 
-	 * limit the Aps
 	 */
 	public StepHandler(int callInterval, int maxStepsPerCall, 
-			GameWindow window, boolean optimizesteplength)
+			GameWindow window)
 	{
 		super(false); // Stephandler doesn't have a superhandler
 		
@@ -65,10 +63,7 @@ public class StepHandler extends ActorHandler implements Runnable
 		this.lastactmillis = System.currentTimeMillis();
 		this.running = false;
 		this.window = window;
-		
-		// Creates an ApsOptimizer and adds it to the actors
-		if (optimizesteplength)
-			add(new ApsOptimizer(this.callinterval, 8, 4000, 20000, 6));
+		this.monitors = new ArrayList<>();
 	}
 	
 	
@@ -86,6 +81,15 @@ public class StepHandler extends ActorHandler implements Runnable
 	
 	
 	// OTHER METHODS	--------------------------------------------------
+	
+	/**
+	 * Adds a performance monitor to the informed monitors
+	 * @param monitor The performance monitor that will be informed
+	 */
+	private void addPerformanceMonitor(PerformanceMonitor monitor)
+	{
+		this.monitors.add(monitor);
+	}
 	
 	/**
 	 * Stops the stephandler from functioning anymore
@@ -109,6 +113,11 @@ public class StepHandler extends ActorHandler implements Runnable
 			double steps = (thisActStartedAt - this.lastactmillis) / 
 					(double) STEPLENGTH;
 			
+			// TODO: The when put to 120 fps, the program works with 60. It can't go higher 
+			// either... Except randomly after the software has been accelerated once and 
+			// the computer has "awaken"
+			//System.out.println(thisActStartedAt - this.lastactmillis);
+			
 			// Sometimes the true amount of steps can't be informed and a 
 			// different number is given instead (physics don't like there 
 			// being too many steps at once)
@@ -124,6 +133,12 @@ public class StepHandler extends ActorHandler implements Runnable
 			// Updates the stepmillis
 			//this.lastactmillis = System.currentTimeMillis();
 			this.lastactmillis = thisActStartedAt;
+			
+			// Informs the monitors
+			for (PerformanceMonitor monitor : this.monitors)
+			{
+				monitor.updateOperationTime(System.currentTimeMillis() - this.lastactmillis, steps);
+			}
 		}
 		// Stops running if dies
 		else
@@ -152,186 +167,136 @@ public class StepHandler extends ActorHandler implements Runnable
 	}
 	
 	
-	// SUBCLASSES	------------------------------------------------------
+	// SUBCLASSES	--------------------------------
 	
-	// ApsOptimizer optimizes the aps to get virtually as close to the 
-	// optimal aps as possible
-	private class ApsOptimizer implements Actor
+	/**
+	 * This class monitors the performance of the stepHandler. It keeps track of how many 
+	 * milliseconds were used in processing.
+	 * 
+	 * @author Mikko Hilpinen
+	 * @since 11.12.2014
+	 */
+	public abstract static class PerformanceMonitor
 	{
-		// ATTRIBUTES	-------------------------------------------------
+		// ATTRIBUTES	----------------------------
 		
-		private int optimalsteptime;
-		private int optimalaps;
-		private int maxstepsizeadjustment;
-		private int currentstepsizeadjustments;
-		private int checkphase;
-		private int checkdelay;
-		private int breaklength;
-		private long lastcheck;
-		private boolean onbreak;
-		private int aps;
-		private int actions;
-		private long lastmillis;
-		private int lastapsdifference;
-		private int stepsizeadjuster;
-		private int maxoptimizations;
-		private int optimizationsdone;
-		
-		private StateOperator isDeadStateOperator, isActiveOperator;
+		private long nextUpdateMillis, updateInterval;
+		private double stepAmount, calculationMillis;
+		private int actCalls;
 		
 		
-		// CONSTRUCTOR	-------------------------------------------------
+		// CONSTRUCTOR	----------------------------
 		
 		/**
-		 * Creates a new apsOptimizer with the given information. The optimizer 
-		 * will start to optimize the aps after a small delay
-		 *
-		 * @param startsteptime How long is the steptime in the beginning 
-		 * of the program (how long is the default step time, also defines the 
-		 * optimal actions per second value)
-		 * @param maxstepsizeadjustment How much the stepsize can be adjusted at 
-		 * once (the larger value makes optimization more precise but also 
-		 * makes it last longer)
-		 * @param checkdelay How many milliseconds the optimizer calculates the 
-		 * values before they are adjusted again (>= 1000)
-		 * @param breaklength How many milliseconds the optimizer sleeps after 
-		 * it has done its optimizing (> checkdelay)
-		 * @param maximumoptimizations how many optimizations will be done 
-		 * before the optimizer dies
+		 * Creates a new object to monitor performance
+		 * @param updateInterval How often the subclass is informed of the monitor status 
+		 * (in milliseconds)
+		 * @param stepHandler The stepHandler that will inform this monitor about performance 
+		 * times
 		 */
-		public ApsOptimizer(int startsteptime, int maxstepsizeadjustment, 
-				int checkdelay, int breaklength, int maximumoptimizations)
+		public PerformanceMonitor(long updateInterval, StepHandler stepHandler)
 		{
-			// Initializes attributes
-			this.optimalsteptime = startsteptime;
-			this.optimalaps = 1000 / this.optimalsteptime;
-			this.aps = this.optimalaps;
-			this.maxstepsizeadjustment = maxstepsizeadjustment;
-			this.checkdelay = checkdelay;
-			this.breaklength = breaklength;
-			this.checkphase = 0;
-			this.lastcheck = System.currentTimeMillis();
-			this.onbreak = false;
-			this.actions = 0;
-			this.lastmillis = System.currentTimeMillis();
-			this.lastapsdifference = 0;
-			this.stepsizeadjuster = 0;
-			this.currentstepsizeadjustments = 0;
-			this.maxoptimizations = maximumoptimizations;
-			this.optimizationsdone = 0;
+			// Initializes atributes
+			this.calculationMillis = 0;
+			this.nextUpdateMillis = System.currentTimeMillis() + updateInterval;
+			this.updateInterval = updateInterval;
+			this.stepAmount = 0;
+			this.actCalls = 0;
 			
-			this.isDeadStateOperator = new LatchStateOperator(false);
-			this.isActiveOperator = new StateOperator(true, false);
+			if (stepHandler != null)
+				stepHandler.addPerformanceMonitor(this);
 		}
 		
 		
-		// IMPLEMENTED METHODS	-----------------------------------------
+		// ABSTRACT METHODS	-------------------------
 		
-		@Override
-		public StateOperator getIsActiveStateOperator()
+		/**
+		 * This method is called upon certain intervals to inform the subclass
+		 * @param lastCalculationMillis How many milliseconds were spent in calculations during the 
+		 * last interval
+		 * @param stepsPerCall How many steps each act event took care of, in average
+		 */
+		protected abstract void updatePerformanceStatus(double lastCalculationMillis, 
+				double stepsPerCall);
+		
+		
+		// OTHER METHODS	-------------------------
+		
+		private void updateOperationTime(double operationMillis, double steps)
 		{
-			return this.isActiveOperator;
+			this.calculationMillis += operationMillis;
+			this.stepAmount += steps;
+			this.actCalls += 1;
+			
+			if (System.currentTimeMillis() >= this.nextUpdateMillis)
+			{
+				this.nextUpdateMillis = System.currentTimeMillis() + this.updateInterval;
+				updatePerformanceStatus(this.calculationMillis, this.stepAmount / this.actCalls);
+				this.calculationMillis = 0;
+				this.stepAmount = 0;
+				this.actCalls = 0;
+			}
 		}
 		
-		@Override
-		public StateOperator getIsDeadStateOperator()
+		/**
+		 * Calculates, how many percent of the performance capacity was used during an interval
+		 * @param calculationMillis How many milliseconds were spent calculating stuff during 
+		 * the interval
+		 * @return How large a portion of the maximum performance was in use [0, 100]
+		 */
+		protected int getIntervalPerformance(double calculationMillis)
 		{
-			return this.isDeadStateOperator;
+			return (int) (100 * calculationMillis / this.updateInterval);
 		}
+	}
+	
+	/**
+	 * Performance accelrator tries to make the program run as smoothly as possible by 
+	 * monitoring and adjusting computation time.
+	 * 
+	 * @author Mikko Hilpinen
+	 * @since 12.12.2014
+	 */
+	public static class PerformanceAccelerator extends PerformanceMonitor
+	{
+		// ATTRIBUTES	--------------------------
+		
+		private StepHandler stepHandler;
+		private int maxInterval;
+		
+		
+		// CONSTRUCTOR	--------------------------
+		
+		/**
+		 * Creates a new accelrator that will modify the given stepHandler
+		 * @param updateInterval How often modifications are made (in milliseconds)
+		 * @param stepHandler The stepHandler that is monitored and adjusted
+		 */
+		public PerformanceAccelerator(long updateInterval,
+				StepHandler stepHandler)
+		{
+			super(updateInterval, stepHandler);
+			
+			// Initializes attributes
+			this.stepHandler = stepHandler;
+			this.maxInterval = this.stepHandler.callinterval;
+		}
+		
+		
+		// IMPLEMENTED METHODS	------------------
 
 		@Override
-		public void act(double steps)
+		protected void updatePerformanceStatus(double lastCalculationMillis,
+				double stepsPerCall)
 		{
-			// Calculates the aps
-			this.actions ++;
+			int performance = getIntervalPerformance(lastCalculationMillis);
 			
-			if (System.currentTimeMillis() - this.lastmillis >= 1000)
-			{
-				this.aps = this.actions;
-				this.actions = 0;
-				this.lastmillis = System.currentTimeMillis();
-			}
-			
-			// Optimizes (if needed)
-			int delay = this.checkdelay;
-			if (this.onbreak)
-				delay = this.breaklength;
-			// Checks if a new check is needed
-			if (System.currentTimeMillis() - this.lastcheck >= delay)
-				optimize();
-		}
-		
-		private void optimize()
-		{
-			// Stops the break
-			this.onbreak = false;
-			
-			// Calculates the current aps difference
-			int currentapsdifference = Math.abs(this.aps - this.optimalaps);
-			
-			// Phase 0: Checks if the aps is optimal
-			if (this.checkphase == 0)
-			{
-				// Of the aps is optimal goes to break
-				if (currentapsdifference == 0)
-					goToBreak();
-				// Otherwise advances to the next phase (and updates the steptime)
-				else
-				{
-					this.optimalsteptime = StepHandler.this.callinterval;
-					if (this.aps < this.optimalaps)
-						this.stepsizeadjuster = -1;
-					else
-						this.stepsizeadjuster = 1;
-					this.checkphase ++;
-					this.currentstepsizeadjustments = 0;
-				}
-			}
-			// Phase 1: Slowly adjusts the steptime in hopes of adjusting 
-			// the aps
-			if (this.checkphase == 1)
-			{
-				// If the current apsdifference is larger than the last aps or 
-				// If there have already been too many adjustments
-				// difference, goes to the next phase
-				if (currentapsdifference > this.lastapsdifference || 
-						this.currentstepsizeadjustments >= 
-						this.maxstepsizeadjustment)
-				{
-					goToBreak();
-					StepHandler.this.callinterval = this.optimalsteptime;
-				}
-				// Otherwise further adjusts the stepduration
-				else
-				{
-					// Checks if the current status is closer to the goal than 
-					// the last and remembers it
-					if (currentapsdifference < this.lastapsdifference)
-						this.optimalsteptime = StepHandler.this.callinterval;
-					
-					// Increases / decreases the stepduration
-					StepHandler.this.callinterval += this.stepsizeadjuster;
-					this.currentstepsizeadjustments ++;
-				}
-			}
-			
-			// Remembers the last aps difference
-			this.lastapsdifference = Math.abs(this.aps - this.optimalaps);
-			// Updates the timer
-			this.lastcheck = System.currentTimeMillis();
-		}
-		
-		private void goToBreak()
-		{
-			// Updates the stephandler's action modifier
-			
-			this.onbreak = true;
-			this.checkphase = 0;
-			this.optimizationsdone ++;
-			
-			// If the optimizer has done enough optimizations, it kills itself
-			if (this.optimizationsdone >= this.maxoptimizations)
-				getIsDeadStateOperator().setState(true);
+			// If the time usage was under 30%, accelerates
+			if (performance < 30 && this.stepHandler.callinterval > 1)
+				this.stepHandler.callinterval -= 1;
+			// If it got over 70%, slows it down (if possible)
+			else if (performance > 70 && this.stepHandler.callinterval < this.maxInterval)
+				this.stepHandler.callinterval += 1;
 		}
 	}
 }

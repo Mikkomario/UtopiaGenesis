@@ -45,6 +45,7 @@ public class GameWindow extends JFrame
 	private MainKeyListenerHandler mainKeyHandler;
 	private ScreenDrawer screendrawer;
 	private HandlerRelay handlerRelay;
+	private StepHandler stepHandler;
 	
 	private ArrayList<JPanel> paddings;
 	private MainPanel mainPanel;
@@ -74,16 +75,11 @@ public class GameWindow extends JFrame
 	 * usability. The program's physics may not support very low framerates 
 	 * though. (> 0)
 	 * @param split How the screen is split between multiple panels
-	 * @param optimizeAps Should Aps (actions per second) optimization be 
-	 * activated. The optimization tries to increase / decrease the Aps to the 
-	 * optimal value. Usually this is unnecessary but may counter the 
-	 * computer's attempts to limit the Aps
 	 */
 	public GameWindow(Vector2D dimensions, String title, boolean hastoolbar, 
-			int maxfpslimit, int minimumsupportedfps, ScreenSplit split, boolean optimizeAps)
+			int maxfpslimit, int minimumsupportedfps, ScreenSplit split)
 	{
-		initialize(dimensions, title, hastoolbar, maxfpslimit, minimumsupportedfps, split, 
-				optimizeAps);
+		initialize(dimensions, title, hastoolbar, maxfpslimit, minimumsupportedfps, split);
 	}
 	
 	/**
@@ -103,7 +99,7 @@ public class GameWindow extends JFrame
 			int minimumSupportedFps)
 	{
 		initialize(dimensions, title, hasToolbar, maxFpsLimit, minimumSupportedFps, 
-				ScreenSplit.HORIZONTAL, false);
+				ScreenSplit.HORIZONTAL);
 	}
 	
 	
@@ -115,6 +111,14 @@ public class GameWindow extends JFrame
 	public MainPanel getMainPanel()
 	{
 		return this.mainPanel;
+	}
+	
+	/**
+	 * @return The stepHandler that informs objects about the passing of time
+	 */
+	public StepHandler getStepHandler()
+	{
+		return this.stepHandler;
 	}
 	
 	
@@ -265,7 +269,7 @@ public class GameWindow extends JFrame
 	}
 	
 	private void initialize(Vector2D dimensions, String title, boolean hastoolbar, 
-			int maxfpslimit, int minimumsupportedfps, ScreenSplit split, boolean optimizeAps)
+			int maxfpslimit, int minimumsupportedfps, ScreenSplit split)
 	{
 		// Sets the decorations off if needed
 		if (!hastoolbar)
@@ -298,14 +302,14 @@ public class GameWindow extends JFrame
 		addKeyListener(new BasicKeyListener());
 		
 		// Creates and initializes important handlers
-		StepHandler stepHandler = new StepHandler(1000 / maxfpslimit, 
+		this.stepHandler = new StepHandler(1000 / maxfpslimit, 
 				(int) Math.round((1000.0 / minimumsupportedfps) / 
-				StepHandler.STEPLENGTH), this, optimizeAps);
+				StepHandler.STEPLENGTH), this);
 		
 		// And the screen drawer
 		this.screendrawer = new ScreenDrawer(this);
 		
-		ActorHandler listenerActorHandler = new ActorHandler(false, stepHandler);
+		ActorHandler listenerActorHandler = new ActorHandler(false, this.stepHandler);
 		this.mainKeyHandler = new MainKeyListenerHandler(listenerActorHandler);
 		this.mainmousehandler = new MainMouseListenerHandler(listenerActorHandler);
 		
@@ -316,12 +320,12 @@ public class GameWindow extends JFrame
 		this.mainmousehandler.add(mouseHandler);
 		
 		this.handlerRelay = new HandlerRelay();
-		this.handlerRelay.addHandler(stepHandler);
+		this.handlerRelay.addHandler(this.stepHandler);
 		this.handlerRelay.addHandler(keyHandler);
 		this.handlerRelay.addHandler(mouseHandler);
 		
 		// Starts the game
-		new Thread(stepHandler).start();
+		new Thread(this.stepHandler).start();
 		new Thread(this.screendrawer).start();
 	}
 	

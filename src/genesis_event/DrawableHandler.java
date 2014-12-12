@@ -98,6 +98,45 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		initialize(usesDepth, depth, depthSortLayers);
 	}
 	
+	/**
+	 * Creates a new DrawableHandler that doesn't use depth
+	 * @param autoDeath Will the handler automatically die once it runs out of handleds
+	 * @param superHandler The drawableHandler that will handle this handler
+	 */
+	public DrawableHandler(boolean autoDeath, DrawableHandler superHandler)
+	{
+		super(autoDeath);
+		
+		// Initializes attributes
+		initialize(false, 0, 1);
+		
+		if (superHandler != null)
+			superHandler.add(this);
+	}
+	
+	/**
+	 * Creates a new DrawableHandler that doesn't use depth
+	 * @param autoDeath Will the handler automatically die once it runs out of handleds
+	 * @param handlers The handlers that will handle this handler
+	 */
+	public DrawableHandler(boolean autoDeath, HandlerRelay handlers)
+	{
+		super(autoDeath, handlers);
+		
+		initialize(false, 0, 1);
+	}
+	
+	/**
+	 * Creates a new DrawableHandler that doesn't use depth
+	 * @param autoDeath Will the handler automatically die once it runs out of handleds
+	 */
+	public DrawableHandler(boolean autoDeath)
+	{
+		super(autoDeath);
+		
+		initialize(false, 0, 1);
+	}
+	
 	
 	// IMPLEMENTED METHODS	----------------------------------------------
 	

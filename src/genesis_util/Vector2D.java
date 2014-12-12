@@ -1,6 +1,7 @@
 package genesis_util;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 
@@ -135,6 +136,25 @@ public class Vector2D
 	
 	
 	// OTHER METHODS	--------------------------------------
+	
+	/**
+	 * Draws the vector as a point
+	 * @param radius The radius of the circle that represents the point
+	 * @param g2d The object that does the actual drawing
+	 */
+	public void drawAsPoint(int radius, Graphics2D g2d)
+	{
+		g2d.drawOval(getFirstInt() - radius / 2, getSecondInt() - radius / 2, radius, radius);
+	}
+	
+	/**
+	 * Draws the vector as a line from origin to the vector's "position"
+	 * @param g2d The object that does the actual drawing
+	 */
+	public void drawAsLine(Graphics2D g2d)
+	{
+		g2d.drawLine(0, 0, getFirstInt(), getSecondInt());
+	}
 	
 	/**
 	 * @param other The other vector

@@ -5,6 +5,7 @@ import java.awt.Color;
 import genesis_event.HandlerRelay;
 import genesis_event.KeyListenerHandler;
 import genesis_event.MouseListenerHandler;
+import genesis_event.StepHandler;
 import genesis_util.Vector2D;
 import genesis_video.GamePanel;
 import genesis_video.GameWindow;
@@ -60,6 +61,10 @@ public class GenesisTest
 		
 		new MousePositionDrawer(this.handlers);
 		new KeyTester(keyHandler, mouseHandler);
+		
+		// Creates a performance monitor as well
+		new TextPerformanceMonitor(1000, this.window.getStepHandler());
+		new StepHandler.PerformanceAccelerator(1000, this.window.getStepHandler());
 	}
 
 	
