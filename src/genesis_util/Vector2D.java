@@ -209,10 +209,7 @@ public class Vector2D
 	 */
 	public Vector2D normal()
 	{
-		if (getFirst() != 0)
-			return this.times(new Vector2D(-1, 1)).normalized();
-		else
-			return this.times(new Vector2D(1, -1)).normalized();
+		return new Vector2D(getSecond() * -1, getFirst());
 	}
 	
 	/**
@@ -325,7 +322,18 @@ public class Vector2D
 	 */
 	public Vector2D times(final Vector2D other)
 	{
-		return new Vector2D(getFirst() * other.getFirst(), getSecond() * other.getSecond());
+		return times(other.getFirst(), other.getSecond());
+	}
+	
+	/**
+	 * @param a The multiplier for the first index
+	 * @param b The multiplier for the second index
+	 * @return The vector scaled with the given values. (2, 3) scaled with 3 and 2 would be 
+	 * (6, 6)
+	 */
+	public Vector2D times(double a, double b)
+	{
+		return new Vector2D(getFirst() * a, getSecond() * b);
 	}
 	
 	/**
@@ -335,7 +343,7 @@ public class Vector2D
 	 */
 	public Vector2D times(double a)
 	{
-		return new Vector2D(getFirst() * a, getSecond() * a);
+		return times(a, a);
 	}
 	
 	/**

@@ -11,6 +11,9 @@ import java.awt.Graphics2D;
  */
 public class Line
 {
+	// TODO: Create intersection method
+	// Also could check line sweep algorithm
+	
 	// ATTRIBUTES	-------------------------------
 	
 	private final Vector2D start, end;

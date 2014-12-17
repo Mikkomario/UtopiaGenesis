@@ -241,6 +241,11 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	private static void informObjectAboutMouseEvent(AdvancedMouseListener listener, 
 			AdvancedMouseEvent event)
 	{
+		// Checks for nullpointers since errors have occured here
+		if (listener == null || listener.getListensToMouseEventsOperator() == null || 
+				listener.getMouseEventSelector() == null)
+			return;
+		
 		// Checks if the event should be given to the listener
 		if (listener.getListensToMouseEventsOperator().getState() && 
 				listener.getMouseEventSelector().selects(event))
