@@ -209,7 +209,7 @@ public class Vector2D
 	 */
 	public Vector2D normal()
 	{
-		return new Vector2D(getSecond() * -1, getFirst());
+		return new Vector2D(getSecond() * -1, getFirst()).normalized();
 	}
 	
 	/**

@@ -77,6 +77,7 @@ public class GamePanel extends JPanel
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 		
+		g.setColor(Color.BLACK);
 		this.drawer.drawSelf(g2d);
 	}
 	

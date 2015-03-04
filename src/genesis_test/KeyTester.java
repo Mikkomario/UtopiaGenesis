@@ -60,7 +60,7 @@ public class KeyTester implements AdvancedKeyListener
 	public void onKeyEvent(AdvancedKeyEvent event)
 	{
 		// Prints the key and does something special with number keys
-		System.out.println("Pressed: " + event.getKeyChar());
+		System.out.println("Pressed: " + event.getKeyChar() + " (" + event.getKey() + ")");
 		
 		switch (event.getKeyChar())
 		{

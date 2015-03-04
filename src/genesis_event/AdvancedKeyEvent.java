@@ -18,6 +18,63 @@ public class AdvancedKeyEvent implements Event
 	private final ContentType contentType;
 	private final double duration;
 	
+	/**
+	 * The left arrow keycode
+	 */
+	public final static int LEFT = 37;
+	/**
+	 * The up arrow keycode
+	 */
+	public final static int UP = 38;
+	/**
+	 * The right arrow keycode
+	 */
+	public final static int RIGTH = 39;
+	/**
+	 * The down arrow keycode
+	 */
+	public final static int DOWN = 40;
+	/**
+	 * The ctrl keycode, same for both left and right control
+	 */
+	public final static int CTRL = 17;
+	/**
+	 * The shift keycode, same for both left and right shift
+	 */
+	public final static int SHIFT = 16;
+	/**
+	 * The backspace keycode
+	 */
+	public final static int BACKSPACE = 8;
+	/**
+	 * The caps lock keycode
+	 */
+	public final static int CAPSLOCK = 20;
+	/**
+	 * The delete keycode
+	 */
+	public final static int DELETE = 127;
+	/**
+	 * The enter keycode
+	 */
+	public final static int ENTER = 10;
+	/**
+	 * The home keycode
+	 */
+	public final static int HOME = 36;
+	/**
+	 * The end keycode
+	 */
+	public final static int END = 35;
+	/**
+	 * The page up keycode
+	 */
+	public final static int PGUP = 33;
+	/**
+	 * The page down keycode
+	 */
+	public final static int PGDOWN = 34;
+	
 	
 	// CONSTRUCTOR	-----------------------------------
 	

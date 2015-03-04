@@ -1,5 +1,8 @@
 package genesis_event;
 
+import genesis_video.GamePanel;
+import genesis_video.GameWindow;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +28,16 @@ public class HandlerRelay
 	{
 		// Initializes attributes
 		this.handlers = new HashMap<>();
+	}
+	
+	/**
+	 * Creates a new handlerRelay that is a copy of the given handlerRelay
+	 * @param other The relay this one is copied from
+	 */
+	public HandlerRelay(HandlerRelay other)
+	{
+		this.handlers = new HashMap<>();
+		this.handlers.putAll(other.handlers);
 	}
 	
 	
@@ -122,5 +135,18 @@ public class HandlerRelay
 	public Handler<? extends Handled> getHandler(HandlerType type)
 	{
 		return this.handlers.get(type);
+	}
+	
+	/**
+	 * Creates a new handlerRelay that contains all the handlers in the given window and panel
+	 * @param window The window that contains handlers
+	 * @param panel The panel that contains a drawableHandler
+	 * @return A handlerRelay that contains the handlers from both the window and the panel
+	 */
+	public static HandlerRelay createDefaultHandlerRelay(GameWindow window, GamePanel panel)
+	{
+		HandlerRelay relay = new HandlerRelay(window.getHandlerRelay());
+		relay.addHandler(panel.getDrawer());
+		return relay;
 	}
 }
