@@ -11,20 +11,20 @@ import genesis_util.Vector2D;
  * @since 28.12.2012.
  * @see MouseListenerHandler
  */
-public interface AdvancedMouseListener extends Handled
+public interface MouseListener extends Handled
 {
 	/**
 	 * This method is called when a desired event occurs. Only Mouse events selected by the 
 	 * listener's selector should be informed.
 	 * @param event The recent mouse event
 	 */
-	public void onMouseEvent(AdvancedMouseEvent event);
+	public void onMouseEvent(MouseEvent event);
 	
 	/**
 	 * @return A mouseEventSelector that determines which mouse events the listener is 
 	 * interested in
 	 */
-	public EventSelector<AdvancedMouseEvent> getMouseEventSelector();
+	public EventSelector<MouseEvent> getMouseEventSelector();
 	
 	/**
 	 * Tell's whether the given position is in the object's special area of interest

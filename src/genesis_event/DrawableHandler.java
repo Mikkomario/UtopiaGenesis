@@ -169,12 +169,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	}
 	
 	@Override
-	public void setDepth(int depth)
-	{
-		this.depth = depth;
-	}
-	
-	@Override
 	public void add(Drawable d)
 	{
 		// Checks if depth causes additional issues

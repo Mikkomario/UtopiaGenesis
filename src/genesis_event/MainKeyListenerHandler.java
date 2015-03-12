@@ -1,7 +1,7 @@
 package genesis_event;
 
-import genesis_event.AdvancedKeyEvent.ContentType;
-import genesis_event.AdvancedKeyEvent.KeyEventType;
+import genesis_event.KeyEvent.ContentType;
+import genesis_event.KeyEvent.KeyEventType;
 import genesis_util.StateOperator;
 
 import java.util.ArrayList;
@@ -175,7 +175,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 		// IMPLEMENTED METHODS	----------------------------------
 		
 		@Override
-		protected boolean handleObject(AdvancedKeyListener listener)
+		protected boolean handleObject(KeyListener listener)
 		{
 			// Informs the object about the current event(s)
 			// Only informs active objects
@@ -193,7 +193,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 					for (int i = 0; i < keys.size(); i++)
 					{
 						informListenerAboutKeyEvent(listener, 
-								new AdvancedKeyEvent(keys.get(i), eventType, contentType, 
+								new KeyEvent(keys.get(i), eventType, contentType, 
 								this.eventDuration));
 					}
 				}

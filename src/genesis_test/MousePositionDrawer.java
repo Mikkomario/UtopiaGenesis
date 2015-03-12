@@ -3,10 +3,10 @@ package genesis_test;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import genesis_event.AdvancedMouseEvent;
-import genesis_event.AdvancedMouseEvent.MouseButtonEventType;
-import genesis_event.AdvancedMouseEvent.MouseEventType;
-import genesis_event.AdvancedMouseListener;
+import genesis_event.MouseEvent;
+import genesis_event.MouseEvent.MouseButtonEventType;
+import genesis_event.MouseEvent.MouseEventType;
+import genesis_event.MouseListener;
 import genesis_event.Drawable;
 import genesis_event.EventSelector;
 import genesis_event.HandlerRelay;
@@ -22,14 +22,14 @@ import genesis_util.Vector2D;
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
-public class MousePositionDrawer implements Drawable, AdvancedMouseListener
+public class MousePositionDrawer implements Drawable, MouseListener
 {
 	// ATTRIBUTES	-------------------------------------
 	
 	private Vector2D lastPressPosition, lastMousePosition;
 	private boolean mouseIsDown;
 	private StateOperator isDeadOperator, isActiveOperator, isVisibleOperator;
-	private MultiEventSelector<AdvancedMouseEvent> selector;
+	private MultiEventSelector<MouseEvent> selector;
 	private double wheelTurn;
 	
 	
@@ -52,9 +52,9 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 		
 		// Listens to mouse presses & releases as well as mouse move
 		this.selector = new MultiEventSelector<>();
-		this.selector.addOption(AdvancedMouseEvent.createButtonStateChangeSelector());
-		this.selector.addOption(AdvancedMouseEvent.createMouseMoveSelector());
-		this.selector.addOption(AdvancedMouseEvent.createMouseWheelSelector());
+		this.selector.addOption(MouseEvent.createButtonStateChangeSelector());
+		this.selector.addOption(MouseEvent.createMouseMoveSelector());
+		this.selector.addOption(MouseEvent.createMouseWheelSelector());
 		
 		handlers.addHandled(this);
 	}
@@ -69,7 +69,7 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 	}
 
 	@Override
-	public void onMouseEvent(AdvancedMouseEvent event)
+	public void onMouseEvent(MouseEvent event)
 	{
 		// Updates mouse position
 		this.lastMousePosition = event.getPosition();
@@ -88,7 +88,7 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 	}
 
 	@Override
-	public EventSelector<AdvancedMouseEvent> getMouseEventSelector()
+	public EventSelector<MouseEvent> getMouseEventSelector()
 	{
 		return this.selector;
 	}
@@ -134,11 +134,5 @@ public class MousePositionDrawer implements Drawable, AdvancedMouseListener
 	public int getDepth()
 	{
 		return DepthConstants.NORMAL;
-	}
-
-	@Override
-	public void setDepth(int depth)
-	{
-		// Fail
 	}
 }

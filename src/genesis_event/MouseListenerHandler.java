@@ -1,7 +1,7 @@
 package genesis_event;
 
-import genesis_event.AdvancedMouseEvent.MouseButtonEventType;
-import genesis_event.AdvancedMouseEvent.MouseEventType;
+import genesis_event.MouseEvent.MouseButtonEventType;
+import genesis_event.MouseEvent.MouseEventType;
 import genesis_util.StateOperator;
 import genesis_util.Vector2D;
 
@@ -12,11 +12,11 @@ import genesis_util.Vector2D;
  * @since 28.12.2012.
  */
 public class MouseListenerHandler extends AbstractMouseListenerHandler 
-	implements AdvancedMouseListener
+	implements MouseListener
 {
 	// ATTRIBUTES	---------------------------------------
 	
-	private MultiEventSelector<AdvancedMouseEvent> selector;
+	private MultiEventSelector<MouseEvent> selector;
 	private StateOperator listensToMouseOperator;
 	
 	
@@ -71,7 +71,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	// IMPLEMENTED METHODS	-------------------------------------------------
 
 	@Override
-	public void onMouseEvent(AdvancedMouseEvent event)
+	public void onMouseEvent(MouseEvent event)
 	{
 		// Updates mouse status
 		setMousePosition(event.getPosition());
@@ -92,7 +92,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	}
 
 	@Override
-	public EventSelector<AdvancedMouseEvent> getMouseEventSelector()
+	public EventSelector<MouseEvent> getMouseEventSelector()
 	{
 		return this.selector;
 	}
@@ -121,8 +121,8 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 		// wheel events
 		this.selector = new MultiEventSelector<>();
 		
-		this.selector.addOption(AdvancedMouseEvent.createButtonStateChangeSelector());
-		this.selector.addOption(AdvancedMouseEvent.createMouseMoveSelector());
-		this.selector.addOption(AdvancedMouseEvent.createMouseWheelSelector());
+		this.selector.addOption(MouseEvent.createButtonStateChangeSelector());
+		this.selector.addOption(MouseEvent.createMouseMoveSelector());
+		this.selector.addOption(MouseEvent.createMouseWheelSelector());
 	}
 }

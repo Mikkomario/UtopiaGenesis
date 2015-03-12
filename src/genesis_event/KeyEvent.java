@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * KeyEvents are used in informing AdvancedKeyListeners
+ * KeyEvents are used in informing KeyListeners
  * 
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
-public class AdvancedKeyEvent implements Event
+public class KeyEvent implements Event
 {
 	// ATTRIBUTES	-----------------------------------
 	
@@ -86,7 +86,7 @@ public class AdvancedKeyEvent implements Event
 	 * @param contentType The type of the content (key)
 	 * @param duration How long the event lasted
 	 */
-	public AdvancedKeyEvent(int key, KeyEventType eventType, ContentType contentType, 
+	public KeyEvent(int key, KeyEventType eventType, ContentType contentType, 
 			double duration)
 	{
 		// Initializes attributes
@@ -158,9 +158,9 @@ public class AdvancedKeyEvent implements Event
 	 * @param eventType The type of event the selector accepts
 	 * @return A selector that only accepts button events of the given type
 	 */
-	public static StrictEventSelector<AdvancedKeyEvent, Feature> createEventTypeSelector(KeyEventType eventType)
+	public static StrictEventSelector<KeyEvent, Feature> createEventTypeSelector(KeyEventType eventType)
 	{
-		StrictEventSelector<AdvancedKeyEvent, Feature> selector = new StrictEventSelector<>();
+		StrictEventSelector<KeyEvent, Feature> selector = new StrictEventSelector<>();
 		selector.addRequiredFeature(eventType);
 		return selector;
 	}
@@ -168,9 +168,9 @@ public class AdvancedKeyEvent implements Event
 	/**
 	 * @return A selector that accepts button presses as well as button releases
 	 */
-	public static StrictEventSelector<AdvancedKeyEvent, Feature> createButtonStateChangeSelector()
+	public static StrictEventSelector<KeyEvent, Feature> createButtonStateChangeSelector()
 	{
-		StrictEventSelector<AdvancedKeyEvent, Feature> selector = new StrictEventSelector<>();
+		StrictEventSelector<KeyEvent, Feature> selector = new StrictEventSelector<>();
 		selector.addUnacceptableFeature(KeyEventType.DOWN);
 		return selector;
 	}
@@ -179,7 +179,7 @@ public class AdvancedKeyEvent implements Event
 	// INTERFACES	------------------------------------------
 	
 	/**
-	 * Features can only describe advancedKeyEvents
+	 * Features can only describe KeyEvents
 	 * @author Mikko Hilpinen
 	 * @since 18.11.2014
 	 */

@@ -45,8 +45,8 @@ public enum GenesisHandlerType implements HandlerType
 	{
 		switch (this)
 		{
-			case MOUSEHANDLER: return AdvancedMouseListener.class;
-			case KEYHANDLER: return AdvancedKeyListener.class;
+			case MOUSEHANDLER: return MouseListener.class;
+			case KEYHANDLER: return KeyListener.class;
 			case DRAWABLEHANDLER: return Drawable.class;
 			case ACTORHANDLER: return Actor.class;
 			case STATEHANDLER: return StateOperatorListener.class;

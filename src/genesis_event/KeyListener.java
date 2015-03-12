@@ -11,20 +11,20 @@ import genesis_util.StateOperator;
  * @since 28.11.2012.
  * @see KeyListenerHandler
  */
-public interface AdvancedKeyListener extends Handled
+public interface KeyListener extends Handled
 {
 	/**
 	 * This method is called when a desired event occurs. Only Key events selected by the 
 	 * listener's selector should be informed.
 	 * @param event The event that occurred
 	 */
-	public void onKeyEvent(AdvancedKeyEvent event);
+	public void onKeyEvent(KeyEvent event);
 	
 	/**
 	 * @return A keyEventSelector that determines whether the listener is interested in certain 
 	 * events.
 	 */
-	public EventSelector<AdvancedKeyEvent> getKeyEventSelector();
+	public EventSelector<KeyEvent> getKeyEventSelector();
 	
 	/**
 	 * @return A stateOperator that determines whether the listener is currently interested 

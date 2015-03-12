@@ -1,8 +1,8 @@
 package genesis_test;
 
-import genesis_event.AdvancedKeyEvent;
-import genesis_event.AdvancedKeyEvent.KeyEventType;
-import genesis_event.AdvancedKeyListener;
+import genesis_event.KeyEvent;
+import genesis_event.KeyEvent.KeyEventType;
+import genesis_event.KeyListener;
 import genesis_event.EventSelector;
 import genesis_event.KeyListenerHandler;
 import genesis_event.MouseListenerHandler;
@@ -15,11 +15,11 @@ import genesis_util.StateOperator;
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
-public class KeyTester implements AdvancedKeyListener
+public class KeyTester implements KeyListener
 {
 	// ATTRIBUTES	-----------------------------------------
 	
-	private EventSelector<AdvancedKeyEvent> selector;
+	private EventSelector<KeyEvent> selector;
 	private StateOperator isDeadOperator, isActiveOperator;
 	private MouseListenerHandler mouseHandler;
 	private KeyListenerHandler keyHandler;
@@ -41,7 +41,7 @@ public class KeyTester implements AdvancedKeyListener
 		this.keyHandler = keyHandler;
 		
 		// Listens to key presses
-		this.selector = AdvancedKeyEvent.createEventTypeSelector(KeyEventType.PRESSED);
+		this.selector = KeyEvent.createEventTypeSelector(KeyEventType.PRESSED);
 		
 		if (keyHandler != null)
 			keyHandler.add(this);
@@ -57,7 +57,7 @@ public class KeyTester implements AdvancedKeyListener
 	}
 
 	@Override
-	public void onKeyEvent(AdvancedKeyEvent event)
+	public void onKeyEvent(KeyEvent event)
 	{
 		// Prints the key and does something special with number keys
 		System.out.println("Pressed: " + event.getKeyChar() + " (" + event.getKey() + ")");
@@ -73,7 +73,7 @@ public class KeyTester implements AdvancedKeyListener
 	}
 
 	@Override
-	public EventSelector<AdvancedKeyEvent> getKeyEventSelector()
+	public EventSelector<KeyEvent> getKeyEventSelector()
 	{
 		return this.selector;
 	}

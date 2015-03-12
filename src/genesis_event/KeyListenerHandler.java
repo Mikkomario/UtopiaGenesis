@@ -8,15 +8,15 @@ import genesis_util.StateOperator;
  * @author Mikko Hilpinen.
  * @since 14.12.2012.
  */
-public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements 
-		AdvancedKeyListener
+public class KeyListenerHandler extends Handler<KeyListener> implements 
+		KeyListener
 {
 	// ATTRIBUTES	---------------------------------
 	
 	private StateOperator listensToKeysOperator;
-	private EventSelector<AdvancedKeyEvent> selector;
+	private EventSelector<KeyEvent> selector;
 	
-	private AdvancedKeyEvent lastEvent;
+	private KeyEvent lastEvent;
 	
 	
 	// CONSTRUCTOR	-----------------------------------------------------
@@ -67,7 +67,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 	// IMPLEMENTED METHODS	---------------------------------------------
 
 	@Override
-	public void onKeyEvent(genesis_event.AdvancedKeyEvent event)
+	public void onKeyEvent(genesis_event.KeyEvent event)
 	{
 		// Inform the listeners about the event
 		this.lastEvent = event;
@@ -76,7 +76,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 	}
 
 	@Override
-	public EventSelector<genesis_event.AdvancedKeyEvent> getKeyEventSelector()
+	public EventSelector<genesis_event.KeyEvent> getKeyEventSelector()
 	{
 		return this.selector;
 	}
@@ -94,7 +94,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 	}
 	
 	@Override
-	protected boolean handleObject(AdvancedKeyListener l)
+	protected boolean handleObject(KeyListener l)
 	{
 		// Only informs active listeners
 		if (!l.getListensToKeyEventsOperator().getState())
@@ -113,7 +113,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 		// Initializes attributes
 		this.listensToKeysOperator = new AnyHandledListensKeyEventsOperator();
 		// The handler listens to all keyboard events
-		this.selector = new StrictEventSelector<AdvancedKeyEvent, AdvancedKeyEvent.Feature>();
+		this.selector = new StrictEventSelector<KeyEvent, KeyEvent.Feature>();
 		
 		this.lastEvent = null;
 	}
@@ -124,7 +124,7 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 	 * @param listener The listener that might be interested in the event
 	 * @param event The event that the listener may be informed about
 	 */
-	protected static void informListenerAboutKeyEvent(AdvancedKeyListener listener, AdvancedKeyEvent event)
+	protected static void informListenerAboutKeyEvent(KeyListener listener, KeyEvent event)
 	{
 		if (listener.getKeyEventSelector().selects(event))
 			listener.onKeyEvent(event);
@@ -146,13 +146,13 @@ public class KeyListenerHandler extends Handler<AdvancedKeyListener> implements
 		// IMPLEMENTED METHODS	------------------------------
 		
 		@Override
-		protected void changeHandledState(AdvancedKeyListener l, boolean newState)
+		protected void changeHandledState(KeyListener l, boolean newState)
 		{
 			l.getListensToKeyEventsOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(AdvancedKeyListener l)
+		protected boolean getHandledState(KeyListener l)
 		{
 			return l.getListensToKeyEventsOperator().getState();
 		}

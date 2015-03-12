@@ -33,12 +33,4 @@ public interface Drawable extends Handled
 	 * @see genesis_util.DepthConstants
 	 */
 	public int getDepth();
-	
-	/**
-	 * Tries to change the objects depth
-	 * 
-	 * @param depth The object's new depth (negative = top, positive = bottom)
-	 * @see genesis_util.DepthConstants
-	 */
-	public void setDepth(int depth);
 }

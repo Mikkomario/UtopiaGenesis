@@ -1,9 +1,9 @@
 package genesis_event;
 
-import genesis_event.AdvancedMouseEvent.MouseButton;
-import genesis_event.AdvancedMouseEvent.MouseButtonEventScale;
-import genesis_event.AdvancedMouseEvent.MouseButtonEventType;
-import genesis_event.AdvancedMouseEvent.MouseMovementEventType;
+import genesis_event.MouseEvent.MouseButton;
+import genesis_event.MouseEvent.MouseButtonEventScale;
+import genesis_event.MouseEvent.MouseButtonEventType;
+import genesis_event.MouseEvent.MouseMovementEventType;
 import genesis_util.StateOperator;
 import genesis_util.Vector2D;
 
@@ -18,13 +18,13 @@ import java.util.List;
  * @author Mikko Hilpinen.
  * @since 28.12.2012.
  */
-public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouseListener> implements Actor
+public abstract class AbstractMouseListenerHandler extends Handler<MouseListener> implements Actor
 {
 	// ATTRIBUTES	-------------------------------------------------------
 	
 	private Vector2D currentMousePosition;
 	private HashMap<MouseButtonEventType, HashMap<MouseButton, Boolean>> mouseButtonStates;
-	private HashMap<MouseMovementEventType, List<AdvancedMouseListener>> movementEventTargets;
+	private HashMap<MouseMovementEventType, List<MouseListener>> movementEventTargets;
 	
 	private double lastStepDuration;
 	
@@ -95,14 +95,14 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		this.lastStepDuration = steps;
 		
 		// Informs the objects
-		informObjectsAboutMouseButtonEvents(new AdvancedMouseEvent(MouseButtonEventType.NONE, 
+		informObjectsAboutMouseButtonEvents(new MouseEvent(MouseButtonEventType.NONE, 
 				MouseButton.NONE, this.currentMousePosition, steps));
-		informObjectsAboutMouseEnterExit(new AdvancedMouseEvent(this.currentMousePosition, 
+		informObjectsAboutMouseEnterExit(new MouseEvent(this.currentMousePosition, 
 				steps));
 	}
 	
 	@Override
-	protected boolean handleObject(AdvancedMouseListener l)
+	protected boolean handleObject(MouseListener l)
 	{
 		// Handles mouse move event
 		
@@ -127,7 +127,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		}
 		
 		// Informs the listener about the move event
-		informObjectAboutMouseEvent(l, new AdvancedMouseEvent(getMousePosition(), 
+		informObjectAboutMouseEvent(l, new MouseEvent(getMousePosition(), 
 				this.lastStepDuration).withMovementType(MouseMovementEventType.MOVE));
 		
 		return true;
@@ -198,20 +198,20 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		if (wheelTurn == 0 && wheelTurnInt == 0)
 			return;
 		
-		handleObjects(new MouseWheelEventOperator(new AdvancedMouseEvent(wheelTurn, 
+		handleObjects(new MouseWheelEventOperator(new MouseEvent(wheelTurn, 
 				wheelTurnInt, this.currentMousePosition, this.lastStepDuration)));
 	}
 	
 	
 	// OTHER METHODS	---------------------------------------------------
 	
-	private void informObjectsAboutMouseEnterExit(AdvancedMouseEvent baseEvent)
+	private void informObjectsAboutMouseEnterExit(MouseEvent baseEvent)
 	{
 		handleObjects(new MouseMovementEventOperator(baseEvent));
 		
 		// After the entered -event has been informed, over -event will be informed in the 
 		// future instead
-		List<AdvancedMouseListener> entered = 
+		List<MouseListener> entered = 
 				this.movementEventTargets.get(MouseMovementEventType.ENTER);
 		if (!entered.isEmpty())
 		{
@@ -222,7 +222,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		this.movementEventTargets.get(MouseMovementEventType.EXIT).clear();
 	}
 	
-	private void informObjectsAboutMouseButtonEvents(AdvancedMouseEvent baseEvent)
+	private void informObjectsAboutMouseButtonEvents(MouseEvent baseEvent)
 	{
 		handleObjects(new MouseButtonEventOperator(baseEvent));
 		
@@ -238,8 +238,8 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		}
 	}
 	
-	private static void informObjectAboutMouseEvent(AdvancedMouseListener listener, 
-			AdvancedMouseEvent event)
+	private static void informObjectAboutMouseEvent(MouseListener listener, 
+			MouseEvent event)
 	{
 		// Checks for nullpointers since errors have occured here
 		if (listener == null || listener.getListensToMouseEventsOperator() == null || 
@@ -263,7 +263,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		this.mouseButtonStates = new HashMap<MouseButtonEventType, HashMap<MouseButton, 
 				Boolean>>();
 		this.movementEventTargets = new HashMap<MouseMovementEventType, 
-				List<AdvancedMouseListener>>();
+				List<MouseListener>>();
 		
 		for (MouseButtonEventType type : MouseButtonEventType.values())
 		{
@@ -278,7 +278,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		for (MouseMovementEventType type : MouseMovementEventType.values())
 		{
 			if (type != MouseMovementEventType.NONE && type != MouseMovementEventType.MOVE)
-				this.movementEventTargets.put(type, new ArrayList<AdvancedMouseListener>());
+				this.movementEventTargets.put(type, new ArrayList<MouseListener>());
 		}
 	}
 	
@@ -310,13 +310,13 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		// IMPLEMENTED METHODS	-------------------------------
 
 		@Override
-		protected void changeHandledState(AdvancedMouseListener l, boolean newState)
+		protected void changeHandledState(MouseListener l, boolean newState)
 		{
 			l.getListensToMouseEventsOperator().setState(newState);
 		}
 
 		@Override
-		protected boolean getHandledState(AdvancedMouseListener l)
+		protected boolean getHandledState(MouseListener l)
 		{
 			return l.getListensToMouseEventsOperator().getState();
 		}
@@ -326,12 +326,12 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	{
 		// ATTRIBUTES	---------------------------------------
 		
-		private AdvancedMouseEvent baseEvent;
+		private MouseEvent baseEvent;
 		
 		
 		// CONSTRUCTOR	---------------------------------------
 		
-		public MouseEventOperator(AdvancedMouseEvent baseEvent)
+		public MouseEventOperator(MouseEvent baseEvent)
 		{
 			this.baseEvent = baseEvent;
 		}
@@ -339,7 +339,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		
 		// GETTERS & SETTERS	-------------------------------
 		
-		protected AdvancedMouseEvent getBaseEvent()
+		protected MouseEvent getBaseEvent()
 		{
 			return this.baseEvent;
 		}
@@ -349,7 +349,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	{	
 		// CONSTRUCTOR	---------------------------------------
 		
-		public MouseMovementEventOperator(AdvancedMouseEvent baseEvent)
+		public MouseMovementEventOperator(MouseEvent baseEvent)
 		{
 			super(baseEvent);
 		}
@@ -358,7 +358,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		// IMPLEMENTED METHODS	-------------------------------
 		
 		@Override
-		protected boolean handleObject(AdvancedMouseListener l)
+		protected boolean handleObject(MouseListener l)
 		{
 			// Checks if informing is needed
 			if (!l.getListensToMouseEventsOperator().getState())
@@ -382,7 +382,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	{
 		// CONSTRUCTOR	----------------------------------------
 		
-		public MouseButtonEventOperator(AdvancedMouseEvent baseEvent)
+		public MouseButtonEventOperator(MouseEvent baseEvent)
 		{
 			super(baseEvent);
 		}
@@ -391,7 +391,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		// IMPLEMENTED METHODS	--------------------------------
 
 		@Override
-		protected boolean handleObject(AdvancedMouseListener l)
+		protected boolean handleObject(MouseListener l)
 		{
 			// Checks if informing is needed
 			if (!l.getListensToMouseEventsOperator().getState())
@@ -409,7 +409,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 				for (MouseButton button : buttonStates.get(buttonEventType).keySet())
 				{
 					if (buttonStates.get(buttonEventType).get(button))
-						informObjectAboutMouseEvent(l, new AdvancedMouseEvent(buttonEventType, 
+						informObjectAboutMouseEvent(l, new MouseEvent(buttonEventType, 
 								button, getBaseEvent().getPosition(), 
 								getBaseEvent().getDuration()).withScale(scale));
 				}
@@ -423,7 +423,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 	{
 		// CONSTRUCTOR	-----------------------------
 		
-		public MouseWheelEventOperator(AdvancedMouseEvent baseEvent)
+		public MouseWheelEventOperator(MouseEvent baseEvent)
 		{
 			super(baseEvent);
 		}
@@ -432,7 +432,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<AdvancedMouse
 		// IMPLEMENTED METHODS	-----------------------
 
 		@Override
-		protected boolean handleObject(AdvancedMouseListener h)
+		protected boolean handleObject(MouseListener h)
 		{
 			// Informs the object about the base event
 			informObjectAboutMouseEvent(h, getBaseEvent());

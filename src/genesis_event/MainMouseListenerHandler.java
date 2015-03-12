@@ -1,6 +1,6 @@
 package genesis_event;
 
-import genesis_event.AdvancedMouseEvent.MouseButton;
+import genesis_event.MouseEvent.MouseButton;
 import genesis_util.Vector2D;
 
 import java.awt.event.MouseEvent;
