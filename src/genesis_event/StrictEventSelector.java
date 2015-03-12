@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * MouseEventSelectors select only certain MouseEvents they receive, based on their attributes. 
+ * StrictEventSelectors select only certain events based on their features. 
  * Selectors can be used for picking the events that interest the user.
  * 
  * @author Mikko Hilpinen
@@ -23,7 +23,8 @@ public class StrictEventSelector<T extends Event, FeatureType extends Event.Feat
 	// CONSTRUCTOR	-------------------------------------
 	
 	/**
-	 * Creates a new MouseEventSelector. The required features should be added separately.
+	 * Creates a new StrictEventSelector. Initially the selector accepts all the events. 
+	 * The required features should be added separately.
 	 */
 	public StrictEventSelector()
 	{

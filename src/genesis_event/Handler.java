@@ -256,9 +256,20 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	/**
 	 * @return How many objects is the handler currently taking care of
 	 */
-	protected int getHandledNumber()
+	public int getHandledNumber()
 	{
 		return this.operationLists.get(HandlingOperation.HANDLE).size();
+	}
+	
+	/**
+	 * Checks if the handler contains the given object
+	 * @param h The handled that may reside in the handler
+	 * @return Is the given handled in this handler
+	 */
+	public boolean containsHandled(Handled h)
+	{
+		return this.operationLists.get(HandlingOperation.HANDLE).contains(h) || 
+				this.operationLists.get(HandlingOperation.ADD).contains(h);
 	}
 	
 	/**
