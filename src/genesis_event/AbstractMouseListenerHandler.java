@@ -5,7 +5,7 @@ import genesis_event.MouseEvent.MouseButtonEventScale;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseMovementEventType;
 import genesis_util.StateOperator;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 {
 	// ATTRIBUTES	-------------------------------------------------------
 	
-	private Vector2D currentMousePosition;
+	private Vector3D currentMousePosition;
 	private HashMap<MouseButtonEventType, HashMap<MouseButton, Boolean>> mouseButtonStates;
 	private HashMap<MouseMovementEventType, List<MouseListener>> movementEventTargets;
 	
@@ -139,7 +139,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	/**
 	 * @return The current position of the mouse
 	 */
-	public Vector2D getMousePosition()
+	public Vector3D getMousePosition()
 	{
 		return this.currentMousePosition;
 	}
@@ -177,7 +177,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	 *
 	 * @param newMousePosition the new mouse position to be set
 	 */
-	public void setMousePosition(Vector2D newMousePosition)
+	public void setMousePosition(Vector3D newMousePosition)
 	{		
 		if (!getMousePosition().equals(newMousePosition))
 		{
@@ -255,7 +255,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	private void initialize()
 	{
 		// Initializes attributes
-		this.currentMousePosition = new Vector2D(0, 0);
+		this.currentMousePosition = Vector3D.zeroVector();
 		this.lastStepDuration = 0;
 		
 		this.isActiveOperator = new AnyHandledListensMouseOperator(false);

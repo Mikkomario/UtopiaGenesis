@@ -3,7 +3,7 @@ package genesis_event;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
 import genesis_util.StateOperator;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 /**
  * Informs multiple mouselisteners about the mouse's movements and button status
@@ -104,7 +104,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	}
 
 	@Override
-	public boolean isInAreaOfInterest(Vector2D testedPosition)
+	public boolean isInAreaOfInterest(Vector3D testedPosition)
 	{
 		// Handlers aren't interested in special areas
 		return false;

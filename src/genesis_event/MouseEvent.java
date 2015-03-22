@@ -1,6 +1,6 @@
 package genesis_event;
 
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +21,7 @@ public class MouseEvent implements Event
 	private final MouseMovementEventType movementType;
 	private final MouseButtonEventScale scale;
 	
-	private final Vector2D position;
+	private final Vector3D position;
 	private final double duration, wheelTurn;
 	private final int wheelTurnInt;
 	
@@ -37,7 +37,7 @@ public class MouseEvent implements Event
 	 * @param duration How many steps the event lasted
 	 */
 	public MouseEvent(MouseButtonEventType type, MouseButton button, 
-			Vector2D position, double duration)
+			Vector3D position, double duration)
 	{
 		// Initializes attributes
 		this.button = button;
@@ -57,7 +57,7 @@ public class MouseEvent implements Event
 	 * @param position The mouse position when the event occurred
 	 * @param duration How many steps the event lasted
 	 */
-	public MouseEvent(Vector2D position, double duration)
+	public MouseEvent(Vector3D position, double duration)
 	{
 		// Initializes attributes
 		this.button = MouseButton.NONE;
@@ -78,7 +78,7 @@ public class MouseEvent implements Event
 	 * @param position Where the mouse was when the wheel turned
 	 * @param duration How many steps the event lasted
 	 */
-	public MouseEvent(double wheelTurn, int wheelTurnInt, Vector2D position, 
+	public MouseEvent(double wheelTurn, int wheelTurnInt, Vector3D position, 
 			double duration)
 	{
 		// Initializes attributes
@@ -199,7 +199,7 @@ public class MouseEvent implements Event
 	/**
 	 * @return The mouse's position when the event was originated
 	 */
-	public final Vector2D getPosition()
+	public final Vector3D getPosition()
 	{
 		return this.position;
 	}

@@ -2,7 +2,7 @@ package genesis_video;
 
 import genesis_event.DrawableHandler;
 import genesis_util.DepthConstants;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -24,7 +24,7 @@ public class GamePanel extends JPanel
 {
 	// ATTRIBUTES ---------------------------------------------------------
 	
-	private Vector2D dimensions, scaling;
+	private Vector3D dimensions, scaling;
 	private DrawableHandler drawer;
 	private boolean clearPrevious;
 	
@@ -40,10 +40,10 @@ public class GamePanel extends JPanel
 	 * Creates a new panel
 	 * @param dimensions How large the panel is by default scaling of 1
 	 */
-	public GamePanel(Vector2D dimensions)
+	public GamePanel(Vector3D dimensions)
 	{
 		// Initializes attributes
-		this.scaling = Vector2D.identityVector();
+		this.scaling = Vector3D.identityVector();
 		this.dimensions = dimensions;
 		this.clearPrevious = true;
 		
@@ -65,7 +65,7 @@ public class GamePanel extends JPanel
 		Graphics2D g2d = (Graphics2D) g;
 		
 		// Scales the area of drawing
-		if (!this.scaling.equals(Vector2D.identityVector()))
+		if (!this.scaling.equals(Vector3D.identityVector()))
 			g2d.scale(this.scaling.getFirst(), this.scaling.getSecond());
 		
 		// Clears the former drawings
@@ -117,7 +117,7 @@ public class GamePanel extends JPanel
 	 * Changes the size of the game panel.
 	 * @param dimensions The new sizes of the panel (in pixels)
 	 */
-	public void setSizes(Vector2D dimensions)
+	public void setSizes(Vector3D dimensions)
 	{
 		this.setSize(dimensions.toDimension());
 		Dimension preferred = dimensions.toDimension();
@@ -167,7 +167,7 @@ public class GamePanel extends JPanel
 	 * of the area. The scaling is relative to the former scaling of the panel
 	 * @param scaling How much the panel is scaled
 	 */
-	protected void scale(Vector2D scaling)
+	protected void scale(Vector3D scaling)
 	{
 		// The scaling is relative to the former scaling
 		setScale(this.scaling.times(scaling));
@@ -178,7 +178,7 @@ public class GamePanel extends JPanel
 	 * of the area
 	 * @param newScaling The panel's new scaling
 	 */
-	protected void setScale(Vector2D newScaling)
+	protected void setScale(Vector3D newScaling)
 	{
 		// Remembers the scaling
 		this.scaling = newScaling;

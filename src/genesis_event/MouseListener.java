@@ -1,7 +1,7 @@
 package genesis_event;
 
 import genesis_util.StateOperator;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 /**
  * Mouselisteners are interested in the mouse's movements and button presses.<br>
@@ -32,7 +32,7 @@ public interface MouseListener extends Handled
 	 * @param position The position that is being tested for being special
 	 * @return Is the position in the object's area of special interest (if applicable)
 	 */
-	public boolean isInAreaOfInterest(Vector2D position);
+	public boolean isInAreaOfInterest(Vector3D position);
 	
 	/**
 	 * @return The stateOperator that determines whether the object is interested in 

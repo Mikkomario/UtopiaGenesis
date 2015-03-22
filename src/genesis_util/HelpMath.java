@@ -43,7 +43,7 @@ public class HelpMath
 	 * @param p2 The second point
 	 * @return The direction from the first point to the second
 	 */
-	public static double pointDirection(Vector2D p1, Vector2D p2)
+	public static double pointDirection(Vector3D p1, Vector3D p2)
 	{
 		return pointDirection(p1.getFirst(), p1.getSecond(), p2.getFirst(), p2.getSecond());
 	}
@@ -58,7 +58,7 @@ public class HelpMath
 	 * @param y2 the second point's y coordinate
 	 * @return the direction from point 1 to point 2 in degrees around the x-axis
 	 * **/
-	public static double pointXDirection(int z1, int y1, int z2, int y2)
+	public static double pointXDirection(double z1, double y1, double z2, double y2)
 	{
 		return HelpMath.pointDirection(z1, y1, z2, y2);
 	}
@@ -73,7 +73,7 @@ public class HelpMath
 	 * @param z2 the second point's x coordinate
 	 * @return the direction from point 1 to point 2 in degrees around the y-axis
 	**/
-	public static double PointYDirection(int x1, int z1, int x2, int z2)
+	public static double pointYDirection(double x1, double z1, double x2, double z2)
 	{
 		return HelpMath.pointDirection(x1, z1, x2, z2);
 	}
@@ -87,7 +87,7 @@ public class HelpMath
 	 * @param y2 the second point's y coordinate
 	 * @return the direction from point 1 to point 2 in degrees around z-axis
 	**/
-	public static double PointZDirection(int x1, int y1, int x2, int y2)
+	public static double pointZDirection(double x1, double y1, double x2, double y2)
 	{
 		return HelpMath.pointDirection(x1, y1, x2, y2);
 	}
@@ -110,20 +110,19 @@ public class HelpMath
 	}
 	
 	/**
-	 * Calculates the distance between two points
+	 * Calculates the distance between two points in 2 dimensions
 	 * 
 	 * @param p1 The first point
 	 * @param p2 The second point
-	 * @return The distance between points p1 and p2
+	 * @return The distance between points p1 and p2 on the x-y plane
 	 */
-	public static double pointDistance(Vector2D p1, Vector2D p2)
+	public static double pointDistance2D(Vector3D p1, Vector3D p2)
 	{
 		return pointDistance(p1.getFirst(), p1.getSecond(), p2.getFirst(), p2.getSecond());
 	}
 	
 	/**
-	 * Calculates a distance between two points in three dimensions. 
-	 * Should only be used in 3D projects.
+	 * Calculates a distance between two points in three dimensions.
 	 *
 	 * @param x1 First point's x coordinate
 	 * @param y1 First point's y coordinate
@@ -133,7 +132,8 @@ public class HelpMath
 	 * @param z2 Second point's z coordinate
 	 * @return Distance between points in pixels
 	 */
-	public static int pointDistance(int x1, int y1, int z1, int x2, int y2, int z2)
+	public static double pointDistance(double x1, double y1, double z1, double x2, double y2, 
+			double z2)
 	{
 		double deltax = x1 - x2;
 		double deltay = y1 - y2;
@@ -142,7 +142,19 @@ public class HelpMath
 		double xydist = Math.sqrt(Math.pow(deltax, 2) + Math.pow(deltay, 2));
 		double xyzdist = Math.sqrt(Math.pow(xydist, 2) + Math.pow(deltaz, 2));
 		
-		return (int) xyzdist;
+		return xyzdist;
+	}
+	
+	/**
+	 * Calculates a distance between two points in three dimensions.
+	 * @param p1 The first point
+	 * @param p2 The second point
+	 * @return Distance between points in pixels
+	 */
+	public static double pointDistance3D(Vector3D p1, Vector3D p2)
+	{
+		return pointDistance(p1.getFirst(), p1.getSecond(), p1.getThird(), p2.getFirst(), 
+				p2.getSecond(), p2.getThird());
 	}
 	
 	/**
@@ -200,7 +212,7 @@ public class HelpMath
 	 * @param maxy The largest possible y
 	 * @return Is the point between the values
 	 */
-	public static boolean pointIsInRange(Vector2D point, double minx, double maxx, 
+	public static boolean pointIsInRange(Vector3D point, double minx, double maxx, 
 			double miny, double maxy)
 	{
 		return (point.getFirst() > minx && point.getSecond() > miny && point.getFirst() 
@@ -208,14 +220,14 @@ public class HelpMath
 	}
 	
 	/**
-	 * Tells whether a point is in the given area
+	 * Tells whether a point is in the given area (in 2D space)
 	 * 
 	 * @param point The point tested
 	 * @param min The top left corner of the area
 	 * @param max The bottom right corner of the area
 	 * @return Is the point in the area
 	 */
-	public static boolean pointIsInRange(Vector2D point, Vector2D min, Vector2D max)
+	public static boolean pointIsInRange(Vector3D point, Vector3D min, Vector3D max)
 	{
 		return pointIsInRange(point, min.getFirst(), max.getFirst(), min.getSecond(), max.getSecond());
 	}
@@ -238,25 +250,25 @@ public class HelpMath
 	}
 	
 	/**
-	 * Rotates a point around the origin and returns the new position
+	 * Rotates a point around the origin (along the z-axis) and returns the new position
 	 *
 	 * @param rotationOrigin the origin around which the point is rotated
 	 * @param point The point which will be rotated
 	 * @param rotation How many degrees the point is rotated around the origin
 	 * @return The new position after the rotation
 	 */
-	public static Vector2D getRotatedPosition(Vector2D rotationOrigin, 
-			Vector2D point, double rotation)
+	public static Vector3D getRotatedPosition(Vector3D rotationOrigin, 
+			Vector3D point, double rotation)
 	{
 		// Calculates the old and the new directions (from the origin to the point)
 		double prevdir = pointDirection(rotationOrigin, point);
 		double newdir = checkDirection(prevdir + rotation);
 		// Also calculates the distance between the object and the point 
 		// (which stays the same during the process)
-		double dist = pointDistance(rotationOrigin, point);
+		double dist = pointDistance2D(rotationOrigin, point);
 		// Returns the new position after the rotation
-		return new Vector2D(rotationOrigin.getFirst() + lendirX(dist, newdir), 
-				rotationOrigin.getSecond() + lendirY(dist, newdir));
+		return new Vector3D(rotationOrigin.getFirst() + lendirX(dist, newdir), 
+				rotationOrigin.getSecond() + lendirY(dist, newdir), point.getThird());
 	}
 	
 	/**
@@ -316,14 +328,13 @@ public class HelpMath
 	 * @param points A list of points
 	 * @return The list's average point
 	 */
-	public static Vector2D getAveragePoint(List<Vector2D> points)
+	public static Vector3D getAveragePoint(List<Vector3D> points)
 	{
 		// If there are not enought points, returns 0
 		if (points == null || points.isEmpty())
-			return Vector2D.zeroVector();
+			return Vector3D.zeroVector();
 		
-		// Calculates the center collision point
-		Vector2D p = points.get(0);
+		Vector3D p = points.get(0);
 		
 		for (int i = 1; i < points.size(); i++)
 		{

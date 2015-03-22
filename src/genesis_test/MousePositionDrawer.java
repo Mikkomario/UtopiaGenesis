@@ -14,7 +14,7 @@ import genesis_event.MultiEventSelector;
 import genesis_util.DepthConstants;
 import genesis_util.LatchStateOperator;
 import genesis_util.StateOperator;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 /**
  * MousePositionDrawer draws the mouse position on screen and is used for testing
@@ -26,7 +26,7 @@ public class MousePositionDrawer implements Drawable, MouseListener
 {
 	// ATTRIBUTES	-------------------------------------
 	
-	private Vector2D lastPressPosition, lastMousePosition;
+	private Vector3D lastPressPosition, lastMousePosition;
 	private boolean mouseIsDown;
 	private StateOperator isDeadOperator, isActiveOperator, isVisibleOperator;
 	private MultiEventSelector<MouseEvent> selector;
@@ -41,8 +41,8 @@ public class MousePositionDrawer implements Drawable, MouseListener
 	 */
 	public MousePositionDrawer(HandlerRelay handlers)
 	{
-		this.lastPressPosition = Vector2D.zeroVector();
-		this.lastMousePosition = Vector2D.zeroVector();
+		this.lastPressPosition = Vector3D.zeroVector();
+		this.lastMousePosition = Vector3D.zeroVector();
 		this.mouseIsDown = false;
 		this.wheelTurn = 0;
 		
@@ -94,7 +94,7 @@ public class MousePositionDrawer implements Drawable, MouseListener
 	}
 
 	@Override
-	public boolean isInAreaOfInterest(Vector2D position)
+	public boolean isInAreaOfInterest(Vector3D position)
 	{
 		return false;
 	}

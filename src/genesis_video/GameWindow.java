@@ -7,7 +7,7 @@ import genesis_event.MainKeyListenerHandler;
 import genesis_event.MainMouseListenerHandler;
 import genesis_event.MouseListenerHandler;
 import genesis_event.StepHandler;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 import genesis_video.MainPanel.ScreenSplit;
 
 import java.awt.BorderLayout;
@@ -39,7 +39,7 @@ public class GameWindow extends JFrame
 {	
 	// ATTRIBUTES ---------------------------------------------------------
 	
-	private Vector2D dimensions, scaling, leftTopPaddings;
+	private Vector3D dimensions, scaling, leftTopPaddings;
 	
 	private MainMouseListenerHandler mainmousehandler;
 	private MainKeyListenerHandler mainKeyHandler;
@@ -76,7 +76,7 @@ public class GameWindow extends JFrame
 	 * though. (> 0)
 	 * @param split How the screen is split between multiple panels
 	 */
-	public GameWindow(Vector2D dimensions, String title, boolean hastoolbar, 
+	public GameWindow(Vector3D dimensions, String title, boolean hastoolbar, 
 			int maxfpslimit, int minimumsupportedfps, ScreenSplit split)
 	{
 		initialize(dimensions, title, hastoolbar, maxfpslimit, minimumsupportedfps, split);
@@ -95,7 +95,7 @@ public class GameWindow extends JFrame
 	 * second the program supports without slowing the simulation down. A low value has better 
 	 * usability at the cost of stability (> 0).
 	 */
-	public GameWindow(Vector2D dimensions, String title, boolean hasToolbar, int maxFpsLimit, 
+	public GameWindow(Vector3D dimensions, String title, boolean hasToolbar, int maxFpsLimit, 
 			int minimumSupportedFps)
 	{
 		initialize(dimensions, title, hasToolbar, maxFpsLimit, minimumSupportedFps, 
@@ -151,7 +151,7 @@ public class GameWindow extends JFrame
 		Point mousePointOnScreen = MouseInfo.getPointerInfo().getLocation();
 		
 		this.mainmousehandler.setMousePosition(
-				getMousePositionOnGamePanels(new Vector2D(mousePointOnScreen)));
+				getMousePositionOnGamePanels(new Vector3D(mousePointOnScreen)));
 	}
 	
 	/**
@@ -182,15 +182,15 @@ public class GameWindow extends JFrame
 	 * @param allowpadding Should the screen get the given size even if 
 	 * aspect ratio is kept (will cause empty areas to appear on the screen)
 	 */
-	public void scaleToSize(Vector2D newDimensions, boolean keepaspectratio, 
+	public void scaleToSize(Vector3D newDimensions, boolean keepaspectratio, 
 			boolean allowpadding)
 	{
 		// Removes old padding
 		removePaddings();
 		// Remembers the former dimensions
-		Vector2D lastDimensions = this.dimensions;
+		Vector3D lastDimensions = this.dimensions;
 		// Calculates the needed scaling
-		Vector2D scale = newDimensions.dividedBy(lastDimensions);
+		Vector3D scale = newDimensions.dividedBy(lastDimensions);
 
 		// Changes the window's size if it doesn't need any more fixing
 		if (!keepaspectratio || allowpadding)
@@ -199,8 +199,8 @@ public class GameWindow extends JFrame
 		if (keepaspectratio)
 		{
 			double smallerScale = Math.min(scale.getFirst(), scale.getSecond());
-			scale = new Vector2D(smallerScale, smallerScale);
-			Vector2D newSizes = lastDimensions.times(scale);
+			scale = new Vector3D(smallerScale, smallerScale);
+			Vector3D newSizes = lastDimensions.times(scale);
 			
 			// Changes the window's size accordingly
 			if (!allowpadding)
@@ -212,22 +212,22 @@ public class GameWindow extends JFrame
 				// padding
 				if (newSizes.getFirst() < newDimensions.getFirst())
 				{
-					this.leftTopPaddings = new Vector2D((newDimensions.getFirst() - 
+					this.leftTopPaddings = new Vector3D((newDimensions.getFirst() - 
 							newSizes.getFirst()) / 2, 0);
 
-					addPadding(new Vector2D(this.leftTopPaddings.getFirst(), 
+					addPadding(new Vector3D(this.leftTopPaddings.getFirst(), 
 							newDimensions.getSecond()), BorderLayout.WEST);
-					addPadding(new Vector2D(this.leftTopPaddings.getFirst(), 
+					addPadding(new Vector3D(this.leftTopPaddings.getFirst(), 
 							newDimensions.getSecond()), BorderLayout.EAST);
 				}
 				else if (newSizes.getSecond() < newDimensions.getSecond())
 				{
-					this.leftTopPaddings = new Vector2D(0, (newDimensions.getSecond() - 
+					this.leftTopPaddings = new Vector3D(0, (newDimensions.getSecond() - 
 							newSizes.getSecond()) / 2);
 
-					addPadding(new Vector2D(newDimensions.getFirst(), 
+					addPadding(new Vector3D(newDimensions.getFirst(), 
 							this.leftTopPaddings.getSecond()), BorderLayout.NORTH);
-					addPadding(new Vector2D(newDimensions.getFirst(), 
+					addPadding(new Vector3D(newDimensions.getFirst(), 
 							this.leftTopPaddings.getSecond()), BorderLayout.SOUTH);
 				}
 			}
@@ -245,12 +245,12 @@ public class GameWindow extends JFrame
 	public void resetScaling()
 	{
 		// Changes the panels' scaling
-		this.mainPanel.setScale(new Vector2D(1, 1));
+		this.mainPanel.setScale(new Vector3D(1, 1));
 		
 		// Changes the window's size
 		setSize(this.dimensions.toDimension());
 		// Resets the scale values
-		this.scaling = Vector2D.identityVector();
+		this.scaling = Vector3D.identityVector();
 		// Removes the padding
 		removePaddings();
 	}
@@ -264,11 +264,11 @@ public class GameWindow extends JFrame
 	{
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
-		scaleToSize(new Vector2D(screenSize.getWidth(), screenSize.getHeight()), 
+		scaleToSize(new Vector3D(screenSize.getWidth(), screenSize.getHeight()), 
 				keepaspectratio, true);
 	}
 	
-	private void initialize(Vector2D dimensions, String title, boolean hastoolbar, 
+	private void initialize(Vector3D dimensions, String title, boolean hastoolbar, 
 			int maxfpslimit, int minimumsupportedfps, ScreenSplit split)
 	{
 		// Sets the decorations off if needed
@@ -277,16 +277,16 @@ public class GameWindow extends JFrame
 		
 		// Initializes attributes
 		this.dimensions = dimensions;
-		this.scaling = Vector2D.identityVector();
+		this.scaling = Vector3D.identityVector();
 		this.paddings = new ArrayList<JPanel>();
-		this.leftTopPaddings = new Vector2D(0, 0);
+		this.leftTopPaddings = new Vector3D(0, 0);
 		this.mainPanel = new MainPanel(this.dimensions, split);
 		
 		this.setTitle(title);
 		
 		// Takes the toolbar into account with height calculations
 		if (hastoolbar)
-			this.dimensions = this.dimensions.plus(new Vector2D(0, BORDERHEIGHT));
+			this.dimensions = this.dimensions.plus(new Vector3D(0, BORDERHEIGHT));
 		
 		//Let's format our window
 		this.formatWindow();
@@ -329,7 +329,7 @@ public class GameWindow extends JFrame
 		new Thread(this.screendrawer).start();
 	}
 	
-	private void addPadding(Vector2D dimensions, String direction)
+	private void addPadding(Vector3D dimensions, String direction)
 	{
 		//System.out.println("Adds padding");
 		JPanel padding = new JPanel();
@@ -351,19 +351,19 @@ public class GameWindow extends JFrame
 		{
 			remove(this.paddings.get(i));
 		}
-		this.leftTopPaddings = new Vector2D(0, 0);
+		this.leftTopPaddings = new Vector3D(0, 0);
 	}
 	
 	// Adds padding, screen position, scaling & borders to mouse position calculation
-	private Vector2D getMousePositionOnGamePanels(Vector2D mousePositionOnScreen)
+	private Vector3D getMousePositionOnGamePanels(Vector3D mousePositionOnScreen)
 	{
 		return mousePositionOnScreen.minus(this.leftTopPaddings).minus(
-				new Vector2D(getInsets().left, getInsets().top)).dividedBy(
-				this.scaling).minus(new Vector2D(getX(), getY()));
+				new Vector3D(getInsets().left, getInsets().top)).dividedBy(
+				this.scaling).minus(new Vector3D(getX(), getY()));
 	}
 	
 	// Takes (only) screen scaling into account in coordinate calculations
-	private Vector2D getScaledPoint(Vector2D p)
+	private Vector3D getScaledPoint(Vector3D p)
 	{
 		return p.dividedBy(this.scaling);
 	}
@@ -400,7 +400,7 @@ public class GameWindow extends JFrame
 		@Override
 		public void mousePressed(MouseEvent e)
 		{
-			Vector2D mousePosition = new Vector2D(e.getPoint());
+			Vector3D mousePosition = new Vector3D(e.getPoint());
 			
 			// Informs the mouse status (scaling affects the mouse coordinates)
 			GameWindow.this.mainmousehandler.setMouseStatus(
@@ -410,7 +410,7 @@ public class GameWindow extends JFrame
 		@Override
 		public void mouseReleased(MouseEvent e)
 		{
-			Vector2D mousePosition = new Vector2D(e.getPoint());
+			Vector3D mousePosition = new Vector3D(e.getPoint());
 			
 			// Informs the mouse status (scaling affects the mouse coordinates)
 			GameWindow.this.mainmousehandler.setMouseStatus(
@@ -421,7 +421,7 @@ public class GameWindow extends JFrame
 		public void mouseWheelMoved(MouseWheelEvent e)
 		{
 			GameWindow.this.mainmousehandler.setMousePosition(getScaledPoint(
-					new Vector2D(e.getPoint())));
+					new Vector3D(e.getPoint())));
 			GameWindow.this.mainmousehandler.informMouseWheelTurn(e.getPreciseWheelRotation(), 
 					e.getWheelRotation());
 		}

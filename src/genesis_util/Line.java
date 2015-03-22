@@ -16,7 +16,7 @@ public class Line
 	
 	// ATTRIBUTES	-------------------------------
 	
-	private final Vector2D start, end;
+	private final Vector3D start, end;
 	
 	
 	// CONSTRUCTOR	-------------------------------
@@ -26,7 +26,7 @@ public class Line
 	 * @param start The start point of the line segment
 	 * @param end The end point of the line segment
 	 */
-	public Line(Vector2D start, Vector2D end)
+	public Line(Vector3D start, Vector3D end)
 	{
 		// Initializes attributes
 		this.start = start;
@@ -37,10 +37,10 @@ public class Line
 	 * Creates a new line from the origin to the given point
 	 * @param end The end point of the line segment
 	 */
-	public Line(Vector2D end)
+	public Line(Vector3D end)
 	{
 		// Initializes attributes
-		this.start = Vector2D.zeroVector();
+		this.start = Vector3D.zeroVector();
 		this.end = end;
 	}
 
@@ -50,7 +50,7 @@ public class Line
 	/**
 	 * @return The starting point of this line segment
 	 */
-	public Vector2D getStart()
+	public Vector3D getStart()
 	{
 		return this.start;
 	}
@@ -58,7 +58,7 @@ public class Line
 	/**
 	 * @return The end point of this line segment
 	 */
-	public Vector2D getEnd()
+	public Vector3D getEnd()
 	{
 		return this.end;
 	}
@@ -70,17 +70,17 @@ public class Line
 	 * @return The line in vector form. The position information is lost but the length and 
 	 * direction stay the same.
 	 */
-	public Vector2D toVector()
+	public Vector3D toVector()
 	{
 		return getEnd().minus(getStart());
 	}
 	
 	/**
-	 * @return The direction of this line
+	 * @return The direction of this line around the z-axis
 	 */
 	public double getDirection()
 	{
-		return this.toVector().getDirection();
+		return this.toVector().getZDirection();
 	}
 	
 	/**
@@ -144,7 +144,7 @@ public class Line
 	 * @param dirLength The vector component (direction & length) of the line
 	 * @return A line with the given start position, direction and length
 	 */
-	public static Line createLine(Vector2D position, Vector2D dirLength)
+	public static Line createLine(Vector3D position, Vector3D dirLength)
 	{
 		return new Line(position, position.plus(dirLength));
 	}

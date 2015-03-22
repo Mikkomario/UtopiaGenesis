@@ -6,7 +6,7 @@ import genesis_event.HandlerRelay;
 import genesis_event.KeyListenerHandler;
 import genesis_event.MouseListenerHandler;
 import genesis_event.StepHandler;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 import genesis_video.GamePanel;
 import genesis_video.GameWindow;
 
@@ -31,7 +31,7 @@ public class GenesisTest
 	 */
 	public GenesisTest()
 	{
-		this.window = new GameWindow(new Vector2D(800, 600), "Test", true, 120, 20);
+		this.window = new GameWindow(new Vector3D(800, 600), "Test", true, 120, 20);
 		
 		// Uses mouseHandler and DrawableHandler by default (drawer is available after the 
 		// panel has been created)

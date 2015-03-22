@@ -5,7 +5,7 @@ import java.awt.GridBagLayout;
 import java.util.ArrayList;
 import java.util.List;
 
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 import javax.swing.JPanel;
 
@@ -22,7 +22,7 @@ public class MainPanel extends JPanel
 	
 	private static final long serialVersionUID = 20842862831771371L;
 
-	private Vector2D dimensions, scaling;
+	private Vector3D dimensions, scaling;
 	private List<GamePanel> gamePanels;
 	private ScreenSplit split;
 	
@@ -35,11 +35,11 @@ public class MainPanel extends JPanel
 	 * @param dimensions The panels original size
 	 * @param split How the screen is split between multiple gamePanels
 	 */
-	public MainPanel(Vector2D dimensions, ScreenSplit split)
+	public MainPanel(Vector3D dimensions, ScreenSplit split)
 	{
 		// Initializes attributes
 		this.dimensions = dimensions;
-		this.scaling = Vector2D.identityVector();
+		this.scaling = Vector3D.identityVector();
 		this.gamePanels = new ArrayList<GamePanel>();
 		this.split = split;
 		
@@ -126,7 +126,7 @@ public class MainPanel extends JPanel
 	 * Changes the panel's scaling
 	 * @param newScale The new scaling the panel receives
 	 */
-	public void setScale(Vector2D newScale)
+	public void setScale(Vector3D newScale)
 	{
 		this.scaling = newScale;
 		updateSizes();
@@ -136,7 +136,7 @@ public class MainPanel extends JPanel
 	 * Scales the panel's dimensions
 	 * @param scaling How much the dimensions are scaled
 	 */
-	public void scale(Vector2D scaling)
+	public void scale(Vector3D scaling)
 	{
 		setScale(this.scaling.times(scaling));
 	}
@@ -144,22 +144,22 @@ public class MainPanel extends JPanel
 	private void updateSizes()
 	{
 		// Calculates the main panel size
-		Vector2D newSizes = this.dimensions.times(this.scaling);
+		Vector3D newSizes = this.dimensions.times(this.scaling);
 		setSize(newSizes.toDimension());
 		
 		// Updates the GamePanel sizes
 		for (int i = 0; i < this.gamePanels.size(); i++)
 		{
-			Vector2D panelSize = new Vector2D(newSizes);
+			Vector3D panelSize = new Vector3D(newSizes);
 			
 			if (getGamePanelAmount() > 1)
 			{
 				if (this.split == ScreenSplit.VERTICAL || getGamePanelAmount() == 4 || 
 						(getGamePanelAmount() == 3 && i > 0))
-					panelSize = new Vector2D(panelSize.getFirst() * 0.5, panelSize.getSecond());
+					panelSize = new Vector3D(panelSize.getFirst() * 0.5, panelSize.getSecond());
 				if (this.split == ScreenSplit.HORIZONTAL || getGamePanelAmount() == 4 || 
 						(getGamePanelAmount() == 3 && i > 0))
-					panelSize = new Vector2D(panelSize.getFirst(), panelSize.getSecond() * 0.5);
+					panelSize = new Vector3D(panelSize.getFirst(), panelSize.getSecond() * 0.5);
 			}
 			
 			getGamePanel(i).setSizes(panelSize);

@@ -1,7 +1,7 @@
 package genesis_event;
 
 import genesis_event.MouseEvent.MouseButton;
-import genesis_util.Vector2D;
+import genesis_util.Vector3D;
 
 import java.awt.event.MouseEvent;
 
@@ -56,7 +56,7 @@ public class MainMouseListenerHandler extends AbstractMouseListenerHandler
 	 * @param mousePressed Is a mouse button pressed
 	 * @param mouseButton Which mouse button is pressed
 	 */
-	public void setMouseStatus(Vector2D mousePosition, 
+	public void setMouseStatus(Vector3D mousePosition, 
 			boolean mousePressed, int mouseButton)
 	{
 		setMousePosition(mousePosition);
