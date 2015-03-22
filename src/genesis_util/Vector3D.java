@@ -81,6 +81,17 @@ public class Vector3D
 		this.third = 0;
 	}
 	
+	/**
+	 * Creates a new 2D vector by copying the information from a point
+	 * @param point The point that is copied into vector
+	 */
+	public Vector3D(final Point2D point)
+	{
+		this.first = point.getX();
+		this.second = point.getY();
+		this.third = 0;
+	}
+	
 	
 	// IMPLEMENTED METHODS	----------------------------------
 	
