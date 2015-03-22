@@ -229,8 +229,8 @@ public class Vector2D
 	public double crossProductLength(Vector2D other)
 	{
 		// = |a||b|sin(a, b)e, |e| = 1 (can't use e in 2D space)
-		return getLength() * other.getLength() * Math.sin(Math.toRadians(
-				this.getSeparatingAngle(other)));
+		return getLength() * other.getLength() * Math.sin(Math.toRadians(other.getDirection() 
+				- getDirection()));
 	}
 	
 	/**
