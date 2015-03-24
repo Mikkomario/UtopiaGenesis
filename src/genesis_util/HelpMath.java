@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class HelpMath
 {
+	// TODO: Use vectors in the methods
+	
 	// CONSTRUCTOR	-------------------------------------
 	
 	private HelpMath()
@@ -21,7 +23,7 @@ public class HelpMath
 	// OTHER METHODS	---------------------------------
 	
 	/**
-	 * Calculates the direction from one point to another (in degrees)
+	 * Calculates the direction around the z-axis from one point to another (in degrees)
 	 *
 	 * @param x1 the first point's x coordinate
 	 * @param y1 the first point's y coordinate
@@ -31,21 +33,19 @@ public class HelpMath
 	 */
 	public static double pointDirection(double x1, double y1, double x2, double y2)
 	{
-		double xdist = x2 - x1;
-		double ydist = y2 - y1;
-		return getVectorDirection(xdist, ydist);
+		return pointDirection(new Vector3D(x1, y1), new Vector3D(x2, y2));
 	}
 	
 	/**
-	 * Calculates the direction from one point to another (in degrees)
+	 * Calculates the direction around the z-axis from one point to another (in degrees)
 	 * 
 	 * @param p1 The first point
 	 * @param p2 The second point
-	 * @return The direction from the first point to the second
+	 * @return The direction from the first point to the second in degrees
 	 */
 	public static double pointDirection(Vector3D p1, Vector3D p2)
 	{
-		return pointDirection(p1.getFirst(), p1.getSecond(), p2.getFirst(), p2.getSecond());
+		return p2.minus(p1).getZDirection();
 	}
 	
 	/**
@@ -60,7 +60,19 @@ public class HelpMath
 	 * **/
 	public static double pointXDirection(double z1, double y1, double z2, double y2)
 	{
-		return HelpMath.pointDirection(z1, y1, z2, y2);
+		return pointXDirection(new Vector3D(0, y1, z1), new Vector3D(0, y2, z2));
+	}
+	
+	/**
+	 * Calculates the direction around the x-axis from one point to another (in degrees)
+	 * 
+	 * @param p1 The first point
+	 * @param p2 The second point
+	 * @return The direction from the first point to the second around the x-axis
+	 */
+	public static double pointXDirection(Vector3D p1, Vector3D p2)
+	{
+		return p2.minus(p1).getXDirection();
 	}
 	
 	/**
@@ -75,21 +87,19 @@ public class HelpMath
 	**/
 	public static double pointYDirection(double x1, double z1, double x2, double z2)
 	{
-		return HelpMath.pointDirection(x1, z1, x2, z2);
+		return pointYDirection(new Vector3D(x1, 0, z1), new Vector3D(x2, 0, z2));
 	}
 	
 	/**
-	 * Calculates the direction from one point to another (in degrees) around z-axis
-	 *
-	 * @param x1 the first point's x coordinate
-	 * @param y1 the first point's y coordinate
-	 * @param x2 the second point's x coordinate
-	 * @param y2 the second point's y coordinate
-	 * @return the direction from point 1 to point 2 in degrees around z-axis
-	**/
-	public static double pointZDirection(double x1, double y1, double x2, double y2)
+	 * Calculates the direction around the y-axis from one point to another (in degrees)
+	 * 
+	 * @param p1 The first point
+	 * @param p2 The second point
+	 * @return The direction from the first point to the second around the y-axis
+	 */
+	public static double pointYDirection(Vector3D p1, Vector3D p2)
 	{
-		return HelpMath.pointDirection(x1, y1, x2, y2);
+		return p2.minus(p1).getYDirection();
 	}
 	
 	/**
@@ -103,10 +113,13 @@ public class HelpMath
 	 */
 	public static double pointDistance(double x1, double y1, double x2, double y2)
 	{
+		/*
 		double a = x1 - x2;
 		double b = y1 - y2;
 		
 		return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
+		*/
+		return pointDistance2D(new Vector3D(x1, y1), new Vector3D(x2, y2));
 	}
 	
 	/**
@@ -118,7 +131,7 @@ public class HelpMath
 	 */
 	public static double pointDistance2D(Vector3D p1, Vector3D p2)
 	{
-		return pointDistance(p1.getFirst(), p1.getSecond(), p2.getFirst(), p2.getSecond());
+		return p1.in2D().minus(p2.in2D()).getLength();
 	}
 	
 	/**
@@ -135,6 +148,7 @@ public class HelpMath
 	public static double pointDistance(double x1, double y1, double z1, double x2, double y2, 
 			double z2)
 	{
+		/*
 		double deltax = x1 - x2;
 		double deltay = y1 - y2;
 		double deltaz = z1 - z2;
@@ -143,6 +157,8 @@ public class HelpMath
 		double xyzdist = Math.sqrt(Math.pow(xydist, 2) + Math.pow(deltaz, 2));
 		
 		return xyzdist;
+		*/
+		return pointDistance3D(new Vector3D(x1, y1, z1), new Vector3D(x2, y2, z2));
 	}
 	
 	/**
@@ -153,8 +169,7 @@ public class HelpMath
 	 */
 	public static double pointDistance3D(Vector3D p1, Vector3D p2)
 	{
-		return pointDistance(p1.getFirst(), p1.getSecond(), p1.getThird(), p2.getFirst(), 
-				p2.getSecond(), p2.getThird());
+		return p2.minus(p1).getLength();
 	}
 	
 	/**
@@ -232,7 +247,7 @@ public class HelpMath
 		return pointIsInRange(point, min.getFirst(), max.getFirst(), min.getSecond(), max.getSecond());
 	}
 	
-	/**
+	/*
 	 * Calculates a force vector that has been created by projecting a force 
 	 * vector to a certain direction
 	 *
@@ -241,6 +256,7 @@ public class HelpMath
 	 * @param newdirection The new direction to which the vector is projected (degrees)
 	 * @return The length of the new projected force vector
 	 */
+	/*
 	public static double getDirectionalForce(double basicdirection, 
 			double basicforce, double newdirection)
 	{
@@ -248,6 +264,7 @@ public class HelpMath
 		
 		return lendirX(basicforce, projectdir);
 	}
+	*/
 	
 	/**
 	 * Rotates a point around the origin (along the z-axis) and returns the new position
@@ -260,6 +277,7 @@ public class HelpMath
 	public static Vector3D getRotatedPosition(Vector3D rotationOrigin, 
 			Vector3D point, double rotation)
 	{
+		/*
 		// Calculates the old and the new directions (from the origin to the point)
 		double prevdir = pointDirection(rotationOrigin, point);
 		double newdir = checkDirection(prevdir + rotation);
@@ -269,18 +287,11 @@ public class HelpMath
 		// Returns the new position after the rotation
 		return new Vector3D(rotationOrigin.getFirst() + lendirX(dist, newdir), 
 				rotationOrigin.getSecond() + lendirY(dist, newdir), point.getThird());
-	}
-	
-	/**
-	 * Calculates a direction of a sum of an x- and y-vector
-	 *
-	 * @param xvector The vector's x-component
-	 * @param yvector The vector's y-component
-	 * @return The vector's direction in degrees
-	 */
-	public static double getVectorDirection(double xvector, double yvector)
-	{
-		return checkDirection(-(Math.toDegrees(Math.atan2(yvector, xvector))));
+		*/
+		Vector3D rotated2D = rotationOrigin.plus(Vector3D.unitVector(pointDirection(
+				rotationOrigin, point) + rotation).withLength(
+				pointDistance2D(rotationOrigin, point)));
+		return new Vector3D(rotated2D.getFirst(), rotated2D.getSecond(), point.getThird());
 	}
 	
 	/**

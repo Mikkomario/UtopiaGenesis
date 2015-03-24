@@ -157,7 +157,8 @@ public class Vector3D
 	 */
 	public double getZDirection()
 	{
-		return HelpMath.getVectorDirection(getFirst(), getSecond());
+		//return HelpMath.getVectorDirection(getFirst(), getSecond());
+		return getZDirection(getFirst(), getSecond());
 	}
 	
 	/**
@@ -165,7 +166,8 @@ public class Vector3D
 	 */
 	public double getYDirection()
 	{
-		return HelpMath.pointYDirection(0, 0, getFirst(), getThird());
+		//return HelpMath.pointYDirection(0, 0, getFirst(), getThird());
+		return getZDirection(getFirst(), getThird());
 	}
 	
 	/**
@@ -173,7 +175,8 @@ public class Vector3D
 	 */
 	public double getXDirection()
 	{
-		return HelpMath.pointXDirection(0, 0, getThird(), getSecond());
+		//return HelpMath.pointXDirection(0, 0, getThird(), getSecond());
+		return getZDirection(getThird(), getSecond());
 	}
 	
 	/**
@@ -262,9 +265,11 @@ public class Vector3D
 	 */
 	public double crossProductLength(Vector3D other)
 	{
-		// = |a||b|sin(a, b)e, |e| = 1
-		double angleDifference = other.getZDirection() - getZDirection();
-		if (HelpMath.areApproximatelyEqual(angleDifference, 0))
+		// = |a||b|sin(a, b)e, |e| = 1 (in this we skip the e)
+		double angleDifference = 0;
+		if (!equalsIn2D(Vector3D.zeroVector()) && !other.equalsIn2D(Vector3D.zeroVector()))
+			angleDifference = other.getZDirection() - getZDirection();
+		else
 			angleDifference = other.getYDirection() - getYDirection();
 		
 		return getLength() * other.getLength() * Math.sin(Math.toRadians(angleDifference));
@@ -559,21 +564,29 @@ public class Vector3D
 	
 	/**
 	 * Calculates a normal for a surface
-	 * @param u The first vector that forms the surface
-	 * @param v The second vector that forms the surface
+	 * @param v1 The first vector that forms the surface
+	 * @param v2 The second vector that forms the surface
 	 * @return A normal perpendicular to the surface
 	 */
-	public static Vector3D getSurfaceNormal(Vector3D u, Vector3D v)
+	public static Vector3D getSurfaceNormal(Vector3D v1, Vector3D v2)
 	{
+		Vector3D u = v1.normalized();
+		Vector3D v = v2.normalized();
+		
 		/*
 		 * Nx = UyVz - UzVy
 			Ny = UzVx - UxVz
 			Nz = UxVy - UyVx
 		 */
-		double x = u.getSecond() * v.getThird() - u.getThird() - v.getSecond();
+		double x = u.getSecond() * v.getThird() - u.getThird() * v.getSecond();
 		double y = u.getThird() * v.getFirst() - u.getFirst() * v.getThird();
 		double z = u.getFirst() * v.getSecond() - u.getSecond() * v.getFirst();
 		
-		return new Vector3D(x, y, z).normalized();
+		return new Vector3D(x, y, z);
+	}
+	
+	private static double getZDirection(double x, double y)
+	{
+		return HelpMath.checkDirection(-(Math.toDegrees(Math.atan2(y, x))));
 	}
 }
