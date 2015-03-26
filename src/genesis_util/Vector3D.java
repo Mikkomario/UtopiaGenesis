@@ -13,7 +13,7 @@ import java.awt.geom.Point2D;
  * @since 18.11.2014
  */
 public class Vector3D
-{
+{	
 	// ATTRIBUTES	------------------------------------------
 	
 	private final double first, second, third;
@@ -349,6 +349,28 @@ public class Vector3D
 	{
 		return new Vector3D(getFirst() + other.getFirst(), getSecond() + other.getSecond(), 
 				getThird() + other.getThird());
+	}
+	
+	/**
+	 * Increases a vectors length by the specified amount
+	 * @param a How much the length is increased
+	 * @return A vector with increased length
+	 */
+	public Vector3D plus(double a)
+	{
+		double length = getLength();
+		double newScale = (length + a) / length;
+		return times(newScale);
+	}
+	
+	/**
+	 * Decreases a vectors length by the specified amount
+	 * @param a How much the length is decreased
+	 * @return A vector with decreased length
+	 */
+	public Vector3D minus(double a)
+	{
+		return plus(-a);
 	}
 	
 	/**
