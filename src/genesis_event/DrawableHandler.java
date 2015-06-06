@@ -323,15 +323,9 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		// IMPLEMENTED METHODS	---------------------------
 
 		@Override
-		protected void changeHandledState(Drawable d, boolean newState)
+		protected StateOperator getHandledStateOperator(Drawable h)
 		{
-			d.getIsVisibleStateOperator().setState(newState);
-		}
-
-		@Override
-		protected boolean getHandledState(Drawable d)
-		{
-			return d.getIsVisibleStateOperator().getState();
+			return h.getIsVisibleStateOperator();
 		}
 	}
 	

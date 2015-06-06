@@ -310,15 +310,9 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 		// IMPLEMENTED METHODS	-------------------------------
 
 		@Override
-		protected void changeHandledState(MouseListener l, boolean newState)
+		protected StateOperator getHandledStateOperator(MouseListener h)
 		{
-			l.getListensToMouseEventsOperator().setState(newState);
-		}
-
-		@Override
-		protected boolean getHandledState(MouseListener l)
-		{
-			return l.getListensToMouseEventsOperator().getState();
+			return h.getListensToMouseEventsOperator();
 		}
 	}
 	

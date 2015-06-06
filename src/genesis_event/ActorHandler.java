@@ -120,15 +120,9 @@ public class ActorHandler extends Handler<Actor> implements Actor
 		// IMPLEMENTED METHODS	------------------------
 
 		@Override
-		protected void changeHandledState(Actor a, boolean newState)
+		protected StateOperator getHandledStateOperator(Actor h)
 		{
-			a.getIsActiveStateOperator().setState(newState);
-		}
-
-		@Override
-		protected boolean getHandledState(Actor a)
-		{
-			return a.getIsActiveStateOperator().getState();
+			return h.getIsActiveStateOperator();
 		}
 	}
 }

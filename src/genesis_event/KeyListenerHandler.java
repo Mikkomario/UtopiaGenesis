@@ -146,15 +146,9 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 		// IMPLEMENTED METHODS	------------------------------
 		
 		@Override
-		protected void changeHandledState(KeyListener l, boolean newState)
+		protected StateOperator getHandledStateOperator(KeyListener h)
 		{
-			l.getListensToKeyEventsOperator().setState(newState);
-		}
-
-		@Override
-		protected boolean getHandledState(KeyListener l)
-		{
-			return l.getListensToKeyEventsOperator().getState();
+			return h.getListensToKeyEventsOperator();
 		}
 	}
 }

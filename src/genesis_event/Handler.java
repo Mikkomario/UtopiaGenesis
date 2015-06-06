@@ -463,18 +463,11 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		// ABSTRACT METHODS	----------------------------------
 		
 		/**
-		 * Changes a state of a handled
-		 * @param h the handled that will be modified
-		 * @param newState The new state the handled should receive
+		 * Returns the stateOperator of the given handled
+		 * @param h The handled in question
+		 * @return The handled's stateOperator
 		 */
-		protected abstract void changeHandledState(T h, boolean newState);
-		
-		/**
-		 * Checks a state of a handled
-		 * @param h The handled that will be checked
-		 * @return The state of the handled
-		 */
-		protected abstract boolean getHandledState(T h);
+		protected abstract StateOperator getHandledStateOperator(T h);
 		
 		
 		// IMPLEMENTED METHODS	------------------------------
@@ -516,7 +509,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 			@Override
 			protected boolean handleObject(T h)
 			{
-				changeHandledState(h, this.newState);
+				getHandledStateOperator(h).setState(this.newState);
 				return true;
 			}	
 		}
@@ -543,7 +536,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 			@Override
 			protected boolean handleObject(T h)
 			{
-				if (getHandledState(h) == this.searchedState)
+				if (getHandledStateOperator(h).getState() == this.searchedState)
 				{
 					this.found = true;
 					return false;
@@ -647,15 +640,9 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		// IMPLEMENTED METHODS	--------------------------------
 
 		@Override
-		protected void changeHandledState(T h, boolean newState)
+		protected StateOperator getHandledStateOperator(T h)
 		{
-			h.getIsDeadStateOperator().setState(newState);
-		}
-
-		@Override
-		protected boolean getHandledState(T h)
-		{
-			return h.getIsDeadStateOperator().getState();
+			return h.getIsDeadStateOperator();
 		}
 	}
 	
@@ -711,16 +698,9 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		// IMPLEMENTED METHODS	------------------------------
 
 		@Override
-		protected void changeHandledState(T h, boolean newState)
+		protected StateOperator getHandledStateOperator(T h)
 		{
-			h.getIsDeadStateOperator().setState(newState);
-		}
-
-		@Override
-		protected boolean getHandledState(T h)
-		{
-			// Isn't required but here it is anyway
-			return h.getIsDeadStateOperator().getState();
+			return h.getIsDeadStateOperator();
 		}
 	}
 }
