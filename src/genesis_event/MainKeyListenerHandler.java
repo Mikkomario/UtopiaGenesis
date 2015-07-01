@@ -192,6 +192,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 					
 					for (int i = 0; i < keys.size(); i++)
 					{
+						// TODO: Nullpointer somehow?
 						informListenerAboutKeyEvent(listener, 
 								new KeyEvent(keys.get(i), eventType, contentType, 
 								this.eventDuration));

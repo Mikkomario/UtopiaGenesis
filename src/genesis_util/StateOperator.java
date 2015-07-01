@@ -33,6 +33,8 @@ public class StateOperator
 	
 	// OTHER METHODS	-----------------------------------
 	
+	// TODO: Add a possibility to bind the operator to another operator?
+	
 	/**
 	 * This may or may not change the object's state to the given new state.
 	 * @param newState The new state the object may receive
@@ -41,8 +43,10 @@ public class StateOperator
 	{
 		if (this.mutable && getState() != newState)
 		{
-			this.state = newState;
+			// Informs the new state before it is applied since the latter may prevent the 
+			// former
 			getListenerHandler().onStateChange(this, newState);
+			this.state = newState;
 		}
 	}
 	

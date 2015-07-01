@@ -292,6 +292,7 @@ public class MouseEvent implements Event
 		StrictEventSelector<MouseEvent, MouseEvent.Feature> selector = 
 				createMovementEventSelector();
 		selector.addUnacceptableFeature(MouseMovementEventType.MOVE);
+		selector.addUnacceptableFeature(MouseMovementEventType.OVER);
 		return selector;
 	}
 	
