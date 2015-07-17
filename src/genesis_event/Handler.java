@@ -150,6 +150,9 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	{	
 		updateStatus();
 		
+		// TODO: Create a blocking system that disables the basic handling operation 
+		// temporarily
+		
 		// Goes through all the handleds
 		boolean handlingskipped = false;
 		this.locks.get(HandlingOperation.HANDLE).lock();
@@ -536,7 +539,8 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 			@Override
 			protected boolean handleObject(T h)
 			{
-				if (getHandledStateOperator(h).getState() == this.searchedState)
+				StateOperator stateOperator = getHandledStateOperator(h);
+				if (stateOperator != null && stateOperator.getState() == this.searchedState)
 				{
 					this.found = true;
 					return false;

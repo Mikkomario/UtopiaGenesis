@@ -5,7 +5,9 @@ import genesis_util.DepthConstants;
 import genesis_util.StateOperator;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Stack;
 
 /**
@@ -17,6 +19,9 @@ import java.util.Stack;
  */
 public class DrawableHandler extends Handler<Drawable> implements Drawable
 {	
+	// TODO: DrawableHandler has numerous multithreading issues. The objects are not fully 
+	// initialized when added to the handler and should not be used right away
+	
 	// ATTRIBUTES	------------------------------------------------------
 	
 	private int depth, lastDrawableDepth;
@@ -25,6 +30,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	private boolean needsSorting, usesSubDrawers, subDrawersAreReady;
 	private SubDrawer[] subDrawers;
 	private Stack<Drawable> drawablesWaitingDepthSorting;
+	private List<Drawable> drawablesWaitingToBeAdded;
 	
 	private StateOperator isVisibleOperator;
 	
@@ -171,6 +177,61 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	@Override
 	public void add(Drawable d)
 	{
+		// Adds the drawables to a separate list first. The list is added only after a 
+		// single handling iteration
+		this.drawablesWaitingToBeAdded.add(d);
+	}
+	
+	@Override
+	protected boolean handleObject(Drawable d)
+	{
+		// Draws the visible object
+		if (d.getIsVisibleStateOperator().getState())
+			d.drawSelf(this.lastg2d);
+		
+		// Also checks if the depths are still ok
+		if (d.getDepth() > this.lastDrawableDepth)
+			this.needsSorting = true;
+		this.lastDrawableDepth = d.getDepth();
+		
+		return true;
+	}
+	
+	@Override
+	protected void updateStatus()
+	{
+		// In addition to normal update, sorts the handling list if needed
+		super.updateStatus();
+		
+		if (this.needsSorting)
+		{
+			sortHandleds(new DepthSorter());
+			this.needsSorting = false;
+		}
+	}
+	
+	@Override
+	protected void handleObjects(HandlingOperator operator)
+	{
+		super.handleObjects(operator);
+		
+		// Drawables are added a bit late
+		List<Drawable> add = new ArrayList<>();
+		add.addAll(this.drawablesWaitingToBeAdded);
+		this.drawablesWaitingToBeAdded.clear();
+		
+		for (Drawable d : add)
+		{
+			delayedAdd(d);
+		}
+	}
+	
+	
+	// OTHER METHODS	---------------------------------------------------
+	
+	// The add function in this handler is delayed by one iteration
+	private void delayedAdd(Drawable d)
+	{
 		// Checks if depth causes additional issues
 		if (this.usesDepth && !(d instanceof SubDrawer))
 		{
@@ -222,41 +283,11 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 			super.add(d);
 	}
 	
-	@Override
-	protected boolean handleObject(Drawable d)
-	{
-		// Draws the visible object
-		if (d.getIsVisibleStateOperator().getState())
-			d.drawSelf(this.lastg2d);
-		
-		// Also checks if the depths are still ok
-		if (d.getDepth() > this.lastDrawableDepth)
-			this.needsSorting = true;
-		this.lastDrawableDepth = d.getDepth();
-		
-		return true;
-	}
-	
-	@Override
-	protected void updateStatus()
-	{
-		// In addition to normal update, sorts the handling list if needed
-		super.updateStatus();
-		
-		if (this.needsSorting)
-		{
-			sortHandleds(new DepthSorter());
-			this.needsSorting = false;
-		}
-	}
-	
-	
-	// OTHER METHODS	---------------------------------------------------
-	
 	private void initialize(boolean usesDepth, int depth, int depthSortLayers)
 	{
 		// Initializes attributes
 		this.drawablesWaitingDepthSorting = new Stack<Drawable>();
+		this.drawablesWaitingToBeAdded = new ArrayList<>();
 		this.depth = depth;
 		this.usesDepth = usesDepth;
 		this.lastg2d = null;

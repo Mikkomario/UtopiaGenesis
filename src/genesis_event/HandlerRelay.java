@@ -31,7 +31,8 @@ public class HandlerRelay
 	}
 	
 	/**
-	 * Creates a new handlerRelay that is a copy of the given handlerRelay
+	 * Creates a new handlerRelay that is a copy of the given handlerRelay. The new relay will 
+	 * use the exact same handlers, not just copies of them.
 	 * @param other The relay this one is copied from
 	 */
 	public HandlerRelay(HandlerRelay other)

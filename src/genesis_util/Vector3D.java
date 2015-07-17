@@ -60,6 +60,17 @@ public class Vector3D
 	}
 	
 	/**
+	 * Creates a new 1D vector
+	 * @param first The first number in the vector
+	 */
+	public Vector3D(double first)
+	{
+		this.first = first;
+		this.second = 0;
+		this.third = 0;
+	}
+	
+	/**
 	 * Creates a new 2D vector by copying the information from a point
 	 * @param point The point that is copied into vector
 	 */
