@@ -1,7 +1,5 @@
 package genesis_event;
 
-import genesis_util.StateOperator;
-
 /**
  * The object from this class will control multiple actors, calling their 
  * act-methods and removing them when necessary
@@ -14,7 +12,6 @@ public class ActorHandler extends Handler<Actor> implements Actor
 	// ATTRIBUTES	------------------------------------------------------
 	
 	private double laststeplength;
-	private StateOperator isActiveOperator;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -63,12 +60,6 @@ public class ActorHandler extends Handler<Actor> implements Actor
 	
 	
 	// IMPLEMENTED METHODS	----------------------------------------------
-
-	@Override
-	public StateOperator getIsActiveStateOperator()
-	{
-		return this.isActiveOperator;
-	}
 	
 	@Override
 	public void act(double steps)
@@ -88,8 +79,7 @@ public class ActorHandler extends Handler<Actor> implements Actor
 	protected boolean handleObject(Actor a)
 	{
 		// Calls the act method of active handleds		
-		if (a.getIsActiveStateOperator().getState())
-			a.act(this.laststeplength);
+		a.act(this.laststeplength);
 		
 		return true;
 	}
@@ -101,28 +91,5 @@ public class ActorHandler extends Handler<Actor> implements Actor
 	{
 		// Initializes attributes
 		this.laststeplength = 0;
-		this.isActiveOperator = new AnyHandledIsActiveOperator();
-	}
-	
-	
-	// SUBCLASSES	------------------------------------
-	
-	private class AnyHandledIsActiveOperator extends ForAnyHandledsOperator
-	{
-		// CONSTRUCTOR	--------------------------------
-		
-		public AnyHandledIsActiveOperator()
-		{
-			super(true);
-		}
-		
-		
-		// IMPLEMENTED METHODS	------------------------
-
-		@Override
-		protected StateOperator getHandledStateOperator(Actor h)
-		{
-			return h.getIsActiveStateOperator();
-		}
 	}
 }

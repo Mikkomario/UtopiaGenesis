@@ -4,7 +4,6 @@ import genesis_event.MouseEvent.MouseButton;
 import genesis_event.MouseEvent.MouseButtonEventScale;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseMovementEventType;
-import genesis_util.StateOperator;
 import genesis_util.Vector3D;
 
 import java.util.ArrayList;
@@ -27,8 +26,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	private HashMap<MouseMovementEventType, List<MouseListener>> movementEventTargets;
 	
 	private double lastStepDuration;
-	
-	private StateOperator isActiveOperator;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -78,12 +75,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	// IMPLEMENTED METHODS	-----------------------------------------------
 	
 	@Override
-	public StateOperator getIsActiveStateOperator()
-	{
-		return this.isActiveOperator;
-	}
-	
-	@Override
 	public HandlerType getHandlerType()
 	{
 		return GenesisHandlerType.MOUSEHANDLER;
@@ -104,12 +95,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	@Override
 	protected boolean handleObject(MouseListener l)
 	{
-		// Handles mouse move event
-		
-		// Checks if informing is needed
-		if (!l.getListensToMouseEventsOperator().getState())
-			return true;
-		
 		// Updates mouse-enter and mouse-exit	
 		// Checks if entered
 		if (!this.movementEventTargets.get(MouseMovementEventType.OVER).contains(l) && 
@@ -242,13 +227,11 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 			MouseEvent event)
 	{
 		// Checks for nullpointers since errors have occured here
-		if (listener == null || listener.getListensToMouseEventsOperator() == null || 
-				listener.getMouseEventSelector() == null)
+		if (listener == null || listener.getMouseEventSelector() == null)
 			return;
 		
 		// Checks if the event should be given to the listener
-		if (listener.getListensToMouseEventsOperator().getState() && 
-				listener.getMouseEventSelector().selects(event))
+		if (listener.getMouseEventSelector().selects(event))
 			listener.onMouseEvent(event);
 	}
 	
@@ -257,8 +240,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 		// Initializes attributes
 		this.currentMousePosition = Vector3D.zeroVector();
 		this.lastStepDuration = 0;
-		
-		this.isActiveOperator = new AnyHandledListensMouseOperator(false);
 		
 		this.mouseButtonStates = new HashMap<MouseButtonEventType, HashMap<MouseButton, 
 				Boolean>>();
@@ -284,37 +265,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	
 	
 	// SUBCLASSES	-------------------------------------------
-	
-	/**
-	 * This StateOperator checks all the Handleds and is true if any of them listens to the 
-	 * mouse. This operator may allow state changes and it may not.
-	 * 
-	 * @author Mikko Hilpinen
-	 * @since 17.11.2014
-	 */
-	protected class AnyHandledListensMouseOperator extends ForAnyHandledsOperator
-	{
-		// CONSTRUCTOR	---------------------------------------
-		
-		/**
-		 * Creates a new StateOperator
-		 * 
-		 * @param mutable can the state of the handleds be changed through this operator
-		 */
-		public AnyHandledListensMouseOperator(boolean mutable)
-		{
-			super(mutable);
-		}
-		
-		
-		// IMPLEMENTED METHODS	-------------------------------
-
-		@Override
-		protected StateOperator getHandledStateOperator(MouseListener h)
-		{
-			return h.getListensToMouseEventsOperator();
-		}
-	}
 	
 	private abstract class MouseEventOperator extends HandlingOperator
 	{
@@ -354,10 +304,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 		@Override
 		protected boolean handleObject(MouseListener l)
 		{
-			// Checks if informing is needed
-			if (!l.getListensToMouseEventsOperator().getState())
-				return true;
-			
 			for (MouseMovementEventType movementType : 
 					AbstractMouseListenerHandler.this.movementEventTargets.keySet())
 			{
@@ -387,10 +333,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 		@Override
 		protected boolean handleObject(MouseListener l)
 		{
-			// Checks if informing is needed
-			if (!l.getListensToMouseEventsOperator().getState())
-				return true;
-			
 			// Checks the event scale
 			MouseButtonEventScale scale = MouseButtonEventScale.GLOBAL;
 			if (l.isInAreaOfInterest(getBaseEvent().getPosition()))

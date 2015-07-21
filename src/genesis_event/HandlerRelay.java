@@ -139,6 +139,18 @@ public class HandlerRelay
 	}
 	
 	/**
+	 * Enables or disables a certain handler in the relay
+	 * @param handlerType The type of handler that will be enabled / disabled
+	 * @param newState The handler's new state
+	 */
+	public void setHandlingState(HandlerType handlerType, boolean newState)
+	{
+		Handler<? extends Handled> handler = getHandler(handlerType);
+		if (handler != null)
+			handler.getHandlingOperator().setState(newState);
+	}
+	
+	/**
 	 * Creates a new handlerRelay that contains all the handlers in the given window and panel
 	 * @param window The window that contains handlers
 	 * @param panel The panel that contains a drawableHandler

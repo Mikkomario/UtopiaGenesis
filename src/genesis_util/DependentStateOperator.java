@@ -12,6 +12,7 @@ public class DependentStateOperator extends StateOperator implements
 	// ATTRIBUTES	---------------------------------------
 	
 	private StateOperator isDeadOperator;
+	private HandlingStateOperatorRelay handlingOperators;
 	
 	
 	// CONSTRUCTOR	---------------------------------------
@@ -26,6 +27,8 @@ public class DependentStateOperator extends StateOperator implements
 		
 		// Initializes attributes
 		this.isDeadOperator = new LatchStateOperator(false);
+		this.handlingOperators = new HandlingStateOperatorRelay(new StateOperator(true, 
+				false));
 		
 		// Adds the object to the handler
 		if (parent != null)
@@ -65,5 +68,11 @@ public class DependentStateOperator extends StateOperator implements
 	public StateOperator getIsDeadStateOperator()
 	{
 		return this.isDeadOperator;
+	}
+	
+	@Override
+	public HandlingStateOperatorRelay getHandlingOperators()
+	{
+		return this.handlingOperators;
 	}
 }

@@ -201,6 +201,17 @@ public class HelpMath
 	}
 	
 	/**
+	 * Calculates a vector that has the given direction and length
+	 * @param length The length of the vector
+	 * @param direction The direction of the vector
+	 * @return A vector with the given direction and length
+	 */
+	public static Vector3D lenDir(double length, double direction)
+	{
+		return new Vector3D(lendirX(length, direction), lendirY(length, direction));
+	}
+	
+	/**
 	 * Changes the direction to a value between 0 and 360. 
 	 * For example -10 becomes 350.
 	 *

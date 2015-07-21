@@ -1,6 +1,5 @@
 package genesis_event;
 
-import genesis_util.StateOperator;
 import genesis_util.Vector3D;
 
 /**
@@ -33,10 +32,4 @@ public interface MouseListener extends Handled
 	 * @return Is the position in the object's area of special interest (if applicable)
 	 */
 	public boolean isInAreaOfInterest(Vector3D position);
-	
-	/**
-	 * @return The stateOperator that determines whether the object is interested in 
-	 * mouse events.
-	 */
-	public StateOperator getListensToMouseEventsOperator();
 }

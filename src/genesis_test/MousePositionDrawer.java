@@ -3,6 +3,7 @@ package genesis_test;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import genesis_event.GenesisHandlerType;
 import genesis_event.MouseEvent;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
@@ -11,8 +12,8 @@ import genesis_event.Drawable;
 import genesis_event.EventSelector;
 import genesis_event.HandlerRelay;
 import genesis_event.MultiEventSelector;
+import genesis_event.SimpleHandled;
 import genesis_util.DepthConstants;
-import genesis_util.LatchStateOperator;
 import genesis_util.StateOperator;
 import genesis_util.Vector3D;
 
@@ -22,13 +23,12 @@ import genesis_util.Vector3D;
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
-public class MousePositionDrawer implements Drawable, MouseListener
+public class MousePositionDrawer extends SimpleHandled implements Drawable, MouseListener
 {
 	// ATTRIBUTES	-------------------------------------
 	
 	private Vector3D lastPressPosition, lastMousePosition;
 	private boolean mouseIsDown;
-	private StateOperator isDeadOperator, isActiveOperator, isVisibleOperator;
 	private MultiEventSelector<MouseEvent> selector;
 	private double wheelTurn;
 	
@@ -41,14 +41,12 @@ public class MousePositionDrawer implements Drawable, MouseListener
 	 */
 	public MousePositionDrawer(HandlerRelay handlers)
 	{
+		super(handlers);
+		
 		this.lastPressPosition = Vector3D.zeroVector();
 		this.lastMousePosition = Vector3D.zeroVector();
 		this.mouseIsDown = false;
 		this.wheelTurn = 0;
-		
-		this.isDeadOperator = new LatchStateOperator(false);
-		this.isActiveOperator = new StateOperator(true, true);
-		this.isVisibleOperator = new StateOperator(true, true);
 		
 		// Listens to mouse presses & releases as well as mouse move
 		this.selector = new MultiEventSelector<>();
@@ -56,17 +54,12 @@ public class MousePositionDrawer implements Drawable, MouseListener
 		this.selector.addOption(MouseEvent.createMouseMoveSelector());
 		this.selector.addOption(MouseEvent.createMouseWheelSelector());
 		
-		handlers.addHandled(this);
+		getHandlingOperators().setShouldBeHandledOperator(GenesisHandlerType.DRAWABLEHANDLER, 
+				new StateOperator(true, true));
 	}
 	
 	
 	// IMPLEMENTED METHODS	-----------------------------
-
-	@Override
-	public StateOperator getIsDeadStateOperator()
-	{
-		return this.isDeadOperator;
-	}
 
 	@Override
 	public void onMouseEvent(MouseEvent event)
@@ -100,12 +93,6 @@ public class MousePositionDrawer implements Drawable, MouseListener
 	}
 
 	@Override
-	public StateOperator getListensToMouseEventsOperator()
-	{
-		return this.isActiveOperator;
-	}
-
-	@Override
 	public void drawSelf(Graphics2D g2d)
 	{
 		g2d.setColor(Color.RED);
@@ -122,12 +109,6 @@ public class MousePositionDrawer implements Drawable, MouseListener
 		else
 			g2d.drawOval(this.lastMousePosition.getFirstInt() - 10, 
 					this.lastMousePosition.getSecondInt() - 10 - (int) this.wheelTurn * 10, 20, 20);
-	}
-
-	@Override
-	public StateOperator getIsVisibleStateOperator()
-	{
-		return this.isVisibleOperator;
 	}
 
 	@Override

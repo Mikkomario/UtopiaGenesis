@@ -1,8 +1,5 @@
 package genesis_event;
 
-import genesis_util.StateOperator;
-
-
 /**
  * Each object implementing this interface will be considered an active creature 
  * that needs to perform its own actions during each step. This acting is 
@@ -26,9 +23,4 @@ public interface Actor extends Handled
 	 * slower or faster than usual it might vary
 	 */
 	public void act(double duration);
-	
-	/**
-	 * @return The stateOperator that determines if the object's act method should be called.
-	 */
-	public StateOperator getIsActiveStateOperator();
 }

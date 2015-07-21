@@ -75,6 +75,8 @@ public class KeyEvent implements Event
 	 */
 	public final static int PGDOWN = 34;
 	
+	// TODO: Add one for escape
+	
 	
 	// CONSTRUCTOR	-----------------------------------
 	

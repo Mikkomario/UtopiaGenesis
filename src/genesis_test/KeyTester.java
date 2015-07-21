@@ -1,12 +1,12 @@
 package genesis_test;
 
+import genesis_event.GenesisHandlerType;
+import genesis_event.HandlerRelay;
 import genesis_event.KeyEvent;
 import genesis_event.KeyEvent.KeyEventType;
 import genesis_event.KeyListener;
 import genesis_event.EventSelector;
-import genesis_event.KeyListenerHandler;
-import genesis_event.MouseListenerHandler;
-import genesis_util.LatchStateOperator;
+import genesis_event.SimpleHandled;
 import genesis_util.StateOperator;
 
 /**
@@ -15,46 +15,32 @@ import genesis_util.StateOperator;
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
-public class KeyTester implements KeyListener
+public class KeyTester extends SimpleHandled implements KeyListener
 {
 	// ATTRIBUTES	-----------------------------------------
 	
 	private EventSelector<KeyEvent> selector;
-	private StateOperator isDeadOperator, isActiveOperator;
-	private MouseListenerHandler mouseHandler;
-	private KeyListenerHandler keyHandler;
+	private HandlerRelay handlers;
 	
 	
 	// CONSTRUCTOR	-----------------------------------------
 	
 	/**
 	 * Creates a new keyTester that has access to the given handlers
-	 * @param keyHandler The key listener handler that informs the tester about key events
-	 * @param mouseHandler The mouse handler that is affected by this tester
+	 * @param handlers The handlers that will handle this object
 	 */
-	public KeyTester(KeyListenerHandler keyHandler, MouseListenerHandler mouseHandler)
+	public KeyTester(HandlerRelay handlers)
 	{
-		// Initializes attributes
-		this.isDeadOperator = new LatchStateOperator(false);
-		this.isActiveOperator = new StateOperator(true, true);
-		this.mouseHandler = mouseHandler;
-		this.keyHandler = keyHandler;
+		super(handlers);
 		
 		// Listens to key presses
 		this.selector = KeyEvent.createEventTypeSelector(KeyEventType.PRESSED);
-		
-		if (keyHandler != null)
-			keyHandler.add(this);
+		getHandlingOperators().setShouldBeHandledOperator(GenesisHandlerType.KEYHANDLER, 
+				new StateOperator(true, false));
 	}
 	
 	
 	// IMPLEMENTED METHODS	------------------------------
-
-	@Override
-	public StateOperator getIsDeadStateOperator()
-	{
-		return this.isDeadOperator;
-	}
 
 	@Override
 	public void onKeyEvent(KeyEvent event)
@@ -64,11 +50,18 @@ public class KeyTester implements KeyListener
 		
 		switch (event.getKeyChar())
 		{
-			case '1': this.mouseHandler.getListensToMouseEventsOperator().setState(false); break;
-			case '2': this.mouseHandler.getListensToMouseEventsOperator().setState(true); break;
-			case '3': this.keyHandler.getIsDeadStateOperator().setState(true); break;
-			case '4': this.keyHandler.getListensToKeyEventsOperator().setState(false); break;
-			case '5': this.mouseHandler.getIsDeadStateOperator().setState(true); break;
+			case '1':
+				this.handlers.setHandlingState(GenesisHandlerType.MOUSEHANDLER, false); break;
+			case '2':
+				this.handlers.setHandlingState(GenesisHandlerType.MOUSEHANDLER, true); break;
+			case '3':
+				this.handlers.getHandler(
+						GenesisHandlerType.KEYHANDLER).getIsDeadStateOperator().setState(true);
+				break;
+			case '5':
+				this.handlers.getHandler(
+						GenesisHandlerType.MOUSEHANDLER).getIsDeadStateOperator().setState(true);
+				break;
 		}
 	}
 
@@ -77,11 +70,4 @@ public class KeyTester implements KeyListener
 	{
 		return this.selector;
 	}
-
-	@Override
-	public StateOperator getListensToKeyEventsOperator()
-	{
-		return this.isActiveOperator;
-	}
-
 }

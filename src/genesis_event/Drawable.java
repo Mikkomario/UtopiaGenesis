@@ -1,8 +1,5 @@
 package genesis_event;
 
-
-import genesis_util.StateOperator;
-
 import java.awt.Graphics2D;
 
 /**
@@ -21,11 +18,6 @@ public interface Drawable extends Handled
 	 * @param g2d The graphics object that will draw the object
 	 */
 	public void drawSelf(Graphics2D g2d);
-	
-	/**
-	 * @return The stateOperator that determines whether the object should be drawn
-	 */
-	public StateOperator getIsVisibleStateOperator();
 	
 	/**
 	 * @return How deep should the object be drawn (object with positive depth 

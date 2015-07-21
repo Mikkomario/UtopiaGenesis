@@ -11,6 +11,7 @@ public class LatchStateOperator extends StateOperator implements StateOperatorLi
 	// ATTRIBUTES	---------------------------------------
 	
 	private StateOperator isDeadStateOperator;
+	private HandlingStateOperatorRelay handlingOperators;
 	
 	
 	// CONSTRUCTOR	---------------------------------------
@@ -25,6 +26,7 @@ public class LatchStateOperator extends StateOperator implements StateOperatorLi
 		
 		// Initializes attributes
 		this.isDeadStateOperator = new StateOperator(false, false);
+		this.handlingOperators = new HandlingStateOperatorRelay(new StateOperator(true, false));
 		getListenerHandler().add(this);
 	}
 	
@@ -42,5 +44,11 @@ public class LatchStateOperator extends StateOperator implements StateOperatorLi
 	public StateOperator getIsDeadStateOperator()
 	{
 		return this.isDeadStateOperator;
+	}
+
+	@Override
+	public HandlingStateOperatorRelay getHandlingOperators()
+	{
+		return this.handlingOperators;
 	}
 }

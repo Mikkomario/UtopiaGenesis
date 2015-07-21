@@ -1,7 +1,5 @@
 package genesis_event;
 
-import genesis_util.StateOperator;
-
 /**
  * Keylisteners are interested in the user's activities on the keyboard and 
  * should be notified when a key is pressed, down or released.<br>
@@ -25,10 +23,4 @@ public interface KeyListener extends Handled
 	 * events.
 	 */
 	public EventSelector<KeyEvent> getKeyEventSelector();
-	
-	/**
-	 * @return A stateOperator that determines whether the listener is currently interested 
-	 * in keyboard events.
-	 */
-	public StateOperator getListensToKeyEventsOperator();
 }

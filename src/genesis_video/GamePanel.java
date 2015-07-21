@@ -128,14 +128,11 @@ public class GamePanel extends JPanel
 	
 	/**
 	 * Changes the panel's background color.
-	 * 
-	 * @param red
-	 * @param green
-	 * @param blue
+	 * @param color The new background color that will be used
 	 */
-	public void setBackgroundColor(int red, int green, int blue)
+	public void setBackgroundColor(Color color)
 	{
-		this.setBackground(new Color(red, green, blue));
+		this.setBackground(color);
 	}
 	
 	/**

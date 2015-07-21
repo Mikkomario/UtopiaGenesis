@@ -1,5 +1,6 @@
 package genesis_event;
 
+import genesis_util.HandlingStateOperatorRelay;
 import genesis_util.StateOperator;
 import genesis_util.StateOperatorListener;
 
@@ -32,6 +33,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	private Map<HandlingOperation, List<T>> operationLists;
 	private StateOperator isDeadOperator;
 	private boolean started, autoDeath;
+	private HandlingStateOperatorRelay handlingOperators;
 	
 	private Map<HandlingOperation, ReentrantLock> locks;
 	
@@ -113,8 +115,23 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		}
 	}
 	
+	@Override
+	public HandlingStateOperatorRelay getHandlingOperators()
+	{
+		return this.handlingOperators;
+	}
+	
 	
 	// OTHER METHODS	---------------------------------------------------
+	
+	/**
+	 * @return The stateOperator that defines whether the objects in this handler should 
+	 * be handled
+	 */
+	public StateOperator getHandlingOperator()
+	{
+		return getHandlingOperators().getShouldBeHandledOperator(getHandlerType());
+	}
 	
 	/**
 	 * Takes Handleds from another handler and moves them to this handler instead.
@@ -163,7 +180,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 			
 			while (iterator.hasNext())
 			{
-				/*
+				/* TODO: Concurrent modification exception on line on the next line?
 				if (this.killed)
 					break;
 				*/
@@ -174,7 +191,10 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 					// Doesn't handle objects after handleobjects has returned 
 					// false. Continues through the cycle though to remove dead 
 					// handleds
-					if (!handlingskipped)
+					// The object's state also defines whether it will be handled at all
+					if (!handlingskipped && h.getHandlingOperators() != null && 
+							h.getHandlingOperators().getShouldBeHandledOperator(
+							getHandlerType()).getState())
 					{
 						if (operator == null)
 						{
@@ -405,9 +425,13 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		this.locks.put(HandlingOperation.ADD, new ReentrantLock());
 		this.locks.put(HandlingOperation.REMOVE, new ReentrantLock());
 		
-		// TODO: Handlers can't use stateOperators that use handlers. StackOverFlow
+		// Handlers can't use stateOperators that use handlers. StackOverFlow
 		this.autoDeath = autoDeath;
 		this.isDeadOperator = null;
+		this.handlingOperators = new HandlingStateOperatorRelay(new StateOperator(true, 
+				false));
+		getHandlingOperators().setShouldBeHandledOperator(getHandlerType(), 
+				new ForAnyHandledShouldBeHandledOperator());
 	}
 	
 	
@@ -444,23 +468,13 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		protected abstract boolean handleObject(T h);
 	}
 	
-	private abstract class IterativeStateOperator extends StateOperator implements 
-			StateOperatorListener
+	private abstract class IterativeStateOperator extends StateOperator
 	{
-		// ATTRIBUTES	--------------------------------------
-		
-		private StateOperator isDeadOperator;
-				
-		
 		// CONSTRUCTOR	--------------------------------------
 				
 		public IterativeStateOperator(boolean mutable)
 		{
 			super(false, mutable);
-			
-			// Initializes attributes
-			this.isDeadOperator = new StateOperator(false, false);
-			getListenerHandler().add(this);
 		}
 		
 		// ABSTRACT METHODS	----------------------------------
@@ -476,16 +490,11 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		// IMPLEMENTED METHODS	------------------------------
 		
 		@Override
-		public StateOperator getIsDeadStateOperator()
-		{
-			return this.isDeadOperator;
-		}
-		
-		@Override
-		public void onStateChange(StateOperator source, boolean newState)
+		public void setState(boolean newState)
 		{
 			// Tries to change the state of all the handleds
 			handleObjects(new StateAdjustMentOperator(newState));
+			super.setState(newState);
 		}
 		
 		
@@ -628,6 +637,25 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 			StateCheckOperator operator = new StateCheckOperator(false);
 			handleObjects(operator);
 			return !operator.getState();
+		}
+	}
+	
+	private class ForAnyHandledShouldBeHandledOperator extends ForAnyHandledsOperator
+	{
+		// CONSTRUCTOR	------------------
+		
+		public ForAnyHandledShouldBeHandledOperator()
+		{
+			super(true);
+		}
+		
+		
+		// IMPLEMENTED METHODS	----------
+		
+		@Override
+		protected StateOperator getHandledStateOperator(T h)
+		{
+			return h.getHandlingOperators().getShouldBeHandledOperator(getHandlerType());
 		}
 	}
 	

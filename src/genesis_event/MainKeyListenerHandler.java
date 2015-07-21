@@ -2,7 +2,6 @@ package genesis_event;
 
 import genesis_event.KeyEvent.ContentType;
 import genesis_event.KeyEvent.KeyEventType;
-import genesis_util.StateOperator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,12 +55,6 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	
 	
 	// IMPLEMENTED METHODS	----------------------------------------------
-
-	@Override
-	public StateOperator getIsActiveStateOperator()
-	{
-		return getListensToKeyEventsOperator();
-	}
 	
 	@Override
 	public void act(double steps)
@@ -178,10 +171,6 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 		protected boolean handleObject(KeyListener listener)
 		{
 			// Informs the object about the current event(s)
-			// Only informs active objects
-			if (!listener.getListensToKeyEventsOperator().getState())
-				return true;
-			
 			for (KeyEventType eventType : MainKeyListenerHandler.this.keyStates.keySet())
 			{
 				for (ContentType contentType : 

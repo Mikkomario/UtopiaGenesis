@@ -2,7 +2,6 @@ package genesis_event;
 
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
-import genesis_util.StateOperator;
 import genesis_util.Vector3D;
 
 /**
@@ -17,7 +16,6 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	// ATTRIBUTES	---------------------------------------
 	
 	private MultiEventSelector<MouseEvent> selector;
-	private StateOperator listensToMouseOperator;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -96,12 +94,6 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	{
 		return this.selector;
 	}
-	
-	@Override
-	public StateOperator getListensToMouseEventsOperator()
-	{
-		return this.listensToMouseOperator;
-	}
 
 	@Override
 	public boolean isInAreaOfInterest(Vector3D testedPosition)
@@ -114,9 +106,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	// OTHER METHODS	----------------------------------
 	
 	private void initialize()
-	{
-		this.listensToMouseOperator = new AnyHandledListensMouseOperator(true);
-		
+	{		
 		// The handler accepts the mouse move event as well as mouse button events and mouse 
 		// wheel events
 		this.selector = new MultiEventSelector<>();

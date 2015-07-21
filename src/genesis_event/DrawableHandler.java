@@ -1,8 +1,6 @@
 package genesis_event;
 
-
 import genesis_util.DepthConstants;
-import genesis_util.StateOperator;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -31,8 +29,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	private SubDrawer[] subDrawers;
 	private Stack<Drawable> drawablesWaitingDepthSorting;
 	private List<Drawable> drawablesWaitingToBeAdded;
-	
-	private StateOperator isVisibleOperator;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -147,12 +143,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	// IMPLEMENTED METHODS	----------------------------------------------
 	
 	@Override
-	public StateOperator getIsVisibleStateOperator()
-	{
-		return this.isVisibleOperator;
-	}
-	
-	@Override
 	public HandlerType getHandlerType()
 	{
 		return GenesisHandlerType.DRAWABLEHANDLER;
@@ -186,8 +176,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	protected boolean handleObject(Drawable d)
 	{
 		// Draws the visible object
-		if (d.getIsVisibleStateOperator().getState())
-			d.drawSelf(this.lastg2d);
+		d.drawSelf(this.lastg2d);
 		
 		// Also checks if the depths are still ok
 		if (d.getDepth() > this.lastDrawableDepth)
@@ -295,8 +284,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		this.lastDrawableDepth = DepthConstants.BOTTOM;
 		this.subDrawersAreReady = false;
 		
-		this.isVisibleOperator = new ForAnyHandledsVisibilityOperator();
-		
 		// Initializes the subdrawers (if needed)
 		if (usesDepth && depthSortLayers > 1)
 		{
@@ -339,25 +326,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 			// Drawables with more depth are put to the front of the list
 			return d2.getDepth() - d1.getDepth();
 		}	
-	}
-	
-	private class ForAnyHandledsVisibilityOperator extends ForAnyHandledsOperator
-	{
-		// CONSTRUCTOR	-----------------------------------
-		
-		public ForAnyHandledsVisibilityOperator()
-		{
-			super(true);
-		}
-		
-		
-		// IMPLEMENTED METHODS	---------------------------
-
-		@Override
-		protected StateOperator getHandledStateOperator(Drawable h)
-		{
-			return h.getIsVisibleStateOperator();
-		}
 	}
 	
 	// Subdrawers handle drawables from certain depth ranges. The handleds 

@@ -1,7 +1,5 @@
 package genesis_event;
 
-import genesis_util.StateOperator;
-
 /**
  * This class informs a group of keylisteners about the key events
  *
@@ -13,7 +11,6 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 {
 	// ATTRIBUTES	---------------------------------
 	
-	private StateOperator listensToKeysOperator;
 	private EventSelector<KeyEvent> selector;
 	
 	private KeyEvent lastEvent;
@@ -82,12 +79,6 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	}
 	
 	@Override
-	public StateOperator getListensToKeyEventsOperator()
-	{
-		return this.listensToKeysOperator;
-	}
-	
-	@Override
 	public HandlerType getHandlerType()
 	{
 		return GenesisHandlerType.KEYHANDLER;
@@ -97,9 +88,6 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	protected boolean handleObject(KeyListener l)
 	{
 		// Only informs active listeners
-		if (!l.getListensToKeyEventsOperator().getState())
-			return true;
-		
 		informListenerAboutKeyEvent(l, this.lastEvent);
 		
 		return true;
@@ -111,7 +99,6 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	private void initialize()
 	{
 		// Initializes attributes
-		this.listensToKeysOperator = new AnyHandledListensKeyEventsOperator();
 		// The handler listens to all keyboard events
 		this.selector = new StrictEventSelector<KeyEvent, KeyEvent.Feature>();
 		
@@ -128,27 +115,5 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	{
 		if (listener.getKeyEventSelector().selects(event))
 			listener.onKeyEvent(event);
-	}
-	
-	
-	// SUBCLASSES	-------------------------------------------------------
-	
-	private class AnyHandledListensKeyEventsOperator extends ForAnyHandledsOperator
-	{
-		// CONSTRUCTOR	-------------------------------------
-		
-		public AnyHandledListensKeyEventsOperator()
-		{
-			super(true);
-		}
-
-		
-		// IMPLEMENTED METHODS	------------------------------
-		
-		@Override
-		protected StateOperator getHandledStateOperator(KeyListener h)
-		{
-			return h.getListensToKeyEventsOperator();
-		}
 	}
 }

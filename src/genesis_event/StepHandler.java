@@ -293,7 +293,9 @@ public class StepHandler extends ActorHandler implements Runnable
 			
 			// If the time usage was under 30%, accelerates
 			if (performance < 30 && this.stepHandler.callinterval > 1)
+			{
 				this.stepHandler.callinterval -= 1;
+			}
 			// If it got over 70%, slows it down (if possible)
 			else if (performance > 70 && this.stepHandler.callinterval < this.maxInterval)
 				this.stepHandler.callinterval += 1;
