@@ -8,6 +8,13 @@ package genesis_util;
  */
 public class DepthConstants
 {
+	// CONSTRUCTOR	-------------------
+	
+	private DepthConstants()
+	{
+		// The interface is static
+	}
+	
 	// CONSTANTS	------------------------------------------------------
 	
 	/**

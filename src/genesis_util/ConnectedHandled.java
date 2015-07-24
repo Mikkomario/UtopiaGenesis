@@ -1,22 +1,21 @@
-package genesis_event;
+package genesis_util;
 
+import genesis_event.Handled;
 import genesis_event.HandlerRelay;
-import genesis_util.HandlingStateOperatorRelay;
-import genesis_util.StateOperator;
 
 /**
- * A Dependent Handled depend from other another object's states.
+ * A ConnectedHandled shares its states with another object.
  * 
  * @author Mikko Hilpinen
- * @param <T> The type of object this one depends from
+ * @param <T> The type of object this one is connected to
  * @since 2.12.2014
  */
-public class DependentHandled<T extends Handled> implements Handled
+public class ConnectedHandled<T extends Handled> implements Handled
 {
 	// ATTRIBUTES	---------------------------------
 	
 	private T master;
-	private StateOperator separateIsDeadOperator;
+	private StateOperator isDeadOperator;
 	private HandlingStateOperatorRelay separateHandlingOperators;
 	
 	
@@ -28,10 +27,12 @@ public class DependentHandled<T extends Handled> implements Handled
 	 * @param master The object this object depends from.
 	 * @param handlers The handlers that will handle this object (optional)
 	 */
-	public DependentHandled(T master, HandlerRelay handlers)
+	public ConnectedHandled(T master, HandlerRelay handlers)
 	{
 		// Initializes attributes
 		setMaster(master);
+		
+		this.isDeadOperator = new DependentStateOperator(getMaster().getIsDeadStateOperator());
 		
 		// Adds the object to the handler(s)
 		if (handlers != null)
@@ -44,10 +45,7 @@ public class DependentHandled<T extends Handled> implements Handled
 	@Override
 	public StateOperator getIsDeadStateOperator()
 	{
-		if (getMaster() != null)
-			return this.master.getIsDeadStateOperator();
-		else
-			return this.separateIsDeadOperator;
+		return this.isDeadOperator;
 	}
 	
 	@Override
@@ -75,8 +73,11 @@ public class DependentHandled<T extends Handled> implements Handled
 		{
 			this.separateHandlingOperators = new HandlingStateOperatorRelay(
 					new StateOperator(false, false));
-			this.separateIsDeadOperator = new StateOperator(true, false);
+			this.isDeadOperator = new StateOperator(true, false);
 		}
+		else
+			this.isDeadOperator = new DependentStateOperator(
+					newMaster.getIsDeadStateOperator());
 	}
 	
 	/**

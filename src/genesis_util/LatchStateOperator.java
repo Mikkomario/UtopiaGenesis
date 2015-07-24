@@ -6,14 +6,8 @@ package genesis_util;
  * @author Mikko Hilpinen
  * @since 16.11.2014
  */
-public class LatchStateOperator extends StateOperator implements StateOperatorListener
+public class LatchStateOperator extends StateOperator
 {
-	// ATTRIBUTES	---------------------------------------
-	
-	private StateOperator isDeadStateOperator;
-	private HandlingStateOperatorRelay handlingOperators;
-	
-	
 	// CONSTRUCTOR	---------------------------------------
 	
 	/**
@@ -23,32 +17,18 @@ public class LatchStateOperator extends StateOperator implements StateOperatorLi
 	public LatchStateOperator(boolean initialState)
 	{
 		super(initialState, true);
-		
-		// Initializes attributes
-		this.isDeadStateOperator = new StateOperator(false, false);
-		this.handlingOperators = new HandlingStateOperatorRelay(new StateOperator(true, false));
-		getListenerHandler().add(this);
 	}
 	
 	
 	// IMPLEMENTED METHODS	------------------------------
 
 	@Override
-	public void onStateChange(StateOperator source, boolean newState)
+	public void setState(boolean newState)
 	{
-		if (source == this)
+		boolean previousState = getState();
+		super.setState(newState);
+		// The operator becomes mutable once the state changes once
+		if (getState() != previousState)
 			setMutable(false);
-	}
-
-	@Override
-	public StateOperator getIsDeadStateOperator()
-	{
-		return this.isDeadStateOperator;
-	}
-
-	@Override
-	public HandlingStateOperatorRelay getHandlingOperators()
-	{
-		return this.handlingOperators;
 	}
 }

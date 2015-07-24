@@ -6,7 +6,7 @@ import genesis_event.KeyEvent;
 import genesis_event.KeyEvent.KeyEventType;
 import genesis_event.KeyListener;
 import genesis_event.EventSelector;
-import genesis_event.SimpleHandled;
+import genesis_util.SimpleHandled;
 import genesis_util.StateOperator;
 
 /**

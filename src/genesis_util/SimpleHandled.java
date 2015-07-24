@@ -1,7 +1,7 @@
-package genesis_event;
+package genesis_util;
 
-import genesis_util.HandlingStateOperatorRelay;
-import genesis_util.StateOperator;
+import genesis_event.Handled;
+import genesis_event.HandlerRelay;
 
 /**
  * This class is a simple implementation of the Handled interface and can be used as a 
@@ -21,11 +21,11 @@ public class SimpleHandled implements Handled
 	
 	/**
 	 * Creates a new object and adds it to the provided HandlerRelay
-	 * @param handlers The handlers that will handle this object
+	 * @param handlers The handlers that will handle this object (optional)
 	 */
 	public SimpleHandled(HandlerRelay handlers)
 	{
-		this.isDeadOperator = new StateOperator(false, true);
+		this.isDeadOperator = new LatchStateOperator(false);
 		this.handlingOperators = new HandlingStateOperatorRelay(new StateOperator(true, true));
 		
 		if (handlers != null)
