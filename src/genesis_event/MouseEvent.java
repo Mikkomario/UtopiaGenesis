@@ -329,6 +329,19 @@ public class MouseEvent implements Event
 		return selector;
 	}
 	
+	/**
+	 * Creates an eventSelector that accepts mouse button events of a certain type
+	 * @param type The type of mouse button event accepted
+	 * @return A selector that only accepts mouse button events of the given type
+	 */
+	public static StrictEventSelector<MouseEvent, Feature> createButtonEventTypeSelector(
+			MouseButtonEventType type)
+	{
+		StrictEventSelector<MouseEvent, Feature> selector = createButtonEventSelector();
+		selector.addRequiredFeature(type);
+		return selector;
+	}
+	
 	
 	// SUBCLASSES	---------------------------------------
 	

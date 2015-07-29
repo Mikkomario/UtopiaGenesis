@@ -450,6 +450,14 @@ public class Vector3D
 	 */
 	public Vector3D dividedBy(double a, double b, double c)
 	{
+		// Can't divide with 0
+		if (a == 0)
+			a = 1;
+		if (b == 0)
+			b = 1;
+		if (c == 0)
+			c = 1;
+		
 		return new Vector3D(getFirst() / a, getSecond() / b, getThird() / c);
 	}
 	
@@ -518,7 +526,7 @@ public class Vector3D
 	}
 	
 	/**
-	 * Draws the vector as a line from origin to the vector's "position"
+	 * Draws the vector as a line from origin (0, 0) to the vector's "position"
 	 * @param g2d The object that does the actual drawing
 	 */
 	public void drawAsLine(Graphics2D g2d)

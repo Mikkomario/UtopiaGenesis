@@ -29,7 +29,7 @@ public class KeyEvent implements Event
 	/**
 	 * The right arrow keycode
 	 */
-	public final static int RIGTH = 39;
+	public final static int RIGHT = 39;
 	/**
 	 * The down arrow keycode
 	 */
