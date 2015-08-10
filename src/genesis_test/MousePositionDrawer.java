@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 
 import genesis_event.GenesisHandlerType;
 import genesis_event.MouseEvent;
+import genesis_event.MouseEvent.MouseButton;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
 import genesis_event.MouseListener;
@@ -14,7 +15,6 @@ import genesis_event.HandlerRelay;
 import genesis_event.MultiEventSelector;
 import genesis_util.DepthConstants;
 import genesis_util.SimpleHandled;
-import genesis_util.StateOperator;
 import genesis_util.Vector3D;
 
 /**
@@ -54,8 +54,10 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 		this.selector.addOption(MouseEvent.createMouseMoveSelector());
 		this.selector.addOption(MouseEvent.createMouseWheelSelector());
 		
-		getHandlingOperators().setShouldBeHandledOperator(GenesisHandlerType.DRAWABLEHANDLER, 
-				new StateOperator(true, true));
+		getHandlingOperators().addOperatorForType(GenesisHandlerType.DRAWABLEHANDLER);
+		
+		System.out.println(getHandlingOperators().getShouldBeHandledOperator(
+				GenesisHandlerType.MOUSEHANDLER).isMutable());
 	}
 	
 	
@@ -72,9 +74,19 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 		{
 			this.lastPressPosition = event.getPosition();
 			this.mouseIsDown = true;
+			
+			if (event.getButton() == MouseButton.MIDDLE)
+				getHandlingOperators().getShouldBeHandledOperator(
+						GenesisHandlerType.DRAWABLEHANDLER).setState(false);
 		}
 		else if (event.getButtonEventType() == MouseButtonEventType.RELEASED)
+		{
 			this.mouseIsDown = false;
+			
+			if (event.getButton() == MouseButton.MIDDLE)
+				getHandlingOperators().getShouldBeHandledOperator(
+						GenesisHandlerType.DRAWABLEHANDLER).setState(true);
+		}
 		
 		if (event.getType() == MouseEventType.WHEEL)
 			this.wheelTurn += event.getWheelTurn();
@@ -108,7 +120,8 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 		// Otherwise draws a circle around the mouse
 		else
 			g2d.drawOval(this.lastMousePosition.getFirstInt() - 10, 
-					this.lastMousePosition.getSecondInt() - 10 - (int) this.wheelTurn * 10, 20, 20);
+					this.lastMousePosition.getSecondInt() - 10 - (int) this.wheelTurn * 10, 
+					20, 20);
 	}
 
 	@Override

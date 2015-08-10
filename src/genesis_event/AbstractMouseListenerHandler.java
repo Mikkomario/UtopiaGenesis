@@ -97,6 +97,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	{
 		// Updates mouse-enter and mouse-exit	
 		// Checks if entered
+		// TODO: Nullpointer
 		if (!this.movementEventTargets.get(MouseMovementEventType.OVER).contains(l) && 
 				!this.movementEventTargets.get(MouseMovementEventType.ENTER).contains(l) 
 				&& l.isInAreaOfInterest(getMousePosition()))
@@ -169,7 +170,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 			this.currentMousePosition = newMousePosition;
 			
 			// Informs the objects
-			handleObjects();
+			handleObjects(true);
 		}
 	}
 	
@@ -184,7 +185,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 			return;
 		
 		handleObjects(new MouseWheelEventOperator(new MouseEvent(wheelTurn, 
-				wheelTurnInt, this.currentMousePosition, this.lastStepDuration)));
+				wheelTurnInt, this.currentMousePosition, this.lastStepDuration)), true);
 	}
 	
 	
@@ -192,7 +193,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	
 	private void informObjectsAboutMouseEnterExit(MouseEvent baseEvent)
 	{
-		handleObjects(new MouseMovementEventOperator(baseEvent));
+		handleObjects(new MouseMovementEventOperator(baseEvent), true);
 		
 		// After the entered -event has been informed, over -event will be informed in the 
 		// future instead
@@ -209,7 +210,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	
 	private void informObjectsAboutMouseButtonEvents(MouseEvent baseEvent)
 	{
-		handleObjects(new MouseButtonEventOperator(baseEvent));
+		handleObjects(new MouseButtonEventOperator(baseEvent), true);
 		
 		for (MouseButtonEventType buttonEvent : this.mouseButtonStates.keySet())
 		{

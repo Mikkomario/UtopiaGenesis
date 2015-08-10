@@ -23,7 +23,7 @@ public class DependentStateOperator extends StateOperator implements
 	 */
 	public DependentStateOperator(StateOperator parent)
 	{
-		super(parent != null ? parent.getState() : false, false);
+		super(parent != null ? parent.getState() : false, true);
 		
 		// Initializes attributes
 		this.isDeadOperator = new LatchStateOperator(false);
@@ -59,9 +59,7 @@ public class DependentStateOperator extends StateOperator implements
 	@Override
 	public void onStateChange(StateOperator source, boolean newState)
 	{
-		setMutable(true);
 		setState(newState);
-		setMutable(false);
 	}
 
 	@Override

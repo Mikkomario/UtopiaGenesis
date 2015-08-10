@@ -68,7 +68,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	{
 		// Inform the listeners about the event
 		this.lastEvent = event;
-		handleObjects();
+		handleObjects(true);
 		this.lastEvent = null;
 	}
 

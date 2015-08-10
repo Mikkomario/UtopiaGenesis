@@ -33,8 +33,6 @@ public class StateOperator
 	
 	// OTHER METHODS	-----------------------------------
 	
-	// TODO: Add a possibility to bind the operator to another operator?
-	
 	/**
 	 * This may or may not change the object's state to the given new state.
 	 * @param newState The new state the object may receive
@@ -69,6 +67,27 @@ public class StateOperator
 			this.listenerHandler = new StateOperatorListenerHandler(false);
 		
 		return this.listenerHandler;
+	}
+	
+	/**
+	 * @return Is the operator mutable
+	 */
+	public boolean isMutable()
+	{
+		return this.mutable;
+	}
+	
+	/**
+	 * Transfers the possible listeners from another stateOperator to this one
+	 * @param other The StateOperator the listeners are transferred from
+	 */
+	public void transferListenersFrom(StateOperator other)
+	{
+		if (other == null || other.listenerHandler == null)
+			return;
+		
+		if (!other.getListenerHandler().isEmpty())
+			getListenerHandler().transferHandledsFrom(other.getListenerHandler());
 	}
 	
 	/**

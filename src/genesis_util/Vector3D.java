@@ -358,6 +358,8 @@ public class Vector3D
 	 */
 	public Vector3D plus(final Vector3D other)
 	{
+		if (other == null)
+			return this;
 		return new Vector3D(getFirst() + other.getFirst(), getSecond() + other.getSecond(), 
 				getThird() + other.getThird());
 	}

@@ -30,9 +30,15 @@ public class ConnectedHandled<T extends Handled> implements Handled
 	public ConnectedHandled(T master, HandlerRelay handlers)
 	{
 		// Initializes attributes
-		setMaster(master);
-		
-		this.isDeadOperator = new DependentStateOperator(getMaster().getIsDeadStateOperator());
+		if (master != null)
+			setMaster(master);
+		else
+		{
+			this.master = null;
+			this.isDeadOperator = new StateOperator(false, true);
+			this.separateHandlingOperators = new HandlingStateOperatorRelay(new StateOperator(
+					false, false));
+		}
 		
 		// Adds the object to the handler(s)
 		if (handlers != null)
@@ -65,19 +71,24 @@ public class ConnectedHandled<T extends Handled> implements Handled
 	 * @param newMaster The new master object for this object to depend from
 	 */
 	public void setMaster(T newMaster)
-	{
-		this.master = newMaster;
-		
+	{	
 		// If the new master is null, has to use own stateOperators (= dies)
 		if (newMaster == null)
 		{
-			this.separateHandlingOperators = new HandlingStateOperatorRelay(
-					new StateOperator(false, false));
+			if (this.separateHandlingOperators != null)
+				this.separateHandlingOperators = new HandlingStateOperatorRelay(
+						new StateOperator(false, false));
 			this.isDeadOperator = new StateOperator(true, false);
 		}
-		else
+		else if (!newMaster.equals(this.master))
+		{
+			StateOperator previous = this.isDeadOperator;
 			this.isDeadOperator = new DependentStateOperator(
 					newMaster.getIsDeadStateOperator());
+			this.isDeadOperator.transferListenersFrom(previous);
+		}
+
+		this.master = newMaster;
 	}
 	
 	/**

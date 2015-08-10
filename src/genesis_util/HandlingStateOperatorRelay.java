@@ -1,5 +1,6 @@
 package genesis_util;
 
+import genesis_event.Handled;
 import genesis_event.HandlerType;
 
 import java.util.HashMap;
@@ -51,6 +52,11 @@ public class HandlingStateOperatorRelay
 	 */
 	public void setDefaultOperator(StateOperator operator)
 	{
+		if (operator == null)
+			return;
+		
+		// Transfers the listeners to the new operator
+		operator.transferListenersFrom(this.defaultOperator);
 		this.defaultOperator = operator;
 	}
 	
@@ -80,7 +86,15 @@ public class HandlingStateOperatorRelay
 	public void setShouldBeHandledOperator(HandlerType type, StateOperator operator)
 	{
 		if (operator != null && type != null)
+		{
+			// If there was an operator for the given type already, transfers the listeners 
+			// from that
+			StateOperator previous = this.operators.get(type);
+			if (previous != null)
+				operator.transferListenersFrom(previous);
+				
 			this.operators.put(type, operator);
+		}
 	}
 	
 	/**
@@ -94,5 +108,28 @@ public class HandlingStateOperatorRelay
 			operator.setState(newState);
 		}
 		this.defaultOperator.setState(newState);
+	}
+	
+	/**
+	 * Makes the operator use a dependent stateOperator for the given handler type
+	 * @param master The object the operator will be dependent from
+	 * @param operatorType The type of operator that will be added
+	 */
+	public void makeDependent(Handled master, HandlerType operatorType)
+	{
+		setShouldBeHandledOperator(operatorType, new DependentStateOperator(
+				master.getHandlingOperators().getShouldBeHandledOperator(operatorType)));
+	}
+	
+	/**
+	 * Adds a StateOperator for the given handler type. The operator will be a normal 
+	 * stateOperator that has the same state and mutability as the previously used operator.
+	 * @param type The type of Handler the operator is used for
+	 */
+	public void addOperatorForType(HandlerType type)
+	{
+		StateOperator previousOperator = getShouldBeHandledOperator(type);
+		setShouldBeHandledOperator(type, new StateOperator(previousOperator.getState(), 
+				previousOperator.isMutable()));
 	}
 }

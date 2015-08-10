@@ -60,7 +60,7 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	public void act(double steps)
 	{	
 		// Informs the objects
-		handleObjects(new MainKeyOperator(steps));
+		handleObjects(new MainKeyOperator(steps), true);
 		
 		// Negates some of the changes (pressed & released)
 		for (KeyEventType eventType : this.keyStates.keySet())

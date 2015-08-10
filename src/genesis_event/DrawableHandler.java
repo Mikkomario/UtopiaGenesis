@@ -16,10 +16,7 @@ import java.util.Stack;
  * @since 27.11.2012.
  */
 public class DrawableHandler extends Handler<Drawable> implements Drawable
-{	
-	// TODO: DrawableHandler has numerous multithreading issues. The objects are not fully 
-	// initialized when added to the handler and should not be used right away
-	
+{
 	// ATTRIBUTES	------------------------------------------------------
 	
 	private int depth, lastDrawableDepth;
@@ -155,7 +152,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		this.lastg2d = g2d;
 		this.lastDrawableDepth = DepthConstants.BOTTOM + 1000;
 		
-		handleObjects();
+		handleObjects(true);
 	}
 	
 	@Override
@@ -200,9 +197,9 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	}
 	
 	@Override
-	protected void handleObjects(HandlingOperator operator)
+	protected void handleObjects(HandlingOperator operator, boolean checkHandlingState)
 	{
-		super.handleObjects(operator);
+		super.handleObjects(operator, checkHandlingState);
 		
 		// Drawables are added a bit late
 		List<Drawable> add = new ArrayList<>();

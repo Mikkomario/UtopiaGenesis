@@ -2,6 +2,7 @@ package genesis_test;
 
 import java.awt.Color;
 
+import genesis_event.Handled;
 import genesis_event.HandlerRelay;
 import genesis_event.StepHandler;
 import genesis_util.Vector3D;
@@ -40,8 +41,8 @@ public class GenesisTest
 		// panel has been created)
 		HandlerRelay handlers = HandlerRelay.createDefaultHandlerRelay(window, panel);
 		
-		new MousePositionDrawer(handlers);
-		new KeyTester(handlers);
+		Handled drawer = new MousePositionDrawer(handlers);
+		new KeyTester(handlers, drawer);
 		
 		// Creates a performance monitor as well
 		new TextPerformanceMonitor(1000, window.getStepHandler());

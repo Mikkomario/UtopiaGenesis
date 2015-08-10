@@ -84,7 +84,8 @@ public class StateOperatorListenerHandler extends Handler<StateOperatorListener>
 		this.lastSource = source;
 		this.lastState = newState;
 		
-		handleObjects();
+		// TODO: Consider setting this false
+		handleObjects(true);
 		
 		this.lastSource = null;
 	}

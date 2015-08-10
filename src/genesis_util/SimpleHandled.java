@@ -51,8 +51,13 @@ public class SimpleHandled implements Handled
 	 * Changes the stateOperator that defines whether the object is considered alive or dead
 	 * @param operator The new stateOperator for liveliness
 	 */
-	protected void setIsDeadOperator(StateOperator operator)
+	public void setIsDeadOperator(StateOperator operator)
 	{
+		if (operator == null)
+			return;
+		
+		// Transfers the listeners between the operators as well
+		operator.transferListenersFrom(this.isDeadOperator);
 		this.isDeadOperator = operator;
 	}
 }

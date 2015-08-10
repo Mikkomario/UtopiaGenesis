@@ -1,6 +1,7 @@
 package genesis_test;
 
 import genesis_event.GenesisHandlerType;
+import genesis_event.Handled;
 import genesis_event.HandlerRelay;
 import genesis_event.KeyEvent;
 import genesis_event.KeyEvent.KeyEventType;
@@ -21,6 +22,7 @@ public class KeyTester extends SimpleHandled implements KeyListener
 	
 	private EventSelector<KeyEvent> selector;
 	private HandlerRelay handlers;
+	private Handled target;
 	
 	
 	// CONSTRUCTOR	-----------------------------------------
@@ -28,8 +30,9 @@ public class KeyTester extends SimpleHandled implements KeyListener
 	/**
 	 * Creates a new keyTester that has access to the given handlers
 	 * @param handlers The handlers that will handle this object
+	 * @param target The object that is affected by the tester
 	 */
-	public KeyTester(HandlerRelay handlers)
+	public KeyTester(HandlerRelay handlers, Handled target)
 	{
 		super(handlers);
 		
@@ -37,6 +40,8 @@ public class KeyTester extends SimpleHandled implements KeyListener
 		this.selector = KeyEvent.createEventTypeSelector(KeyEventType.PRESSED);
 		getHandlingOperators().setShouldBeHandledOperator(GenesisHandlerType.KEYHANDLER, 
 				new StateOperator(true, false));
+		this.handlers = handlers;
+		this.target = target;
 	}
 	
 	
@@ -58,9 +63,17 @@ public class KeyTester extends SimpleHandled implements KeyListener
 				this.handlers.getHandler(
 						GenesisHandlerType.KEYHANDLER).getIsDeadStateOperator().setState(true);
 				break;
+			case '4':
+				this.target.getHandlingOperators().getShouldBeHandledOperator(
+						GenesisHandlerType.MOUSEHANDLER).setState(false);
+				break;
 			case '5':
-				this.handlers.getHandler(
-						GenesisHandlerType.MOUSEHANDLER).getIsDeadStateOperator().setState(true);
+				this.target.getHandlingOperators().getShouldBeHandledOperator(
+						GenesisHandlerType.MOUSEHANDLER).setState(true);
+				break;
+			case '6':
+				this.handlers.getHandler(GenesisHandlerType.MOUSEHANDLER
+						).getIsDeadStateOperator().setState(true);
 				break;
 		}
 	}

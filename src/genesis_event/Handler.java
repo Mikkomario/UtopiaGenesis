@@ -125,6 +125,14 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	// OTHER METHODS	---------------------------------------------------
 	
 	/**
+	 * @return Is the handler currently empty
+	 */
+	public boolean isEmpty()
+	{
+		return getHandledNumber() == 0;
+	}
+	
+	/**
 	 * @return The stateOperator that defines whether the objects in this handler should 
 	 * be handled
 	 */
@@ -144,6 +152,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		// Transfers the handleds
 		List<T> handledsToBeTransferred = new ArrayList<T>();
 		handledsToBeTransferred.addAll(other.operationLists.get(HandlingOperation.HANDLE));
+		handledsToBeTransferred.addAll(other.operationLists.get(HandlingOperation.ADD));
 		
 		for (T h : handledsToBeTransferred)
 		{
@@ -159,16 +168,15 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 * -method for the objects
 	 * @param operator The operation done for each handled. Null if the default 
 	 * handleObject(Handled) should be used
-	 * 
+	 * @param checkHandlingState If this is true, the object's handling state affects whether 
+	 * the {@link #handleObject(Handled)} will be called for that object. If false, the method 
+	 * will be called for each object in the handler
 	 * @see #handleObject(Handled)
 	 * @see HandlingOperator
 	 */
-	protected void handleObjects(HandlingOperator operator)
+	protected void handleObjects(HandlingOperator operator, boolean checkHandlingState)
 	{	
 		updateStatus();
-		
-		// TODO: Create a blocking system that disables the basic handling operation 
-		// temporarily
 		
 		// Goes through all the handleds
 		boolean handlingskipped = false;
@@ -192,9 +200,9 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 					// false. Continues through the cycle though to remove dead 
 					// handleds
 					// The object's state also defines whether it will be handled at all
-					if (!handlingskipped && h.getHandlingOperators() != null && 
-							h.getHandlingOperators().getShouldBeHandledOperator(
-							getHandlerType()).getState())
+					if (!handlingskipped && !checkHandlingState || (h.getHandlingOperators() 
+							!= null && h.getHandlingOperators().getShouldBeHandledOperator(
+							getHandlerType()).getState()))
 					{
 						if (operator == null)
 						{
@@ -217,13 +225,15 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	/**
 	 * Goes through all the handleds and calls handleObject -method for those 
 	 * objects
-	 * 
+	 * @param checkHandlingState If this is true, the object's handling state affects whether 
+	 * the {@link #handleObject(Handled)} will be called for that object. If false, the method 
+	 * will be called for each object in the handler
 	 * @see #handleObject(Handled)
-	 * @see #handleObjects(HandlingOperator)
+	 * @see #handleObjects(HandlingOperator, boolean)
 	 */
-	protected void handleObjects()
+	protected void handleObjects(boolean checkHandlingState)
 	{
-		handleObjects(null);
+		handleObjects(null, checkHandlingState);
 	}
 	
 	/**
@@ -233,8 +243,11 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 */
 	public void add(T h)
 	{	
+		// TODO: Delay add for all objects so that they can initialize themselves first
+		
 		// Performs necessary checks
-		if (h != this && !this.operationLists.get(HandlingOperation.HANDLE).contains(h) && 
+		if (h != null && h != this && !this.operationLists.get(
+				HandlingOperation.HANDLE).contains(h) && 
 				!this.operationLists.get(HandlingOperation.ADD).contains(h))
 		{
 			// Adds the handled to the queue
@@ -281,7 +294,8 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	 */
 	public int getHandledNumber()
 	{
-		return this.operationLists.get(HandlingOperation.HANDLE).size();
+		return this.operationLists.get(HandlingOperation.HANDLE).size() + 
+				this.operationLists.get(HandlingOperation.ADD).size();
 	}
 	
 	/**
@@ -316,11 +330,11 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 	/**
 	 * Updates the handler list by adding new members and removing old ones. 
 	 * This method should not be called during an iteration but is useful before 
-	 * testsing the handler status.<br>
+	 * testing the handler status.<br>
 	 * Status is automatically updated each time the handleds in the handler 
 	 * are handled.
 	 * 
-	 * @see #handleObjects()
+	 * @see #handleObjects(boolean)
 	 */
 	protected void updateStatus()
 	{
@@ -493,7 +507,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		public void setState(boolean newState)
 		{
 			// Tries to change the state of all the handleds
-			handleObjects(new StateAdjustMentOperator(newState));
+			handleObjects(new StateAdjustMentOperator(newState), false);
 			super.setState(newState);
 		}
 		
@@ -599,7 +613,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		{
 			// The operator's state depends on the state of the handleds
 			StateCheckOperator operator = new StateCheckOperator(true);
-			handleObjects(operator);
+			handleObjects(operator, false);
 			return operator.getState();
 		}
 	}
@@ -635,7 +649,7 @@ public abstract class Handler<T extends Handled> implements Handled, StateOperat
 		{
 			// The operator's state depends on the state of the handleds
 			StateCheckOperator operator = new StateCheckOperator(false);
-			handleObjects(operator);
+			handleObjects(operator, false);
 			return !operator.getState();
 		}
 	}

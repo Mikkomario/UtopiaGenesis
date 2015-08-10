@@ -66,7 +66,7 @@ public class ActorHandler extends Handler<Actor> implements Actor
 	{
 		// Updates the steplength and informs objects
 		this.laststeplength = steps;
-		handleObjects();
+		handleObjects(true);
 	}
 	
 	@Override
