@@ -144,12 +144,91 @@ public class Line
 	 * Calculates the intersection points between the line and a circle
 	 * @param origin The circle's origin
 	 * @param radius The circle's radius
+	 * @param onlyPointsOnLine Should the results only contain the points that fall between 
+	 * the start and end point of the line (true) or whether any point aligned with the 
+	 * line should be returned (false)
 	 * @return The intersection points between the circle and the line
 	 */
-	public List<Vector3D> circleIntersection2D(Vector3D origin, double radius)
+	public List<Vector3D> circleIntersection2D(Vector3D origin, double radius, 
+			boolean onlyPointsOnLine)
 	{
+		//http://math.stackexchange.com/questions/311921/get-location-of-vector-circle-intersection
+		
 		List<Vector3D> points = new ArrayList<>();
 		
+		/*
+		 * Terms for the quadratic equation
+		 * --------------------------------
+		 * 
+		 * a = (x1 - x0)^2 + (y1 - y0)^2
+		 * b = 2 * (x1 - x0) * (x0 - cx) + 2 * (y1 - y0) * (y0 - cy)
+		 * c = (x0 - cx)^2 + (y0 - cy)^2 - r^2
+		 * 
+		 * Where (x1, y1) is the end point, (x0, y0) is the starting point, (cx, cy) is the 
+		 * circle origin and r is the circle radius
+		 * 
+		 * Vx = (x1 - x0), The transition vector (end - start)
+		 * Vy = (y1 - y0)
+		 * 
+		 * Lx = (x0 - cx), The transition vector from the circle origin to the line start
+		 * Ly = (y0 - cy)	(start - origin)
+		 * 
+		 * With this added:
+		 * a = Vx^2  +  Vy^2
+		 * b = 2 * Vx * Lx  +  2 * Vy * Ly
+		 * c = Lx^2  +  Ly^2  -  r^2
+		 */
+		Vector3D V = toVector(); // The translation vector
+		Vector3D L = getStart().minus(origin); // The line start in relation to the circle origin
+		
+		double a = Math.pow(V.getFirst(), 2) + Math.pow(V.getSecond(), 2);
+		double b = 2 * V.getFirst() * L.getFirst() + 2 * V.getSecond() * L.getSecond();
+		double c = Math.pow(L.getFirst(), 2) + Math.pow(L.getSecond(), 2) - Math.pow(radius, 2);
+		
+		/*
+		 * The equation
+		 * ------------
+		 * 
+		 * t = (-b +- sqrt(b^2 - 4*a*c)) / (2*a)
+		 * Where t is the modifier for the intersection points [0, 1] would be on the line
+		 * Where b^2 - 4*a*c is called the discriminant and where a != 0
+		 * 
+		 * If The discriminant is negative, there is no intersection
+		 * If the discriminant is 0, there is a single intersection point
+		 * Otherwise there are two
+		 */
+		if (a == 0)
+			return points;
+		
+		double discriminant = Math.pow(b, 2) - 4*a*c;
+		
+		if (discriminant >= 0)
+		{
+			/*
+			 * The intersection points
+			 * -----------------------
+			 * 
+			 * The final intersection points are simply
+			 * start + t * V
+			 * Where start is the line start position, and V is the line translation vector 
+			 * (end - start)
+			 */
+			
+			double discriminantRoot = Math.sqrt(discriminant);
+			double t1 = (-b + discriminantRoot) / (2 * a);
+			
+			if (!onlyPointsOnLine || (t1 >= 0 && t1 <= 1))
+				points.add(getStart().plus(V.times(t1)));
+			
+			if (!HelpMath.areApproximatelyEqual(discriminant, 0))
+			{
+				double t2 = (-b - discriminantRoot) / (2 * a);
+				if (!onlyPointsOnLine || (t2 >= 0 && t2 <= 1))
+					points.add(getStart().plus(V.times(t2)));
+			}
+		}
+		
+		/* TODO: Remove old comments
 		// A and B are for simplification
 		// A = (y2 - y1) / (x2 - x1)
 		double A = (getEnd().getSecond() - getStart().getSecond()) / 
@@ -191,6 +270,7 @@ public class Line
 			double yp2 = A * (xp2 - getStart().getFirst() + getStart().getSecond());
 			points.add(new Vector3D(xp2, yp2));
 		}
+		*/
 		
 		return points;
 	}

@@ -111,7 +111,7 @@ public class GenesisTest
 		{
 			this.lastMouseLine = new Line(event.getPosition());
 			this.lastIntersectionPoints = this.lastMouseLine.circleIntersection2D(
-					new Vector3D(100, 100), 50);
+					new Vector3D(100, 100), 50, true);
 		}
 
 		@Override
