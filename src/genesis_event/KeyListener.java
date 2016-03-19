@@ -1,5 +1,8 @@
 package genesis_event;
 
+import utopia.inception.event.EventSelector;
+import utopia.inception.handling.Handled;
+
 /**
  * Keylisteners are interested in the user's activities on the keyboard and 
  * should be notified when a key is pressed, down or released.<br>

@@ -1,5 +1,7 @@
 package genesis_event;
 
+import utopia.inception.handling.Handled;
+
 /**
  * Each object implementing this interface will be considered an active creature 
  * that needs to perform its own actions during each step. This acting is 

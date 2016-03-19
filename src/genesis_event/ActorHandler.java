@@ -1,5 +1,8 @@
 package genesis_event;
 
+import utopia.inception.handling.Handler;
+import utopia.inception.handling.HandlerType;
+
 /**
  * The object from this class will control multiple actors, calling their 
  * act-methods and removing them when necessary
@@ -18,43 +21,10 @@ public class ActorHandler extends Handler<Actor> implements Actor
 	
 	/**
 	 * Creates a new actorhandler. Actors must be added manually later
-	 *
-	 * @param autodeath Will the handler die if there are no living actors to be handled
-	 * @param superhandler The handler that will call the act-event of the object (optional)
 	 */
-	public ActorHandler(boolean autodeath, ActorHandler superhandler)
+	public ActorHandler()
 	{
-		super(autodeath);
-		
 		// Initializes attributes
-		initialize();
-		
-		if (superhandler != null)
-			superhandler.add(this);
-	}
-	
-	/**
-	 * Creates a new empty ActorHandler
-	 * 
-	 * @param autoDeath Will the Handler die once it becomes empty
-	 * @param superHandlers The HandlerRelay that holds the handlers that will handle this Handler
-	 */
-	public ActorHandler(boolean autoDeath, HandlerRelay superHandlers)
-	{
-		super(autoDeath, superHandlers);
-		
-		initialize();
-	}
-	
-	/**
-	 * Creates a new empty ActorHandler
-	 * 
-	 * @param autoDeath Will the Handler die once it becomes empty
-	 */
-	public ActorHandler(boolean autoDeath)
-	{
-		super(autoDeath);
-		
 		initialize();
 	}
 	

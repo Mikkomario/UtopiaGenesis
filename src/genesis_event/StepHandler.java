@@ -9,8 +9,7 @@ import genesis_video.GameWindow;
  * This class calculates millisconds and calls all actors when a certain number 
  * of milliseconds has passed. All of the actors should be under the command of 
  * this object. This object doesn't stop functioning by itself if it runs out 
- * of actors.<p>
- *
+ * of actors.
  * @author Mikko Hilpinen.
  * @since 29.11.2012.
  */
@@ -23,10 +22,9 @@ public class StepHandler extends ActorHandler implements Runnable
 	 */
 	public static final int STEPLENGTH = 15;
 	
-	private int callinterval, maxstepspercall;
+	private int callinterval, maxstepspercall; // TODO: Create an option for unbound interval
 	private long nextupdatemillis, lastactmillis;
-	private boolean running;
-	private GameWindow window;
+	private GameWindow window; // TODO: Make the window an actor instead
 	private List<PerformanceMonitor> monitors;
 	
 	
@@ -36,9 +34,8 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * This creates a new stephandler. Actors are informed 
 	 * when a certain number of milliseconds has passed. Actors can be 
 	 * added using addActor method.
-	 * 
 	 * @param callInterval How many milliseconds will there at least be between 
-	 * update calls? This also defines the maximum frame rate / action rate 
+	 * update calls. This also defines the maximum frame rate / action rate 
 	 * for the program. No more than 20 milliseconds is advised. All computers 
 	 * may be unable to update the program in less than 10 milliseconds though. 
 	 * (>0)
@@ -53,15 +50,12 @@ public class StepHandler extends ActorHandler implements Runnable
 	 */
 	public StepHandler(int callInterval, int maxStepsPerCall, 
 			GameWindow window)
-	{
-		super(false); // Stephandler doesn't have a superhandler
-		
+	{	
 		// Initializes attributes
 		this.callinterval = callInterval;
 		this.maxstepspercall = maxStepsPerCall;
 		this.nextupdatemillis = 0;
 		this.lastactmillis = System.currentTimeMillis();
-		this.running = false;
 		this.window = window;
 		this.monitors = new ArrayList<>();
 	}
@@ -72,10 +66,8 @@ public class StepHandler extends ActorHandler implements Runnable
 	@Override
 	public void run()
 	{
-		this.running = true;
-		
 		// Starts counting steps and does it until the object is killed
-		while (this.running)
+		while (!getIsDeadStateOperator().getState())
 			update();
 	}
 	
@@ -91,76 +83,62 @@ public class StepHandler extends ActorHandler implements Runnable
 		this.monitors.add(monitor);
 	}
 	
-	/**
-	 * Stops the stephandler from functioning anymore
-	 */
-	public void stop()
-	{
-		this.running = false;
-	}
-	
-	// This method updates the actors and the window when needed
+	// This method updates the actors when needed
 	private void update()
 	{
 		// Remembers the time
 		this.nextupdatemillis = System.currentTimeMillis() + this.callinterval;
 		
-		// Calls all actors
-		if (!getIsDeadStateOperator().getState())
+		// Calculates the step length that is informed for the objects
+		long thisActStartedAt = System.currentTimeMillis();
+		double steps = (thisActStartedAt - this.lastactmillis) / 
+				(double) STEPLENGTH;
+		
+		// TODO: when put to 120 fps, the program works with 60. It can't go higher 
+		// either... Except randomly after the software has been accelerated once and 
+		// the computer has "awaken"
+		//System.out.println(thisActStartedAt - this.lastactmillis);
+		
+		// Sometimes the true amount of steps can't be informed and a 
+		// different number is given instead (physics don't like there 
+		// being too many steps at once)
+		if (steps > this.maxstepspercall)
+			steps = this.maxstepspercall;
+		
+		act(steps);
+		
+		// Updates the game according to the changes
+		this.window.callScreenUpdate(); // TODO: Remove these
+		this.window.callMousePositionUpdate();
+		
+		// Updates the stepmillis
+		this.lastactmillis = thisActStartedAt;
+		
+		// Informs the monitors
+		for (PerformanceMonitor monitor : this.monitors)
 		{
-			// Calculates the step length that is informed for the objects
-			long thisActStartedAt = System.currentTimeMillis();
-			double steps = (thisActStartedAt - this.lastactmillis) / 
-					(double) STEPLENGTH;
-			
-			// TODO: The when put to 120 fps, the program works with 60. It can't go higher 
-			// either... Except randomly after the software has been accelerated once and 
-			// the computer has "awaken"
-			//System.out.println(thisActStartedAt - this.lastactmillis);
-			
-			// Sometimes the true amount of steps can't be informed and a 
-			// different number is given instead (physics don't like there 
-			// being too many steps at once)
-			if (steps > this.maxstepspercall)
-				steps = this.maxstepspercall;
-			
-			act(steps);
-			
-			// Updates the game according to the changes
-			this.window.callScreenUpdate();
-			this.window.callMousePositionUpdate();
-			
-			// Updates the stepmillis
-			//this.lastactmillis = System.currentTimeMillis();
-			this.lastactmillis = thisActStartedAt;
-			
-			// Informs the monitors
-			for (PerformanceMonitor monitor : this.monitors)
-			{
-				monitor.updateOperationTime(System.currentTimeMillis() - this.lastactmillis, steps);
-			}
+			monitor.updateOperationTime(System.currentTimeMillis() - this.lastactmillis, steps);
 		}
-		// Stops running if dies
-		else
-			stop();
 		
 		// If there is time, the thread will wait until another step is needed
-		if (System.currentTimeMillis() < this.nextupdatemillis)
+		long waitMillis = this.nextupdatemillis - System.currentTimeMillis();
+		if (waitMillis > 0)
 		{
 			synchronized (this)
 			{
-				try
+				while (true)
 				{
-					// Apparently this can become negative under very 
-					// rare circumstances (added the second check, hope it helps)
-					if (System.currentTimeMillis() < this.nextupdatemillis)
-						wait(this.nextupdatemillis - System.currentTimeMillis());
-				}
-				catch (InterruptedException exception)
-				{
-					System.err.println("StepHandler's stepdelay was " +
-							"interupted unexpectedly");
-					exception.printStackTrace();
+					try
+					{
+						wait(waitMillis);
+						break;
+					}
+					catch (InterruptedException exception)
+					{
+						waitMillis = this.nextupdatemillis - System.currentTimeMillis();
+						if (waitMillis <= 0)
+							break;
+					}
 				}
 			}
 		}
@@ -172,7 +150,6 @@ public class StepHandler extends ActorHandler implements Runnable
 	/**
 	 * This class monitors the performance of the stepHandler. It keeps track of how many 
 	 * milliseconds were used in processing.
-	 * 
 	 * @author Mikko Hilpinen
 	 * @since 11.12.2014
 	 */
@@ -253,7 +230,6 @@ public class StepHandler extends ActorHandler implements Runnable
 	/**
 	 * Performance accelrator tries to make the program run as smoothly as possible by 
 	 * monitoring and adjusting computation time.
-	 * 
 	 * @author Mikko Hilpinen
 	 * @since 12.12.2014
 	 */

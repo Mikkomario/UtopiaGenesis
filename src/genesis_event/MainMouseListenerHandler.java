@@ -9,44 +9,12 @@ import java.awt.event.MouseEvent;
  * This class takes input straight from the gamewindow and informs all 
  * mouselisteners 'below' it. There should be only one 
  * mainmouselistenerhandler created and / or used at a time
- *
  * @author Mikko Hilpinen.
  * @since 29.12.2012.
  * @see genesis_video.GameWindow
  */
 public class MainMouseListenerHandler extends AbstractMouseListenerHandler
 {	
-	// CONSTRUCTOR	------------------------------------------------------
-	
-	/**
-	 * Creates a new empty mouselistenerhandler. The handler won't die 
-	 * automatically
-	 * 
-	 * @param actorhandler The handler that will handle this handler (optional)
-	 */
-	public MainMouseListenerHandler(ActorHandler actorhandler)
-	{
-		super(false, actorhandler);
-	}
-	
-	/**
-	 * Creates a new empty MainMouseListenerHandler.
-	 * @param superHandlers The HandlerRelay that holds the handlers that handle this handler
-	 */
-	public MainMouseListenerHandler(HandlerRelay superHandlers)
-	{
-		super(false, superHandlers);
-	}
-	
-	/**
-	 * Creates a new empty MainMouseListenerHandler
-	 */
-	public MainMouseListenerHandler()
-	{
-		super(false);
-	}
-	
-	
 	// OTHER METHODS	--------------------------------------------------
 	
 	/**

@@ -3,8 +3,6 @@ package genesis_util;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
-import java.util.HashMap;
-import java.util.Map;
 
 import genesis_util.HelpMath;
 import genesis_util.Line;
@@ -14,7 +12,6 @@ import genesis_util.Vector3D;
  * Transformation represents an object's state. Transformation can affect many things, 
  * including physics simulation, drawing and collision checking. Transformations are immutable 
  * once created.
- *  
  * @author Mikko Hilpinen
  * @since 3.12.2014
  */
@@ -221,7 +218,6 @@ public final class Transformation
 	 */
 	public Transformation inverse()
 	{
-		// TODO: Test
 		return new Transformation(getPosition().reverse(), 
 				Vector3D.identityVector().dividedBy(getScaling()), getShear().reverse(), 
 				HelpMath.checkDirection(-getAngle()));
@@ -289,43 +285,6 @@ public final class Transformation
 		Transformation t = this.clone();
 		t.angle = HelpMath.checkDirection(angle);
 		return t;
-	}
-	
-	/**
-	 * Creates a copy of this transformation with the given attribute value. This is supposed 
-	 * to be used in constructable objects that want to construct their transformations (hence 
-	 * the string format).
-	 * @param attributeName The name of the changed attribute [position, scaling, shear, angle]
-	 * @param attributeValue The value given to the attribute
-	 * @return A transformation similar to this but with the given attribute
-	 */
-	public Transformation withAttribute(String attributeName, String attributeValue)
-	{
-		switch (attributeName)
-		{
-			case "position": return this.withPosition(Vector3D.parseFromString(attributeValue));
-			case "scaling": return this.withScaling(Vector3D.parseFromString(attributeValue));
-			case "shear": return this.withShear(Vector3D.parseFromString(attributeValue));
-			case "angle": return this.withAngle(Double.parseDouble(attributeValue));
-		}
-		
-		return this;
-	}
-	
-	/**
-	 * @return The attributes of this transformation in string format. This method is supposed 
-	 * to be used in writable objects so they can write their transformations more easily.
-	 */
-	public Map<String, String> getAttributes()
-	{
-		Map<String, String> attributes = new HashMap<>();
-		
-		attributes.put("position", getPosition().toString());
-		attributes.put("scaling", getScaling().toString());
-		attributes.put("shear", getShear().toString());
-		attributes.put("angle", getAngle() + "");
-		
-		return attributes;
 	}
 	
 	/**

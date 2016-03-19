@@ -3,6 +3,9 @@ package genesis_event;
 import java.util.ArrayList;
 import java.util.List;
 
+import utopia.inception.event.Event;
+import utopia.inception.event.StrictEventSelector;
+
 /**
  * KeyEvents are used in informing KeyListeners
  * 
@@ -74,8 +77,10 @@ public class KeyEvent implements Event
 	 * The page down keycode
 	 */
 	public final static int PGDOWN = 34;
-	
-	// TODO: Add one for escape
+	/**
+	 * The escape keycode
+	 */
+	public final static int ESCAPE = 27;
 	
 	
 	// CONSTRUCTOR	-----------------------------------

@@ -5,6 +5,8 @@ import genesis_event.MouseEvent.MouseButtonEventScale;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseMovementEventType;
 import genesis_util.Vector3D;
+import utopia.inception.handling.Handler;
+import utopia.inception.handling.HandlerType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +15,6 @@ import java.util.List;
 /**
  * This class handles the informing of mouseListeners. It does not actively find 
  * any new information though, which must be done through the subclasses.
- *
  * @author Mikko Hilpinen.
  * @since 28.12.2012.
  */
@@ -32,42 +33,10 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 
 	/**
 	 * Creates a new empty mouselistenerhandler
-	 *
-	 * @param autodeath Will the handler die when it runs out of living listeners
-	 * @param actorhandler The ActorHandler that will make the handler inform 
-	 * its listeners (optional)
 	 */
-	public AbstractMouseListenerHandler(boolean autodeath, ActorHandler actorhandler)
+	public AbstractMouseListenerHandler()
 	{
-		super(autodeath);
-		
 		// Initializes attributes
-		initialize();
-		
-		if (actorhandler != null)
-			actorhandler.add(this);
-	}
-	
-	/**
-	 * Creates a new empty mouselistenerhandler
-	 * @param autoDeath Will the handler die when it runs out of living listeners
-	 * @param superHandlers The handlerRelay that holds the handlers that will handle this handler
-	 */
-	public AbstractMouseListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
-	{
-		super(autoDeath, superHandlers);
-		
-		initialize();
-	}
-	
-	/**
-	 * Creates a new empty mouseListenerHandler
-	 * @param autoDeath Will the handler die once it runs out of handleds
-	 */
-	public AbstractMouseListenerHandler(boolean autoDeath)
-	{
-		super(autoDeath);
-		
 		initialize();
 	}
 
@@ -97,7 +66,6 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	{
 		// Updates mouse-enter and mouse-exit	
 		// Checks if entered
-		// TODO: Nullpointer
 		if (!this.movementEventTargets.get(MouseMovementEventType.OVER).contains(l) && 
 				!this.movementEventTargets.get(MouseMovementEventType.ENTER).contains(l) 
 				&& l.isInAreaOfInterest(getMousePosition()))
@@ -224,10 +192,8 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 		}
 	}
 	
-	private static void informObjectAboutMouseEvent(MouseListener listener, 
-			MouseEvent event)
+	private static void informObjectAboutMouseEvent(MouseListener listener, MouseEvent event)
 	{
-		// Checks for nullpointers since errors have occured here
 		if (listener == null || listener.getMouseEventSelector() == null)
 			return;
 		

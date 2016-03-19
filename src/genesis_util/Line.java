@@ -214,6 +214,7 @@ public class Line
 			 * (end - start)
 			 */
 			
+			// TODO: Add parameters for enter & exit points only
 			double discriminantRoot = Math.sqrt(discriminant);
 			double t1 = (-b + discriminantRoot) / (2 * a);
 			
@@ -227,50 +228,6 @@ public class Line
 					points.add(getStart().plus(V.times(t2)));
 			}
 		}
-		
-		/* TODO: Remove old comments
-		// A and B are for simplification
-		// A = (y2 - y1) / (x2 - x1)
-		double A = (getEnd().getSecond() - getStart().getSecond()) / 
-				(getEnd().getFirst() - getStart().getFirst());
-		// B = -Ax1 + y1
-		double B = -A * getStart().getFirst() + getStart().getSecond();
-		
-		// a, b and c form the equation: ax^2 + bx + c = 0
-		// a = 1 + A^2
-		double a = 1 + Math.pow(A, 2);
-		// b = -2 * (x0 + A * (-0.5A - B + y0))
-		double b = -2 * (origin.getFirst() + A * (-0.5 * A - B + origin.getSecond()));
-		// c = x0^2 + B * (B - 2y0) + y0^2 - r^2
-		double c = Math.pow(origin.getFirst(), 2) + B * (B - 2 * origin.getSecond()) + 
-				Math.pow(origin.getSecond(), 2) - Math.pow(radius, 2);
-		
-		// C and D are for solving the equation
-		// D = b^2 - 4ac
-		double D = Math.pow(b, 2) - 4 * a * c;
-		
-		if (D < 0)
-			return points;
-		
-		// C = sqrt(D)
-		double C = Math.sqrt(D);
-		
-		// Calculates the first point
-		// xp1 = (-b + C) / 2a
-		double xp1 = (-b + C) / 2 * a;
-		// y = A * (x - x1) + y1
-		double yp1 = A * (xp1 - getStart().getFirst()) + getStart().getSecond();
-		points.add(new Vector3D(xp1, yp1));
-		
-		// There may also be a second point
-		if (!HelpMath.areApproximatelyEqual(D, 0))
-		{
-			// xp2 = (-b - C) / 2a
-			double xp2 = (-b - C) / 2 * a;
-			double yp2 = A * (xp2 - getStart().getFirst() + getStart().getSecond());
-			points.add(new Vector3D(xp2, yp2));
-		}
-		*/
 		
 		return points;
 	}

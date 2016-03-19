@@ -1,6 +1,8 @@
 package genesis_event;
 
 import genesis_util.Vector3D;
+import utopia.inception.event.Event;
+import utopia.inception.event.StrictEventSelector;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,6 @@ public class MouseEvent implements Event
 	
 	/**
 	 * Creates a new MouseButtonEvent with the given information
-	 * 
 	 * @param type The type of the button originated event
 	 * @param button The mouse button that originated the event
 	 * @param position The mouse position when the event occurred
@@ -53,7 +54,6 @@ public class MouseEvent implements Event
 	
 	/**
 	 * Creates a new MouseMovementEvent with the given information
-	 * 
 	 * @param position The mouse position when the event occurred
 	 * @param duration How many steps the event lasted
 	 */
@@ -347,7 +347,6 @@ public class MouseEvent implements Event
 	
 	/**
 	 * A wrapper for elements that describe AdvancedMouseEvents
-	 * 
 	 * @author Mikko Hilpinen
 	 * @since 17.11.2014
 	 */
@@ -409,7 +408,6 @@ public class MouseEvent implements Event
 	
 	/**
 	 * MouseButtonEventType tells which type of mouse button action originated the event
-	 * 
 	 * @author Mikko Hilpinen
 	 * @since 17.11.2014
 	 */
@@ -435,7 +433,6 @@ public class MouseEvent implements Event
 	
 	/**
 	 * MouseMovementEventType tells which kind of mouse movement action originated the event
-	 * 
 	 * @author Mikko Hilpinen
 	 * @since 17.11.2014
 	 */

@@ -2,6 +2,8 @@ package genesis_event;
 
 import java.awt.Graphics2D;
 
+import utopia.inception.handling.Handled;
+
 /**
  * All objects which implement this class can be drawn. Each also has a depth 
  * that specifies the layer to which the object is drawn. Drawables can also be 

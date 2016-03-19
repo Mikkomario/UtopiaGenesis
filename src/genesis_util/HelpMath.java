@@ -4,14 +4,11 @@ import java.util.List;
 
 /**
  * This class calculates some mathematical problems
- *
  * @author Mikko Hilpinen.
  * @since 28.11.2012.
  */
 public class HelpMath
-{
-	// TODO: Use vectors in the methods
-	
+{	
 	// CONSTRUCTOR	-------------------------------------
 	
 	private HelpMath()
@@ -24,7 +21,6 @@ public class HelpMath
 	
 	/**
 	 * Calculates the direction around the z-axis from one point to another (in degrees)
-	 *
 	 * @param x1 the first point's x coordinate
 	 * @param y1 the first point's y coordinate
 	 * @param x2 the second point's x coordinate
@@ -124,7 +120,6 @@ public class HelpMath
 	
 	/**
 	 * Calculates the distance between two points in 2 dimensions
-	 * 
 	 * @param p1 The first point
 	 * @param p2 The second point
 	 * @return The distance between points p1 and p2 on the x-y plane
@@ -136,7 +131,6 @@ public class HelpMath
 	
 	/**
 	 * Calculates a distance between two points in three dimensions.
-	 *
 	 * @param x1 First point's x coordinate
 	 * @param y1 First point's y coordinate
 	 * @param z1 First point's z coordinate
@@ -175,7 +169,6 @@ public class HelpMath
 	/**
 	 * Returns the x-coordinate of a point that is <b>length</b> pixels away to direction 
 	 * <b>angle</b> from the origin. Cos(direction) * length
-	 *
 	 * @param length How far from the origin the point is (pixels)
 	 * @param direction Towards which direction from the origin the point is 
 	 * (degrees) [0, 360[
@@ -214,7 +207,6 @@ public class HelpMath
 	/**
 	 * Changes the direction to a value between 0 and 360. 
 	 * For example -10 becomes 350.
-	 *
 	 * @param direction The direction to be adjusted (in degrees)
 	 * @return The adjusted direction (in degrees)
 	 */
@@ -230,7 +222,6 @@ public class HelpMath
 	
 	/**
 	 * Tells whether a point is between the given values
-	 *
 	 * @param point The point tested
 	 * @param minx The smallest possible x
 	 * @param maxx The largest possible x
@@ -247,7 +238,6 @@ public class HelpMath
 	
 	/**
 	 * Tells whether a point is in the given area (in 2D space)
-	 * 
 	 * @param point The point tested
 	 * @param min The top left corner of the area
 	 * @param max The bottom right corner of the area
@@ -279,7 +269,6 @@ public class HelpMath
 	
 	/**
 	 * Rotates a point around the origin (along the z-axis) and returns the new position
-	 *
 	 * @param rotationOrigin the origin around which the point is rotated
 	 * @param point The point which will be rotated
 	 * @param rotation How many degrees the point is rotated around the origin
@@ -308,7 +297,6 @@ public class HelpMath
 	/**
 	 * Calculates the directional difference between the two angles. The 
 	 * difference is somewhere between 0 and 180 degrees.
-	 *
 	 * @param angle1 The first angle (degrees) [0, 360[
 	 * @param angle2 The second angle (degrees) [0, 360[
 	 * @return The difference between the two angles in degrees [0, 180[
@@ -328,7 +316,6 @@ public class HelpMath
 	/**
 	 * Calculates the directional difference between the two angles. The 
 	 * difference is somewhere between 0 and 90 degrees.
-	 *
 	 * @param angle1 The first angle (degrees) [0, 360[
 	 * @param angle2 The second angle (degrees) [0, 360[
 	 * @return The difference between the two angles in degrees [0, 90[
@@ -346,7 +333,6 @@ public class HelpMath
 	
 	/**
 	 * Calculates an average point from multiple points
-	 *
 	 * @param points A list of points
 	 * @return The list's average point
 	 */

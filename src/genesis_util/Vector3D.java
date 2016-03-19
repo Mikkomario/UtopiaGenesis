@@ -8,7 +8,6 @@ import java.awt.geom.Point2D;
 /**
  * Vector3D is an array of three number values. Vector3Ds can be used for representing 
  * points and other three number pairs. The vector is immutable once created.
- * 
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
@@ -23,7 +22,6 @@ public class Vector3D
 	
 	/**
 	 * Creates a new vector
-	 * 
 	 * @param first The first number in the vector
 	 * @param second The second number in the vector
 	 * @param third The third number in the vector
@@ -37,7 +35,6 @@ public class Vector3D
 	
 	/**
 	 * Creates a new vector by copying the given vector
-	 * 
 	 * @param other The vector from which the values are copied from
 	 */
 	public Vector3D(final Vector3D other)
@@ -168,7 +165,6 @@ public class Vector3D
 	 */
 	public double getZDirection()
 	{
-		//return HelpMath.getVectorDirection(getFirst(), getSecond());
 		return getZDirection(getFirst(), getSecond());
 	}
 	
@@ -177,7 +173,6 @@ public class Vector3D
 	 */
 	public double getYDirection()
 	{
-		//return HelpMath.pointYDirection(0, 0, getFirst(), getThird());
 		return getZDirection(getFirst(), getThird());
 	}
 	
@@ -186,7 +181,6 @@ public class Vector3D
 	 */
 	public double getXDirection()
 	{
-		//return HelpMath.pointXDirection(0, 0, getThird(), getSecond());
 		return getZDirection(getThird(), getSecond());
 	}
 	
@@ -232,6 +226,7 @@ public class Vector3D
 	}
 	
 	/**
+	 * Projects this vector over another vector
 	 * @param other The other vector
 	 * @return The scalar projection of this vector to the other vector
 	 */

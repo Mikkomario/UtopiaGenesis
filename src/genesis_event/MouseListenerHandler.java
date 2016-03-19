@@ -3,10 +3,11 @@ package genesis_event;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
 import genesis_util.Vector3D;
+import utopia.inception.event.EventSelector;
+import utopia.inception.event.MultiEventSelector;
 
 /**
  * Informs multiple mouselisteners about the mouse's movements and button status
- *
  * @author Mikko Hilpinen.
  * @since 28.12.2012.
  */
@@ -22,46 +23,9 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	
 	/**
 	 * Creates a new empty mouselistenerhandler
-	 *
-	 * @param autodeath Will the handler die when it runs out of listeners
-	 * @param actorhandler The actorhandler that will handle this handler 
-	 * (optional)
-	 * @param superhandler The mouselistenerhandler that will inform this 
-	 * handler (optional)
 	 */
-	public MouseListenerHandler(boolean autodeath, 
-			ActorHandler actorhandler, MouseListenerHandler superhandler)
+	public MouseListenerHandler()
 	{
-		super(autodeath, actorhandler);
-		
-		initialize();
-		
-		// Tries to add the object to the second handler
-		if (superhandler != null)
-			superhandler.add(this);
-	}
-	
-	/**
-	 * Creates a new MouseListenerHandler
-	 * 
-	 * @param autoDeath Will the handler die automatically once it becomes empty again
-	 * @param superHandlers The HandlerRelay that holds the handlers that will handle this handler
-	 */
-	public MouseListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
-	{
-		super(autoDeath, superHandlers);
-		
-		initialize();
-	}
-	
-	/**
-	 * Creates a new empty mouseListenerHandler
-	 * @param autoDeath Will the handler die once it empties
-	 */
-	public MouseListenerHandler(boolean autoDeath)
-	{
-		super(autoDeath);
-		
 		initialize();
 	}
 	

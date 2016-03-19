@@ -1,8 +1,12 @@
 package genesis_event;
 
+import utopia.inception.event.EventSelector;
+import utopia.inception.event.StrictEventSelector;
+import utopia.inception.handling.Handler;
+import utopia.inception.handling.HandlerType;
+
 /**
  * This class informs a group of keylisteners about the key events
- *
  * @author Mikko Hilpinen.
  * @since 14.12.2012.
  */
@@ -12,7 +16,6 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	// ATTRIBUTES	---------------------------------
 	
 	private EventSelector<KeyEvent> selector;
-	
 	private KeyEvent lastEvent;
 	
 	
@@ -20,43 +23,10 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	
 	/**
 	 * Creates a new empty keylistenerhandler. Listeners must be added manually
-	 *
-	 * @param autodeath Will the handler die when it runs out of living handleds
-	 * @param superhandler The handler that will handle this handler (optional)
 	 */
-	public KeyListenerHandler(boolean autodeath, KeyListenerHandler superhandler)
+	public KeyListenerHandler()
 	{
-		super(autodeath);
-		
 		// Initializes attributes
-		initialize();
-		
-		if (superhandler != null)
-			superhandler.add(this);
-	}
-	
-	/**
-	 * Creates a new empty KeyListenerHandler
-	 * 
-	 * @param autoDeath Will the handler die once it becomes empty
-	 * @param superHandlers The HandlerRelay that holds the Handlers that will handle this Handler
-	 */
-	public KeyListenerHandler(boolean autoDeath, HandlerRelay superHandlers)
-	{
-		super(autoDeath, superHandlers);
-		
-		initialize();
-	}
-	
-	/**
-	 * Creates a new empty KeyListenerHandler
-	 * 
-	 * @param autoDeath Will the handler die once it becomes empty
-	 */
-	public KeyListenerHandler(boolean autoDeath)
-	{
-		super(autoDeath);
-		
 		initialize();
 	}
 	
@@ -68,6 +38,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	{
 		// Inform the listeners about the event
 		this.lastEvent = event;
+		// Only informs active listeners
 		handleObjects(true);
 		this.lastEvent = null;
 	}
@@ -87,9 +58,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	@Override
 	protected boolean handleObject(KeyListener l)
 	{
-		// Only informs active listeners
 		informListenerAboutKeyEvent(l, this.lastEvent);
-		
 		return true;
 	}
 	
@@ -101,13 +70,11 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 		// Initializes attributes
 		// The handler listens to all keyboard events
 		this.selector = new StrictEventSelector<KeyEvent, KeyEvent.Feature>();
-		
 		this.lastEvent = null;
 	}
 	
 	/**
 	 * Informs a listener about a keyEvent, but only if the listener listens to such events
-	 * 
 	 * @param listener The listener that might be interested in the event
 	 * @param event The event that the listener may be informed about
 	 */

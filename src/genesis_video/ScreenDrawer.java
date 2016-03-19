@@ -25,6 +25,7 @@ public class ScreenDrawer implements Runnable
 	 */
 	public ScreenDrawer(GameWindow window)
 	{
+		// TODO: Repaint a main panel instead
 		// Initializes attributes
 		this.window = window;
 		this.running = false;
@@ -41,6 +42,9 @@ public class ScreenDrawer implements Runnable
 		// Draws the screen until stopped
 		while (isRunning())
 			draw();
+		
+		// Releases the memory
+		this.window = null;
 	}
 	
 	
@@ -86,8 +90,7 @@ public class ScreenDrawer implements Runnable
 		}
 		catch (InterruptedException exception)
 		{
-			System.out.println("The drawing thread's wait was interrupted");
-			exception.printStackTrace();
+			// Ignored
 		}
 	}
 }

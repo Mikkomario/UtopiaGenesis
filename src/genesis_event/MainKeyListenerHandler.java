@@ -12,7 +12,6 @@ import java.util.Map;
  * This class unites the actor and keyListening interfaces so that keyevents are 
  * only called once in a step. The handler informs all its listeners about the 
  * events
- *
  * @author Mikko Hilpinen.
  * @since 2.12.2012.
  */
@@ -29,27 +28,10 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	 * Simply creates a new KeyListenerHandler. Keylistenerhandler does not 
 	 * die automatically so it must be killed with the kill method. Also, 
 	 * listeners must be added manually later.
-	 * 
-	 * @param actorhandler The handler that will handle this handler (optional)
-	 */
-	public MainKeyListenerHandler(ActorHandler actorhandler)
-	{
-		super(false);
-		
-		// Initializes the attributes
-		initialize();
-		
-		if (actorhandler != null)
-			actorhandler.add(this);
-	}
-	
-	/**
-	 * Creates a new empty MainKeyListenerHandler
 	 */
 	public MainKeyListenerHandler()
 	{
-		super(false);
-		
+		// Initializes the attributes
 		initialize();
 	}
 	
@@ -79,7 +61,6 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	
 	/**
 	 * This method should be called at each keyPressed -event
-	 *
 	 * @param key The key that was pressed
 	 * @param code The key's keycode
 	 * @param coded Does the key use its keycode
@@ -108,7 +89,6 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	
 	/**
 	 * This method should be called at each keyReleased -event
-	 *
 	 * @param key The key that was released
 	 * @param code The key's keycode
 	 * @param coded Does the key use its keycode
@@ -136,13 +116,13 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 	private void initialize()
 	{
 		// Initializes the attributes
-		this.keyStates = new HashMap<KeyEventType, Map<ContentType, List<Integer>>>();
+		this.keyStates = new HashMap<>();
 		for (KeyEventType keyEvent : KeyEventType.values())
 		{
-			this.keyStates.put(keyEvent, new HashMap<ContentType, List<Integer>>());
+			this.keyStates.put(keyEvent, new HashMap<>());
 			for (ContentType contentType : ContentType.values())
 			{
-				this.keyStates.get(keyEvent).put(contentType, new ArrayList<Integer>());
+				this.keyStates.get(keyEvent).put(contentType, new ArrayList<>());
 			}
 		}
 	}
@@ -179,12 +159,10 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 					List<Integer> keys = 
 							MainKeyListenerHandler.this.keyStates.get(eventType).get(contentType);
 					
-					for (int i = 0; i < keys.size(); i++)
+					for (int key : keys)
 					{
-						// TODO: Nullpointer somehow?
 						informListenerAboutKeyEvent(listener, 
-								new KeyEvent(keys.get(i), eventType, contentType, 
-								this.eventDuration));
+								new KeyEvent(key, eventType, contentType, this.eventDuration));
 					}
 				}
 			}

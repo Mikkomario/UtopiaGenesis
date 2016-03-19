@@ -1,6 +1,6 @@
 package genesis_event;
 
-import genesis_util.StateOperatorListener;
+import utopia.inception.handling.HandlerType;
 
 /**
  * GenesisHandlerType contains all the different HandlerTypes used in Utopia Genesis module.
@@ -29,13 +29,7 @@ public enum GenesisHandlerType implements HandlerType
 	 * ActorHandler handles Actors and informs them about step events
 	 * @see ActorHandler
 	 */
-	ACTORHANDLER,
-	/**
-	 * StateHandler handles StateListeners and informs them about stateOperator changes.
-	 * @see StateOperatorListener
-	 * @see genesis_util.StateOperator
-	 */
-	STATEHANDLER;
+	ACTORHANDLER;
 
 	
 	// IMPLEMENTED METHODS	---------------------------------------
@@ -49,7 +43,6 @@ public enum GenesisHandlerType implements HandlerType
 			case KEYHANDLER: return KeyListener.class;
 			case DRAWABLEHANDLER: return Drawable.class;
 			case ACTORHANDLER: return Actor.class;
-			case STATEHANDLER: return StateOperatorListener.class;
 			
 			default: return null;
 		}

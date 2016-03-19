@@ -1,17 +1,15 @@
 package genesis_event;
 
 import genesis_util.DepthConstants;
+import utopia.inception.handling.Handler;
+import utopia.inception.handling.HandlerType;
 
 import java.awt.Graphics2D;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
-import java.util.Stack;
 
 /**
  * The object from this class will draw multiple drawables, calling their 
  * drawSelf-methods and removing them when necessary
- *
  * @author Mikko Hilpinen.
  * @since 27.11.2012.
  */
@@ -22,18 +20,14 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	private int depth, lastDrawableDepth;
 	private boolean usesDepth;
 	private Graphics2D lastg2d;
-	private boolean needsSorting, usesSubDrawers, subDrawersAreReady;
+	private boolean needsSorting, usesSubDrawers;
 	private SubDrawer[] subDrawers;
-	private Stack<Drawable> drawablesWaitingDepthSorting;
-	private List<Drawable> drawablesWaitingToBeAdded;
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
 	
 	/**
 	 * Creates a new drawableHandler. Drawables must be added later manually.
-	 *
-	 * @param autodeath Will the handler die if it has no living drawables to handle
 	 * @param usesDepth Will the handler draw the objects in a depth-specific order
 	 * @param depth How 'deep' the objects in this handler are drawn
 	 * @param depthSortLayers In how many sections the depthSorting is done. 
@@ -41,98 +35,20 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	 * a larger number like 5-6 is excellent. For handlers that contain objects 
 	 * that have large depth changes a smaller number 1-3 is better. If the 
 	 * handler doesn't use depth this doesn't matter.
-	 * @param superhandler The drawableHandler that will draw this handler (optional)
 	 * @see DepthConstants
 	 */
-	public DrawableHandler(boolean autodeath, boolean usesDepth, int depth, 
-			int depthSortLayers, DrawableHandler superhandler)
+	public DrawableHandler(boolean usesDepth, int depth, int depthSortLayers)
 	{
-		super(autodeath);
-		
 		// Initializes attributes
 		initialize(usesDepth, depth, depthSortLayers);
-		
-		if (superhandler != null)
-			superhandler.add(this);
-	}
-	
-	/**
-	 * Creates a new drawablehandler. Drawables must be added later manually.
-	 *
-	 * @param autoDeath Will the handler die if it has no living drawables to handle
-	 * @param usesDepth Will the handler draw the objects in a depth-specific order
-	 * @param depth How 'deep' the objects in this handler are drawn
-	 * @param depthSortLayers In how many sections the depthSorting is done. 
-	 * For handlers that contain objects that have small or no depth changes, 
-	 * a larger number like 5-6 is excellent. For handlers that contain objects 
-	 * that have large depth changes a smaller number 1-3 is better. If the 
-	 * handler doesn't use depth this doesn't matter.
-	 * @param superHandlers The HandlerRelay that holds the handlers that will handle this handler
-	 * @see DepthConstants
-	 */
-	public DrawableHandler(boolean autoDeath, boolean usesDepth, int depth, 
-			int depthSortLayers, HandlerRelay superHandlers)
-	{
-		super(autoDeath, superHandlers);
-		
-		initialize(usesDepth, depth, depthSortLayers);
-	}
-	
-	/**
-	 * Creates a new drawablehandler. Drawables must be added later manually.
-	 *
-	 * @param autoDeath Will the handler die if it has no living drawables to handle
-	 * @param usesDepth Will the handler draw the objects in a depth-specific order
-	 * @param depth How 'deep' the objects in this handler are drawn
-	 * @param depthSortLayers In how many sections the depthSorting is done. 
-	 * For handlers that contain objects that have small or no depth changes, 
-	 * a larger number like 5-6 is excellent. For handlers that contain objects 
-	 * that have large depth changes a smaller number 1-3 is better. If the 
-	 * handler doesn't use depth this doesn't matter.
-	 */
-	public DrawableHandler(boolean autoDeath, boolean usesDepth, int depth, int depthSortLayers)
-	{
-		super(autoDeath);
-		
-		initialize(usesDepth, depth, depthSortLayers);
 	}
 	
 	/**
 	 * Creates a new DrawableHandler that doesn't use depth
-	 * @param autoDeath Will the handler automatically die once it runs out of handleds
-	 * @param superHandler The drawableHandler that will handle this handler
 	 */
-	public DrawableHandler(boolean autoDeath, DrawableHandler superHandler)
+	public DrawableHandler()
 	{
-		super(autoDeath);
-		
 		// Initializes attributes
-		initialize(false, 0, 1);
-		
-		if (superHandler != null)
-			superHandler.add(this);
-	}
-	
-	/**
-	 * Creates a new DrawableHandler that doesn't use depth
-	 * @param autoDeath Will the handler automatically die once it runs out of handleds
-	 * @param handlers The handlers that will handle this handler
-	 */
-	public DrawableHandler(boolean autoDeath, HandlerRelay handlers)
-	{
-		super(autoDeath, handlers);
-		
-		initialize(false, 0, 1);
-	}
-	
-	/**
-	 * Creates a new DrawableHandler that doesn't use depth
-	 * @param autoDeath Will the handler automatically die once it runs out of handleds
-	 */
-	public DrawableHandler(boolean autoDeath)
-	{
-		super(autoDeath);
-		
 		initialize(false, 0, 1);
 	}
 	
@@ -159,14 +75,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	public int getDepth()
 	{
 		return this.depth;
-	}
-	
-	@Override
-	public void add(Drawable d)
-	{
-		// Adds the drawables to a separate list first. The list is added only after a 
-		// single handling iteration
-		this.drawablesWaitingToBeAdded.add(d);
 	}
 	
 	@Override
@@ -197,26 +105,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 	}
 	
 	@Override
-	protected void handleObjects(HandlingOperator operator, boolean checkHandlingState)
-	{
-		super.handleObjects(operator, checkHandlingState);
-		
-		// Drawables are added a bit late
-		List<Drawable> add = new ArrayList<>();
-		add.addAll(this.drawablesWaitingToBeAdded);
-		this.drawablesWaitingToBeAdded.clear();
-		
-		for (Drawable d : add)
-		{
-			delayedAdd(d);
-		}
-	}
-	
-	
-	// OTHER METHODS	---------------------------------------------------
-	
-	// The add function in this handler is delayed by one iteration
-	private void delayedAdd(Drawable d)
+	public void add(Drawable d)
 	{
 		// Checks if depth causes additional issues
 		if (this.usesDepth && !(d instanceof SubDrawer))
@@ -224,15 +113,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 			// If there are subDrawers, checks to which this drawable should 
 			// be added to
 			if (this.usesSubDrawers)
-			{
-				// If the subDrawers aren't ready yet, simply adds the drawable 
-				// to a stack of waiting objects
-				if (!this.subDrawersAreReady)
-				{
-					this.drawablesWaitingDepthSorting.push(d);
-					return;
-				}
-				
+			{	
 				int drawableDepth = d.getDepth();
 				boolean spotFound = false;
 					
@@ -269,17 +150,17 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 			super.add(d);
 	}
 	
+	
+	// OTHER METHODS	---------------------------------------------------
+	
 	private void initialize(boolean usesDepth, int depth, int depthSortLayers)
 	{
 		// Initializes attributes
-		this.drawablesWaitingDepthSorting = new Stack<Drawable>();
-		this.drawablesWaitingToBeAdded = new ArrayList<>();
 		this.depth = depth;
 		this.usesDepth = usesDepth;
 		this.lastg2d = null;
 		this.needsSorting = false;
 		this.lastDrawableDepth = DepthConstants.BOTTOM;
-		this.subDrawersAreReady = false;
 		
 		// Initializes the subdrawers (if needed)
 		if (usesDepth && depthSortLayers > 1)
@@ -297,13 +178,6 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 						lastMaxDepth - depthRange, lastMaxDepth);
 				lastMaxDepth -= depthRange;
 			}
-			
-			this.subDrawersAreReady = true;
-		
-			// Adds all 1000 drawables that wanted to be added before the 
-			// subDrawers could be initialized
-			while (this.drawablesWaitingDepthSorting.size() > 0)
-				add(this.drawablesWaitingDepthSorting.pop());
 		}
 		else
 		{
@@ -339,12 +213,16 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		
 		public SubDrawer(DrawableHandler superhandler, int minDepth, int maxDepth)
 		{
-			super(false, true, minDepth, 1, superhandler);
+			super(true, minDepth, 1);
 			
 			// Initializes attributes
 			this.minDepth = minDepth;
 			this.maxDepth = maxDepth;
 			this.superHandler = superhandler;
+			
+			// This is an exception to the "no adding yourself to a handler" rule since 
+			// the reference is saved anyway
+			this.superHandler.add(this);
 		}
 		
 		
@@ -354,7 +232,7 @@ public class DrawableHandler extends Handler<Drawable> implements Drawable
 		protected boolean handleObject(Drawable d)
 		{
 			// Also checks if the object is out of the depth range
-			if (d.getDepth() < this.minDepth || d.getDepth() > this.maxDepth)
+			if (!depthIsWithinRange(d.getDepth()))
 			{
 				// Removes the drawable from this depth range and requests a 
 				// repositioning

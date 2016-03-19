@@ -1,7 +1,6 @@
 package genesis_video;
 
 import genesis_event.ActorHandler;
-import genesis_event.HandlerRelay;
 import genesis_event.KeyListenerHandler;
 import genesis_event.MainKeyListenerHandler;
 import genesis_event.MainMouseListenerHandler;
@@ -9,6 +8,7 @@ import genesis_event.MouseListenerHandler;
 import genesis_event.StepHandler;
 import genesis_util.Vector3D;
 import genesis_video.MainPanel.ScreenSplit;
+import utopia.inception.handling.HandlerRelay;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -30,13 +30,15 @@ import javax.swing.JPanel;
 /**
  * GameWindow is the main frame of the program in which all the drawing is done. 
  * The window should hold at least one gamepanel.
- * 
  * @author Unto Solala & Mikko Hilpinen
  * @since 8.8.2013
  * @see GamePanel
  */
 public class GameWindow extends JFrame
 {	
+	// TODO: Separate the controller properties of this class (handlers) into a separate entity
+	// The view elements (handling main panel, should remain here)
+	
 	// ATTRIBUTES ---------------------------------------------------------
 	
 	private Vector3D dimensions, scaling, leftTopPaddings;
@@ -53,7 +55,7 @@ public class GameWindow extends JFrame
 	/**
 	 * The height of the border at the top of the window (if there is one)
 	 */
-	private static final int BORDERHEIGHT = 32;
+	private static final int BORDERHEIGHT = 32; // TODO: Remove and use insets instead
 	private static final long serialVersionUID = -7682965360963042160L;
 	
 	
@@ -61,7 +63,6 @@ public class GameWindow extends JFrame
 	
 	/**
 	 * Creates a new window frame with given width and height.
-	 * 
 	 * @param dimensions The size of the window (in pixels)
 	 * @param title The title shown in the window's border
 	 * @param hastoolbar Should the window have an toolbar (usually false if 
@@ -84,7 +85,6 @@ public class GameWindow extends JFrame
 	
 	/**
 	 * Creates a new window
-	 * 
 	 * @param dimensions The size of the window
 	 * @param title The title shown in the window
 	 * @param hasToolbar Does the window have a tool bar
@@ -144,7 +144,6 @@ public class GameWindow extends JFrame
 	 */
 	public void callMousePositionUpdate()
 	{
-		// Throws exceptions from time to time so nullcheck is needed
 		if (MouseInfo.getPointerInfo() == null)
 			return;
 		
@@ -175,9 +174,8 @@ public class GameWindow extends JFrame
 	 * Scales the window to fill the given size. Panels should already be 
 	 * added to the window or they won't be scaled. The resolution of the 
 	 * window stays the same.
-	 * 
 	 * @param newDimensions The new size of the window
-	 * @param keepaspectratio Should the ratio between x- and yscaling stay 
+	 * @param keepaspectratio Should the ratio between x and y -scaling stay 
 	 * the same through the process
 	 * @param allowpadding Should the screen get the given size even if 
 	 * aspect ratio is kept (will cause empty areas to appear on the screen)
@@ -193,37 +191,37 @@ public class GameWindow extends JFrame
 		Vector3D scale = newDimensions.dividedBy(lastDimensions);
 
 		// Changes the window's size if it doesn't need any more fixing
-		if (!keepaspectratio || allowpadding)
+		if (!keepaspectratio)
 			setSize(newDimensions.toDimension());
 		// The program may need to update the scaling so the ratio stays the same
-		if (keepaspectratio)
+		else
 		{
 			double smallerScale = Math.min(scale.getFirst(), scale.getSecond());
 			scale = new Vector3D(smallerScale, smallerScale);
-			Vector3D newSizes = lastDimensions.times(scale);
+			Vector3D newDimensionsWithAspectRatio = lastDimensions.times(scale);
 			
 			// Changes the window's size accordingly
 			if (!allowpadding)
-				setSize(newSizes.toDimension());
+				setSize(newDimensionsWithAspectRatio.toDimension());
 			// Or adds padding
 			else
 			{
 				// If new width is not the same as the intended, adds vertical 
 				// padding
-				if (newSizes.getFirst() < newDimensions.getFirst())
+				if (newDimensionsWithAspectRatio.getFirst() < newDimensions.getFirst())
 				{
 					this.leftTopPaddings = new Vector3D((newDimensions.getFirst() - 
-							newSizes.getFirst()) / 2, 0);
+							newDimensionsWithAspectRatio.getFirst()) / 2, 0);
 
 					addPadding(new Vector3D(this.leftTopPaddings.getFirst(), 
 							newDimensions.getSecond()), BorderLayout.WEST);
 					addPadding(new Vector3D(this.leftTopPaddings.getFirst(), 
 							newDimensions.getSecond()), BorderLayout.EAST);
 				}
-				else if (newSizes.getSecond() < newDimensions.getSecond())
+				else if (newDimensionsWithAspectRatio.getSecond() < newDimensions.getSecond())
 				{
 					this.leftTopPaddings = new Vector3D(0, (newDimensions.getSecond() - 
-							newSizes.getSecond()) / 2);
+							newDimensionsWithAspectRatio.getSecond()) / 2);
 
 					addPadding(new Vector3D(newDimensions.getFirst(), 
 							this.leftTopPaddings.getSecond()), BorderLayout.NORTH);
@@ -257,7 +255,7 @@ public class GameWindow extends JFrame
 	
 	/**
 	 * Makes the window fill the whole screen without borders
-	 * @param keepaspectratio Should the ratio between x- and yscaling stay 
+	 * @param keepaspectratio Should the ratio between x and y -scaling stay 
 	 * the same through the process
 	 */
 	public void setFullScreen(boolean keepaspectratio)

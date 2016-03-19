@@ -1,7 +1,6 @@
 package genesis_video;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,9 +9,7 @@ import genesis_util.Vector3D;
 import javax.swing.JPanel;
 
 /**
- * MainPanel is the panel that draws all the game content. MainPanel can hold multiple separate 
- * GamePanels
- * 
+ * MainPanel is the panel that draws game content. a MainPanel can hold multiple GamePanels
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
@@ -22,58 +19,71 @@ public class MainPanel extends JPanel
 	
 	private static final long serialVersionUID = 20842862831771371L;
 
-	private Vector3D dimensions, scaling;
+	private Vector3D scaling;
 	private List<GamePanel> gamePanels;
 	private ScreenSplit split;
 	
+	// TODO: Move some of the game window functionality here (mouse, keyboard, drawing on action)
 	
 	// CONSTRUCTOR	------------------------------------
 	
 	/**
-	 * Creates a new panel with the given sizes
-	 * 
-	 * @param dimensions The panels original size
+	 * Creates a new panel with the given resolution
+	 * @param dimensions The panels initial size
 	 * @param split How the screen is split between multiple gamePanels
 	 */
-	public MainPanel(Vector3D dimensions, ScreenSplit split)
+	public MainPanel(Dimension dimensions, ScreenSplit split)
 	{
 		// Initializes attributes
-		this.dimensions = dimensions;
 		this.scaling = Vector3D.identityVector();
-		this.gamePanels = new ArrayList<GamePanel>();
+		this.gamePanels = new ArrayList<>();
 		this.split = split;
 		
 		// Formats the screen
 		setVisible(true);
-		setLayout(new GridBagLayout());
+		setLayout(null);
 		
 		updatePanelPositions();
+		setSize(dimensions);
+	}
+	
+	
+	// IMPLEMENTED METHODS	---------------------
+	
+	@Override
+	public void setSize(Dimension size)
+	{
+		super.setSize(size);
 		updateSizes();
+		updatePanelPositions();
+	}
+	
+	@Override
+	public void setSize(int width, int height)
+	{
+		super.setSize(width, height);
+		updateSizes();
+		updatePanelPositions();
 	}
 	
 	
 	// GETTERS & SETTERS	----------------------------
 	
 	/**
-	 * @return How many GamePanels are currently drawn in this panel
+	 * @return The game panels held in this panel. The returned list is a copy and changes 
+	 * made to it won't affect the original
+	 */
+	public List<GamePanel> getGamePanels()
+	{
+		return new ArrayList<>(this.gamePanels);
+	}
+	
+	/**
+	 * @return How many game panels are currently held in this panel
 	 */
 	public int getGamePanelAmount()
 	{
 		return this.gamePanels.size();
-	}
-	
-	/**
-	 * Returns a gamePanel from the main panel
-	 * 
-	 * @param index The index of the GamePanel, starting from 0
-	 * @return A gamePanel from this panel or null if no panel with that index exists
-	 */
-	public GamePanel getGamePanel(int index)
-	{
-		if (index < 0 || index >= this.gamePanels.size())
-			return null;
-			
-		return this.gamePanels.get(index);
 	}
 	
 	
@@ -85,7 +95,7 @@ public class MainPanel extends JPanel
 	 */
 	public void addGamePanel(GamePanel panel)
 	{
-		if (panel != null && !this.gamePanels.contains(panel) && getGamePanelAmount() < 4)
+		if (panel != null && !this.gamePanels.contains(panel) && this.gamePanels.size() < 4)
 		{
 			this.gamePanels.add(panel);
 			updatePanelPositions();
@@ -102,7 +112,7 @@ public class MainPanel extends JPanel
 		if (getGamePanelAmount() >= 4)
 			return null;
 		
-		GamePanel newPanel = new GamePanel(this.dimensions);
+		GamePanel newPanel = new GamePanel(getSize());
 		addGamePanel(newPanel);
 		
 		return newPanel;
@@ -123,7 +133,8 @@ public class MainPanel extends JPanel
 	}
 	
 	/**
-	 * Changes the panel's scaling
+	 * Changes the panel's scaling. This won't change the panel's resolution, just the in-game 
+	 * size
 	 * @param newScale The new scaling the panel receives
 	 */
 	public void setScale(Vector3D newScale)
@@ -133,7 +144,7 @@ public class MainPanel extends JPanel
 	}
 	
 	/**
-	 * Scales the panel's dimensions
+	 * Scales the panel's in-game size. Doesn't affect the panel's resolution
 	 * @param scaling How much the dimensions are scaled
 	 */
 	public void scale(Vector3D scaling)
@@ -141,99 +152,74 @@ public class MainPanel extends JPanel
 		setScale(this.scaling.times(scaling));
 	}
 	
+	/**
+	 * Changes the panel's resolution, maintaining the in-game size
+	 * @param newSize The new resolution of the panel
+	 */
+	public void scaleToFill(Vector3D newSize)
+	{
+		Vector3D originalSize = new Vector3D(getWidth(), getHeight());
+		Vector3D scaling = newSize.dividedBy(originalSize);
+		
+		scale(scaling);
+		setSize(newSize.toDimension());
+	}
+	
 	private void updateSizes()
 	{
-		// Calculates the main panel size
-		Vector3D newSizes = this.dimensions.times(this.scaling);
-		setSize(newSizes.toDimension());
-		
 		// Updates the GamePanel sizes
 		for (int i = 0; i < this.gamePanels.size(); i++)
 		{
-			Vector3D panelSize = new Vector3D(newSizes);
+			Vector3D panelSize = new Vector3D(getWidth(), getHeight());
 			
 			if (getGamePanelAmount() > 1)
 			{
 				if (this.split == ScreenSplit.VERTICAL || getGamePanelAmount() == 4 || 
 						(getGamePanelAmount() == 3 && i > 0))
-					panelSize = new Vector3D(panelSize.getFirst() * 0.5, panelSize.getSecond());
+					panelSize = panelSize.dividedBy(2, 1, 1);
 				if (this.split == ScreenSplit.HORIZONTAL || getGamePanelAmount() == 4 || 
 						(getGamePanelAmount() == 3 && i > 0))
-					panelSize = new Vector3D(panelSize.getFirst(), panelSize.getSecond() * 0.5);
+					panelSize = panelSize.dividedBy(1, 2, 1);
 			}
 			
-			getGamePanel(i).setSizes(panelSize);
+			this.gamePanels.get(i).setSize(panelSize.toDimension());
 		}
 	}
 	
 	private void updatePanelPositions()
 	{
-		// Removes the old panels
-		for (GamePanel panel : this.gamePanels)
-		{
-			remove(panel);
-		}
-		// Adds the panels again
+		// Repositions each panel
 		for (int i = 0; i < getGamePanelAmount(); i++)
 		{
-			GridBagConstraints c = new GridBagConstraints();
+			int x = 0;
+			int y = 0;
 			
-			if (getGamePanelAmount() == 1)
+			// On 4 panel split screen, each panel is ordered similarly
+			if (getGamePanelAmount() == 4)
 			{
-				c.gridx = 0;
-				c.gridy = 0;
+				x = i % 2;
+				y = i / 2;
 			}
-			else if (getGamePanelAmount() == 2)
+			// The first panel is always at (0, 0)
+			else if (i > 0)
 			{
+				// The 2nd and 3rd panel share the bottom half on horizontal split
 				if (this.split == ScreenSplit.HORIZONTAL)
 				{
-					c.gridx = 0;
-					c.gridy = i;
+					y = 1;
+					if (i == 2)
+						x = 1;
 				}
+				// On vertical split, the right side is shared
 				else
 				{
-					c.gridx = i;
-					c.gridy = 0;
+					x = 1;
+					if (i == 2)
+						y = 1;
 				}
-			}
-			else if (getGamePanelAmount() == 3)
-			{
-				if (this.split == ScreenSplit.HORIZONTAL)
-				{
-					if (i == 0)
-					{
-						c.gridx = 0;
-						c.gridy = 0;
-						c.gridwidth = 2;
-					}
-					else
-					{
-						c.gridx = i - 1;
-						c.gridy = 1;
-					}
-				}
-				else
-				{
-					if (i == 0)
-					{
-						c.gridx = 0;
-						c.gridy = 0;
-						c.gridheight = 2;
-					}
-					else
-					{
-						c.gridx = 1;
-						c.gridy = i - 1;
-					}
-				}
-			}
-			else
-			{
-				c.gridx = i % 2;
-				c.gridy = i / 2;
 			}
 			
-			add(getGamePanel(i), c);
+			this.gamePanels.get(i).setLocation(x * getWidth() / 2, y * getHeight() / 2);
 		}
 	}
 	
@@ -246,7 +232,7 @@ public class MainPanel extends JPanel
 	 * @author Mikko Hilpinen
 	 * @since 18.11.2014
 	 */
-	public enum ScreenSplit
+	public static enum ScreenSplit
 	{
 		/**
 		 * The panels are placed a top of each other
