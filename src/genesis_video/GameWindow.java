@@ -41,6 +41,7 @@ public class GameWindow extends JFrame
 	
 	// ATTRIBUTES ---------------------------------------------------------
 	
+	// TODO: Paddings don't need to be measured anymore
 	private Vector3D dimensions, scaling, leftTopPaddings;
 	
 	private MainMouseListenerHandler mainmousehandler;
@@ -123,21 +124,6 @@ public class GameWindow extends JFrame
 	
 	
 	// OTHER METHODS	 ---------------------------------------------------
-	
-	private void formatWindow()
-	{
-		//Let's set our window's layout
-		this.setLayout(new BorderLayout());
-		//Let's make sure our window closes properly
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		//Let's set our window's size
-		this.setSize(this.dimensions.toDimension());
-		// Also sets other stats
-		setResizable(false);
-		getContentPane().setBackground(Color.BLACK);
-		//And make it visible
-		this.setVisible(true);
-	}
 	
 	/**
 	 * Updates mouse's position in the game
@@ -325,6 +311,21 @@ public class GameWindow extends JFrame
 		// Starts the game
 		new Thread(this.stepHandler).start();
 		new Thread(this.screendrawer).start();
+	}
+	
+	private void formatWindow()
+	{
+		//Let's set our window's layout
+		this.setLayout(new BorderLayout());
+		//Let's make sure our window closes properly
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//Let's set our window's size
+		this.setSize(this.dimensions.toDimension());
+		// Also sets other stats
+		setResizable(false);
+		getContentPane().setBackground(Color.BLACK);
+		//And make it visible
+		this.setVisible(true);
 	}
 	
 	private void addPadding(Vector3D dimensions, String direction)
