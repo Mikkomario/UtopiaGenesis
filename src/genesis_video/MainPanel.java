@@ -1,6 +1,10 @@
 package genesis_video;
 
 import java.awt.Dimension;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,62 +12,77 @@ import genesis_util.Vector3D;
 
 import javax.swing.JPanel;
 
+import genesis_event.ActorHandler;
+import genesis_event.KeyListenerHandler;
+import genesis_event.MainKeyListenerHandler;
+
 /**
  * MainPanel is the panel that draws game content. a MainPanel can hold multiple GamePanels
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
-public class MainPanel extends JPanel
+public class MainPanel extends JPanel implements ComponentListener
 {
 	// ATTRIBUTES	------------------------------------
 	
 	private static final long serialVersionUID = 20842862831771371L;
 
-	private Vector3D scaling;
 	private List<GamePanel> gamePanels;
 	private ScreenSplit split;
 	
-	// TODO: Move some of the game window functionality here (mouse, keyboard, drawing on action)
+	private KeyListenerHandler keyHandler;
+	private ActorHandler actorHandler = new ActorHandler();
+	// TODO: Move some of the game window functionality here (keyboard, drawing on action)
+	
 	
 	// CONSTRUCTOR	------------------------------------
 	
 	/**
 	 * Creates a new panel with the given resolution
-	 * @param dimensions The panels initial size
+	 * @param size The panels initial size
 	 * @param split How the screen is split between multiple gamePanels
 	 */
-	public MainPanel(Dimension dimensions, ScreenSplit split)
+	public MainPanel(Dimension size, ScreenSplit split)
 	{
 		// Initializes attributes
-		this.scaling = Vector3D.identityVector();
 		this.gamePanels = new ArrayList<>();
 		this.split = split;
 		
+		PanelKeyHandler keyHandler = new PanelKeyHandler();
+		this.keyHandler = keyHandler;
+		addKeyListener(keyHandler);
+		
 		// Formats the screen
+		setSize(size);
 		setVisible(true);
 		setLayout(null);
-		
-		updatePanelPositions();
-		setSize(dimensions);
 	}
 	
 	
 	// IMPLEMENTED METHODS	---------------------
 	
 	@Override
-	public void setSize(Dimension size)
+	public void componentResized(ComponentEvent e)
 	{
-		super.setSize(size);
-		updateSizes();
-		updatePanelPositions();
+		updatePanelBounds();
 	}
-	
+
 	@Override
-	public void setSize(int width, int height)
+	public void componentMoved(ComponentEvent e)
 	{
-		super.setSize(width, height);
-		updateSizes();
-		updatePanelPositions();
+		// Ignored
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e)
+	{
+		// Ignored
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e)
+	{
+		// Ignored
 	}
 	
 	
@@ -98,8 +117,13 @@ public class MainPanel extends JPanel
 		if (panel != null && !this.gamePanels.contains(panel) && this.gamePanels.size() < 4)
 		{
 			this.gamePanels.add(panel);
-			updatePanelPositions();
-			updateSizes();
+			updatePanelBounds();
+			
+			// Updates the panel's handler information, if necessary
+			if (!panel.getHandlerRelay().containsHandlerOfType(this.keyHandler.getHandlerType()))
+				panel.getHandlerRelay().addHandler(this.keyHandler);
+			if (!panel.getHandlerRelay().containsHandlerOfType(this.actorHandler.getHandlerType()))
+				panel.getHandlerRelay().addHandler(this.actorHandler);
 		}
 	}
 	
@@ -107,6 +131,7 @@ public class MainPanel extends JPanel
 	 * Creates and adds a new GamePanel to the screen.
 	 * @return The panel that was just added
 	 */
+	/*
 	public GamePanel addGamePanel()
 	{
 		if (getGamePanelAmount() >= 4)
@@ -116,7 +141,7 @@ public class MainPanel extends JPanel
 		addGamePanel(newPanel);
 		
 		return newPanel;
-	}
+	}*/
 	
 	/**
 	 * Removes a new GamePanel from the panels
@@ -127,45 +152,11 @@ public class MainPanel extends JPanel
 		if (panel != null && this.gamePanels.contains(panel))
 		{
 			this.gamePanels.remove(panel);
-			updatePanelPositions();
-			updateSizes();
+			updatePanelBounds();
 		}
 	}
 	
-	/**
-	 * Changes the panel's scaling. This won't change the panel's resolution, just the in-game 
-	 * size
-	 * @param newScale The new scaling the panel receives
-	 */
-	public void setScale(Vector3D newScale)
-	{
-		this.scaling = newScale;
-		updateSizes();
-	}
-	
-	/**
-	 * Scales the panel's in-game size. Doesn't affect the panel's resolution
-	 * @param scaling How much the dimensions are scaled
-	 */
-	public void scale(Vector3D scaling)
-	{
-		setScale(this.scaling.times(scaling));
-	}
-	
-	/**
-	 * Changes the panel's resolution, maintaining the in-game size
-	 * @param newSize The new resolution of the panel
-	 */
-	public void scaleToFill(Vector3D newSize)
-	{
-		Vector3D originalSize = new Vector3D(getWidth(), getHeight());
-		Vector3D scaling = newSize.dividedBy(originalSize);
-		
-		scale(scaling);
-		setSize(newSize.toDimension());
-	}
-	
-	private void updateSizes()
+	private void updatePanelBounds()
 	{
 		// Updates the GamePanel sizes
 		for (int i = 0; i < this.gamePanels.size(); i++)
@@ -184,6 +175,8 @@ public class MainPanel extends JPanel
 			
 			this.gamePanels.get(i).setSize(panelSize.toDimension());
 		}
+		
+		updatePanelPositions();
 	}
 	
 	private void updatePanelPositions()
@@ -242,5 +235,36 @@ public class MainPanel extends JPanel
 		 * The panels are placed next to each other
 		 */
 		VERTICAL;
+	}
+	
+	
+	// NESTED CLASSES	---------------
+	
+	/**
+	 * This listener handler receives its events from the awt keyboard events
+	 * @author Unto Solala & Mikko Hilpinen
+	 * @since 8.8.2013
+	 */
+	private static class PanelKeyHandler extends MainKeyListenerHandler implements KeyListener
+	{
+		@Override
+		public void keyPressed(KeyEvent ke)
+		{
+			onKeyPressed(ke.getKeyChar(), ke.getKeyCode(), 
+					ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED);
+		}
+
+		@Override
+		public void keyReleased(KeyEvent ke)
+		{
+			onKeyReleased(ke.getKeyChar(), ke.getKeyCode(), 
+					ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED);
+		}
+
+		@Override
+		public void keyTyped(KeyEvent arg0)
+		{
+			// Not needed
+		}
 	}
 }

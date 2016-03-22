@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class unites the actor and keyListening interfaces so that keyevents are 
+ * This class unites the actor and keyListening interfaces so that key events are 
  * only called once in a step. The handler informs all its listeners about the 
  * events
  * @author Mikko Hilpinen.

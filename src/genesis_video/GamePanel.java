@@ -1,7 +1,6 @@
 package genesis_video;
 
 import genesis_event.DrawableHandler;
-import genesis_event.MainMouseListenerHandler;
 import genesis_util.DepthConstants;
 import genesis_util.Vector3D;
 import utopia.inception.handling.HandlerRelay;
@@ -11,10 +10,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
@@ -31,13 +26,11 @@ public class GamePanel extends JPanel implements ComponentListener
 	
 	private static final long serialVersionUID = -6510794439938372969L;
 	
-	private Vector3D scaling, gameWorldSize, originalGameWorldSize;
+	private Vector3D gameWorldSize, originalGameWorldSize;
 	private DrawableHandler drawer;
-	private boolean clearPrevious;
+	private boolean clearPrevious = true;
 	private ScalingPolicy scalingPolicy;
-	
-	private HandlerRelay handlerRelay;
-	// TODO: Move mouse listening here, add a separate handler relay
+	private double scaling = 1;
 	
 	
 	// CONSTRUCTOR ---------------------------------------------------------
@@ -47,20 +40,16 @@ public class GamePanel extends JPanel implements ComponentListener
 	 * @param gameWorldSize The size of the game world viewed through this panel
 	 * @param scalingPolicy How the panel's in-game world should be scaled when the panel's 
 	 * aspect ratio changes
+	 * @param handlers The handlers that will handle the component(s) created by this panel
 	 */
-	public GamePanel(Vector3D gameWorldSize, ScalingPolicy scalingPolicy)
+	public GamePanel(Vector3D gameWorldSize, ScalingPolicy scalingPolicy, HandlerRelay handlers)
 	{
 		// Initializes attributes
-		this.scaling = Vector3D.identityVector();
-		this.clearPrevious = true;
 		this.gameWorldSize = gameWorldSize;
 		this.originalGameWorldSize = gameWorldSize;
 		this.scalingPolicy = scalingPolicy;
 		
-		this.handlerRelay = new HandlerRelay();
 		this.drawer = new DrawableHandler(true, DepthConstants.NORMAL, 5);
-		this.handlerRelay.addHandler(this.drawer);
-		// TODO: Also add mouse handling
 		
 		//Formats the panel
 		setLayout(null);
@@ -84,8 +73,8 @@ public class GamePanel extends JPanel implements ComponentListener
 		AffineTransform previousTransform = g2d.getTransform();
 		
 		// Scales the area of drawing
-		if (!this.scaling.equals(Vector3D.identityVector()))
-			g2d.scale(this.scaling.getFirst(), this.scaling.getSecond());
+		if (this.scaling != 1)
+			g2d.scale(this.scaling, this.scaling);
 		
 		// Clears the former drawings (optional)
 		if (this.clearPrevious)
@@ -130,16 +119,7 @@ public class GamePanel extends JPanel implements ComponentListener
 	}
 	
 	
-	// OTHER METHODS ---------------------------------------------------
-	
-	/**
-	 * Changes whether the previous drawings should be cleared before new are drawn
-	 * @param clearEnabled Should previous drawings be cleared before new are drawn
-	 */
-	public void setClearEnabled(boolean clearEnabled)
-	{
-		this.clearPrevious = clearEnabled;
-	}
+	// ACCESSORS	------------------
 	
 	/**
 	 * @return The drawablehandler that draws the content of this panel
@@ -158,15 +138,6 @@ public class GamePanel extends JPanel implements ComponentListener
 	}
 	
 	/**
-	 * @return The preffered in-game size of the panel. This is achieved if the panel's 
-	 * aspect ratio is that of the this vector's
-	 */
-	public Vector3D getPrefferedGameWorldSize()
-	{
-		return this.originalGameWorldSize;
-	}
-	
-	/**
 	 * Changes the in-game size of the panel. The resulting in-game size may vary depending 
 	 * from the aspect ratio of the panel.
 	 * @param gameWorldSize The new preferred game-world size for the component
@@ -177,6 +148,35 @@ public class GamePanel extends JPanel implements ComponentListener
 		
 		// Calculates the new scaling
 		calculateScaling();
+	}
+	
+	/**
+	 * @return The preffered in-game size of the panel. This is achieved if the panel's 
+	 * aspect ratio is that of the this vector's
+	 */
+	public Vector3D getPrefferedGameWorldSize()
+	{
+		return this.originalGameWorldSize;
+	}
+	
+	/**
+	 * @return How much the game world is scaled when displayed on the panel
+	 */
+	public double getScaling()
+	{
+		return this.scaling;
+	}
+	
+	
+	// OTHER METHODS ---------------------------------------------------
+	
+	/**
+	 * Changes whether the previous drawings should be cleared before new are drawn
+	 * @param clearEnabled Should previous drawings be cleared before new are drawn
+	 */
+	public void setClearEnabled(boolean clearEnabled)
+	{
+		this.clearPrevious = clearEnabled;
 	}
 	
 	private void calculateScaling()
@@ -210,7 +210,7 @@ public class GamePanel extends JPanel implements ComponentListener
 		}
 		
 		// Calculates the scaling used in drawing
-		this.scaling = size.dividedBy(this.gameWorldSize);
+		this.scaling = size.dividedBy(this.gameWorldSize).getFirst();
 	}
 	
 	
@@ -240,67 +240,5 @@ public class GamePanel extends JPanel implements ComponentListener
 		 * necessary. The total area of the in game world is preserved.
 		 */
 		PROJECT
-	}
-	
-	
-	// NESTED CLASSES	---------------
-	
-	/**
-	 * This mouse handler also originates new mouse events based on the awt mouse events 
-	 * it receives
-	 * @author Unto Solala & Mikko Hilpinen
-	 * @since 8.8.2013
-	 */
-	private static class PanelMouseListenerHandler extends MainMouseListenerHandler 
-			implements MouseListener, MouseWheelListener
-	{
-		// 
-		
-		@Override
-		public void mouseClicked(MouseEvent e)
-		{
-			// Not needed
-		}
-
-		@Override
-		public void mouseEntered(MouseEvent e)
-		{
-			// Not needed
-		}
-
-		@Override
-		public void mouseExited(MouseEvent e)
-		{
-			// Not needed
-		}
-
-		@Override
-		public void mousePressed(MouseEvent e)
-		{
-			Vector3D mousePosition = new Vector3D(e.getPoint());
-			
-			// Informs the mouse status (scaling affects the mouse coordinates)
-			GameWindow.this.mainmousehandler.setMouseStatus(
-					getScaledPoint(mousePosition), true, e.getButton());
-		}
-
-		@Override
-		public void mouseReleased(MouseEvent e)
-		{
-			Vector3D mousePosition = new Vector3D(e.getPoint());
-			
-			// Informs the mouse status (scaling affects the mouse coordinates)
-			GameWindow.this.mainmousehandler.setMouseStatus(
-					getScaledPoint(mousePosition), false, e.getButton());
-		}
-
-		@Override
-		public void mouseWheelMoved(MouseWheelEvent e)
-		{
-			GameWindow.this.mainmousehandler.setMousePosition(getScaledPoint(
-					new Vector3D(e.getPoint())));
-			GameWindow.this.mainmousehandler.informMouseWheelTurn(e.getPreciseWheelRotation(), 
-					e.getWheelRotation());
-		}
 	}
 }
