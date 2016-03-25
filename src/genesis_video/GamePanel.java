@@ -3,7 +3,6 @@ package genesis_video;
 import genesis_event.DrawableHandler;
 import genesis_util.DepthConstants;
 import genesis_util.Vector3D;
-import utopia.inception.handling.HandlerRelay;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -32,6 +31,9 @@ public class GamePanel extends JPanel implements ComponentListener
 	private ScalingPolicy scalingPolicy;
 	private double scaling = 1;
 	
+	private int refreshWaitMillis;
+	private RefreshThread refreshThread = null;
+	
 	
 	// CONSTRUCTOR ---------------------------------------------------------
 	
@@ -40,11 +42,17 @@ public class GamePanel extends JPanel implements ComponentListener
 	 * @param gameWorldSize The size of the game world viewed through this panel
 	 * @param scalingPolicy How the panel's in-game world should be scaled when the panel's 
 	 * aspect ratio changes
-	 * @param handlers The handlers that will handle the component(s) created by this panel
+	 * @param framesPerSecond How many times a second the panel is refreshed. If the value 
+	 * is 0 or less, the panel will be updated constantly.
 	 */
-	public GamePanel(Vector3D gameWorldSize, ScalingPolicy scalingPolicy, HandlerRelay handlers)
+	public GamePanel(Vector3D gameWorldSize, ScalingPolicy scalingPolicy, int framesPerSecond)
 	{
 		// Initializes attributes
+		if (framesPerSecond <= 0)
+			this.refreshWaitMillis = 0;
+		else
+			this.refreshWaitMillis = 1000 / framesPerSecond;
+		
 		this.gameWorldSize = gameWorldSize;
 		this.originalGameWorldSize = gameWorldSize;
 		this.scalingPolicy = scalingPolicy;
@@ -109,13 +117,23 @@ public class GamePanel extends JPanel implements ComponentListener
 	@Override
 	public void componentShown(ComponentEvent e)
 	{
-		// Does nothing
+		// Starts the refreshing thread
+		if (this.refreshThread == null)
+		{
+			this.refreshThread = new RefreshThread();
+			this.refreshThread.start();
+		}
 	}
 
 	@Override
 	public void componentHidden(ComponentEvent e)
 	{
-		// Does nothing
+		// Hides the refreshing thread
+		if (this.refreshThread != null)
+		{
+			this.refreshThread.end();
+			this.refreshThread = null;
+		}
 	}
 	
 	
@@ -240,5 +258,51 @@ public class GamePanel extends JPanel implements ComponentListener
 		 * necessary. The total area of the in game world is preserved.
 		 */
 		PROJECT
+	}
+	
+	
+	// NESTED CLASSES	-------------
+	
+	private class RefreshThread extends Thread
+	{
+		// ATTRIBUTES	-------------
+		
+		private boolean ended = false;
+		
+		
+		// IMPLEMENTED METHODS	-----
+		
+		@Override
+		public void run()
+		{
+			while (!this.ended)
+			{
+				long nextDrawMillis = System.currentTimeMillis() + GamePanel.this.refreshWaitMillis;
+				
+				// Redraws the screen, then waits if necessary
+				repaint();
+				
+				long waitMillis = nextDrawMillis - System.currentTimeMillis();
+				if (waitMillis > 0)
+				{
+					try
+					{
+						wait(waitMillis);
+					}
+					catch (InterruptedException e)
+					{
+						// Wait interrupt is ignored
+					}
+				}
+			}
+		}
+		
+		
+		// OTHER METHODS	-------
+		
+		public void end()
+		{
+			this.ended = true;
+		}
 	}
 }
