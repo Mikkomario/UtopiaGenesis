@@ -1,30 +1,34 @@
 package genesis_test;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
+import genesis_event.AbstractMouseListenerHandler;
 import genesis_event.Drawable;
-import genesis_event.DrawableHandler;
-import genesis_event.EventSelector;
 import genesis_event.GenesisHandlerType;
-import genesis_event.HandlerRelay;
 import genesis_event.MouseEvent;
 import genesis_event.MouseEvent.MouseButton;
 import genesis_event.MouseEvent.MouseButtonEventScale;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseListener;
-import genesis_event.MouseListenerHandler;
-import genesis_event.StrictEventSelector;
-import genesis_util.ConnectedHandled;
-import genesis_util.DependentStateOperator;
+import genesis_event.StepHandler;
 import genesis_util.HelpMath;
-import genesis_util.SimpleHandled;
 import genesis_util.Transformable;
 import genesis_util.Transformation;
 import genesis_util.Vector3D;
 import genesis_video.GamePanel;
 import genesis_video.GameWindow;
+import genesis_video.PanelMouseListenerHandler;
+import genesis_video.GamePanel.ScalingPolicy;
+import genesis_video.SplitPanel.ScreenSplit;
+import utopia.inception.event.EventSelector;
+import utopia.inception.event.StrictEventSelector;
+import utopia.inception.handling.HandlerRelay;
+import utopia.inception.state.DependentStateOperator;
+import utopia.inception.util.ConnectedHandled;
+import utopia.inception.util.SimpleHandled;
 
 /**
  * This class tests the dependencies in stateOperators and transformations
@@ -49,15 +53,29 @@ public class GenesisDependencyTest
 	 */
 	public static void main(String[] args)
 	{
-		GameWindow window = new GameWindow(new Vector3D(1360, 768), "Genesis dependency test", 
-				true, 120, 20);
-		GamePanel panel = window.getMainPanel().addGamePanel();
+		// Creates the display
+		GameWindow window = new GameWindow(new Dimension(1360, 768), "Genesis dependency test", 
+				false, ScreenSplit.HORIZONTAL);
+		GamePanel panel = new GamePanel(new Vector3D(1360, 768), ScalingPolicy.PROJECT, 120);
+		panel.setBackground(Color.PINK);
+		window.getMainPanel().addGamePanel(panel);
 		
+		// Creates the handlers
+		StepHandler stepHandler = new StepHandler(120, 10);
+		AbstractMouseListenerHandler mouseHandler = new PanelMouseListenerHandler(panel, false);
+		stepHandler.add(mouseHandler);
+		
+		// Creates the handler relay
 		HandlerRelay handlers = new HandlerRelay();
-		handlers.addHandler(new DrawableHandler(false, panel.getDrawer()));
-		handlers.addHandler(new MouseListenerHandler(false, window.getHandlerRelay()));
+		handlers.addHandler(stepHandler);
+		handlers.addHandler(panel.getDrawer());
+		handlers.addHandler(mouseHandler);
 		
-		new TestNode(handlers, null, new Vector3D(150, 150));
+		// Creates the test node
+		handlers.add(new TestNode(handlers, null, new Vector3D(150, 150)));
+		
+		// Starts the game
+		stepHandler.start();
 	}
 	
 	
@@ -79,7 +97,7 @@ public class GenesisDependencyTest
 		
 		public TestNode(HandlerRelay handlers, TestNode parent, Vector3D relativePosition)
 		{
-			super(handlers);
+			super();
 			
 			this.parent = parent;
 			this.ownTransformation = new Transformation(relativePosition, new Vector3D(0.8, 
@@ -93,7 +111,7 @@ public class GenesisDependencyTest
 			localPressSelector.addRequiredFeature(MouseButtonEventScale.LOCAL);
 			this.selector = localPressSelector;
 			
-			new TestDependentBlob(this, handlers);
+			handlers.add(new TestDependentBlob(this));
 			
 			if (parent != null)
 			{
@@ -111,15 +129,17 @@ public class GenesisDependencyTest
 			// On left pressed, creates a new child
 			if (event.getButton() == MouseButton.LEFT)
 			{
-				System.out.println(this.handlers.getHandler(GenesisHandlerType.DRAWABLEHANDLER).getHandledNumber());
+				System.out.println(this.handlers.getHandler(
+						GenesisHandlerType.DRAWABLEHANDLER).getHandledNumber());
 				Vector3D relativePos = new Vector3D(this.childAmount * 150, 150);
-				new TestNode(this.handlers, this, relativePos);
+				this.handlers.add(new TestNode(this.handlers, this, relativePos));
 			}
 			// On right pressed, kills itself
 			else if (event.getButton() == MouseButton.RIGHT)
 			{
 				if (this.parent != null)
-					System.out.println(this.parent.getIsDeadStateOperator().getListenerHandler().getHandledNumber());
+					System.out.println(
+							this.parent.getIsDeadStateOperator().getListenerHandler().getHandledNumber());
 				getIsDeadStateOperator().setState(true);
 			}
 		}
@@ -177,9 +197,9 @@ public class GenesisDependencyTest
 	{
 		// CONSTRUCTOR	---------------
 		
-		public TestDependentBlob(TestNode master, HandlerRelay handlers)
+		public TestDependentBlob(TestNode master)
 		{
-			super(master, handlers);
+			super(master);
 		}
 		
 		

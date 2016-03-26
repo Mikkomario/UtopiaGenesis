@@ -3,8 +3,6 @@ package genesis_event;
 import java.util.ArrayList;
 import java.util.List;
 
-import genesis_video.GameWindow;
-
 /**
  * This class calculates millisconds and calls all actors when a certain number 
  * of milliseconds has passed. All of the actors should be under the command of 
@@ -22,9 +20,9 @@ public class StepHandler extends ActorHandler implements Runnable
 	 */
 	public static final int STEPLENGTH = 15;
 	
-	private int callinterval, maxstepspercall; // TODO: Create an option for unbound interval
+	private int callinterval;
+	private double maxStepsPerCall;
 	private long nextupdatemillis, lastactmillis;
-	private GameWindow window; // TODO: Make the window an actor instead
 	private List<PerformanceMonitor> monitors;
 	
 	
@@ -34,30 +32,39 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * This creates a new stephandler. Actors are informed 
 	 * when a certain number of milliseconds has passed. Actors can be 
 	 * added using addActor method.
-	 * @param callInterval How many milliseconds will there at least be between 
-	 * update calls. This also defines the maximum frame rate / action rate 
-	 * for the program. No more than 20 milliseconds is advised. All computers 
-	 * may be unable to update the program in less than 10 milliseconds though. 
-	 * (>0)
-	 * @param maxStepsPerCall How many steps can be "skipped" or simulated 
-	 * during a single call. Normally there is only one step or less for each 
-	 * call, but if the program can't run fast enough more steps are simulated 
-	 * for each call. The larger the value, the more unstable the program can 
-	 * become under heavy CPU-usage, but the better the game keeps from slowing 
-	 * down. The adviced value is from 2 to 3 but it can be 
-	 * different depending on the nature of the software. (> 0)
-	 * @param window The which which created the stepHandler
+	 * @param maxActionsPerSecond How many actions per second rate the handler is trying to 
+	 * achieve. Use 0 or negative if you want unbound speed.
+	 * @param minActionsPerSecond How many actions per second the handler supports at minimum. 
+	 * Some physics related functions may break if too many steps are simulated at once.
 	 */
-	public StepHandler(int callInterval, int maxStepsPerCall, 
-			GameWindow window)
+	public StepHandler(int maxActionsPerSecond, double minActionsPerSecond)
 	{	
 		// Initializes attributes
-		this.callinterval = callInterval;
-		this.maxstepspercall = maxStepsPerCall;
+		if (maxActionsPerSecond <= 0)
+			this.callinterval = 0;
+		else
+			this.callinterval = 1000 / maxActionsPerSecond;
+		
+		this.maxStepsPerCall = (1000 / minActionsPerSecond) / STEPLENGTH;
 		this.nextupdatemillis = 0;
 		this.lastactmillis = System.currentTimeMillis();
-		this.window = window;
 		this.monitors = new ArrayList<>();
+	}
+	
+	/**
+	 * This creates a new stephandler in a separate thread and starts it right away.
+	 * @param maxActionsPerSecond How many actions per second rate the handler is trying to 
+	 * achieve. Use 0 or negative if you want unbound speed.
+	 * @param minActionsPerSecond How many actions per second the handler supports at minimum. 
+	 * Some physics related functions may break if too many steps are simulated at once.
+	 * @return The stepHandler that was started
+	 */
+	public static StepHandler createAndStartStepHandler(int maxActionsPerSecond, 
+			double minActionsPerSecond)
+	{
+		StepHandler handler = new StepHandler(maxActionsPerSecond, minActionsPerSecond);
+		new Thread(handler).start();
+		return handler;
 	}
 	
 	
@@ -75,6 +82,16 @@ public class StepHandler extends ActorHandler implements Runnable
 	// OTHER METHODS	--------------------------------------------------
 	
 	/**
+	 * @return Starts the stepHandler so that it will be updated periodically
+	 */
+	public Thread start()
+	{
+		Thread thread = new Thread(this);
+		thread.start();
+		return thread;
+	}
+	
+	/**
 	 * Adds a performance monitor to the informed monitors
 	 * @param monitor The performance monitor that will be informed
 	 */
@@ -84,7 +101,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	}
 	
 	// This method updates the actors when needed
-	private void update()
+	private synchronized void update()
 	{
 		// Remembers the time
 		this.nextupdatemillis = System.currentTimeMillis() + this.callinterval;
@@ -102,14 +119,10 @@ public class StepHandler extends ActorHandler implements Runnable
 		// Sometimes the true amount of steps can't be informed and a 
 		// different number is given instead (physics don't like there 
 		// being too many steps at once)
-		if (steps > this.maxstepspercall)
-			steps = this.maxstepspercall;
+		if (steps > this.maxStepsPerCall)
+			steps = this.maxStepsPerCall;
 		
 		act(steps);
-		
-		// Updates the game according to the changes
-		this.window.callScreenUpdate(); // TODO: Remove these
-		this.window.callMousePositionUpdate();
 		
 		// Updates the stepmillis
 		this.lastactmillis = thisActStartedAt;
@@ -124,21 +137,18 @@ public class StepHandler extends ActorHandler implements Runnable
 		long waitMillis = this.nextupdatemillis - System.currentTimeMillis();
 		if (waitMillis > 0)
 		{
-			synchronized (this)
+			while (true)
 			{
-				while (true)
+				try
 				{
-					try
-					{
-						wait(waitMillis);
+					wait(waitMillis);
+					break;
+				}
+				catch (InterruptedException exception)
+				{
+					waitMillis = this.nextupdatemillis - System.currentTimeMillis();
+					if (waitMillis <= 0)
 						break;
-					}
-					catch (InterruptedException exception)
-					{
-						waitMillis = this.nextupdatemillis - System.currentTimeMillis();
-						if (waitMillis <= 0)
-							break;
-					}
 				}
 			}
 		}

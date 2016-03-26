@@ -10,16 +10,14 @@ import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
 import genesis_event.MouseListener;
 import genesis_event.Drawable;
-import genesis_event.EventSelector;
-import genesis_event.HandlerRelay;
-import genesis_event.MultiEventSelector;
 import genesis_util.DepthConstants;
-import genesis_util.SimpleHandled;
 import genesis_util.Vector3D;
+import utopia.inception.event.EventSelector;
+import utopia.inception.event.MultiEventSelector;
+import utopia.inception.util.SimpleHandled;
 
 /**
  * MousePositionDrawer draws the mouse position on screen and is used for testing
- * 
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
@@ -37,12 +35,9 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 	
 	/**
 	 * Creates a new tester
-	 * @param handlers The handlers used in the test
 	 */
-	public MousePositionDrawer(HandlerRelay handlers)
+	public MousePositionDrawer()
 	{
-		super(handlers);
-		
 		this.lastPressPosition = Vector3D.zeroVector();
 		this.lastMousePosition = Vector3D.zeroVector();
 		this.mouseIsDown = false;

@@ -1,14 +1,14 @@
 package genesis_test;
 
 import genesis_event.GenesisHandlerType;
-import genesis_event.Handled;
-import genesis_event.HandlerRelay;
 import genesis_event.KeyEvent;
 import genesis_event.KeyEvent.KeyEventType;
 import genesis_event.KeyListener;
-import genesis_event.EventSelector;
-import genesis_util.SimpleHandled;
-import genesis_util.StateOperator;
+import utopia.inception.event.EventSelector;
+import utopia.inception.handling.Handled;
+import utopia.inception.handling.HandlerRelay;
+import utopia.inception.state.StateOperator;
+import utopia.inception.util.SimpleHandled;
 
 /**
  * KeyTester prints the keys that are being pressed
@@ -29,12 +29,12 @@ public class KeyTester extends SimpleHandled implements KeyListener
 	
 	/**
 	 * Creates a new keyTester that has access to the given handlers
-	 * @param handlers The handlers that will handle this object
+	 * @param handlers The handlers that will be affected by this object
 	 * @param target The object that is affected by the tester
 	 */
 	public KeyTester(HandlerRelay handlers, Handled target)
 	{
-		super(handlers);
+		super();
 		
 		// Listens to key presses
 		this.selector = KeyEvent.createEventTypeSelector(KeyEventType.PRESSED);

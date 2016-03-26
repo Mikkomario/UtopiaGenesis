@@ -17,7 +17,7 @@ import javax.swing.JPanel;
  * Gamepanel is a single panel in a main panel that draws numerous drawable objects.
  * @author Unto Solala & Mikko Hilpinen
  * @since 8.8.2013
- * @see MainPanel
+ * @see SplitPanel
  */
 public class GamePanel extends JPanel implements ComponentListener
 {
@@ -62,8 +62,11 @@ public class GamePanel extends JPanel implements ComponentListener
 		//Formats the panel
 		setLayout(null);
 		setSize(gameWorldSize.toDimension());
-		setVisible(true);
 		setBackground(Color.WHITE);
+		
+		// Starts the refreshing thread
+		this.refreshThread = new RefreshThread();
+		this.refreshThread.start();
 		
 		addComponentListener(this);
 	}
@@ -273,7 +276,7 @@ public class GamePanel extends JPanel implements ComponentListener
 		// IMPLEMENTED METHODS	-----
 		
 		@Override
-		public void run()
+		public synchronized void run()
 		{
 			while (!this.ended)
 			{

@@ -3,8 +3,6 @@ package genesis_video;
 import java.awt.Dimension;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,16 +10,12 @@ import genesis_util.Vector3D;
 
 import javax.swing.JPanel;
 
-import genesis_event.ActorHandler;
-import genesis_event.KeyListenerHandler;
-import genesis_event.MainKeyListenerHandler;
-
 /**
- * MainPanel is the panel that draws game content. a MainPanel can hold multiple GamePanels
+ * A split panel can handle multiple game panels, splitting the screen when required
  * @author Mikko Hilpinen
  * @since 18.11.2014
  */
-public class MainPanel extends JPanel implements ComponentListener
+public class SplitPanel extends JPanel implements ComponentListener
 {
 	// ATTRIBUTES	------------------------------------
 	
@@ -29,10 +23,6 @@ public class MainPanel extends JPanel implements ComponentListener
 
 	private List<GamePanel> gamePanels;
 	private ScreenSplit split;
-	
-	private KeyListenerHandler keyHandler;
-	private ActorHandler actorHandler = new ActorHandler();
-	// TODO: Move some of the game window functionality here (keyboard, drawing on action)
 	
 	
 	// CONSTRUCTOR	------------------------------------
@@ -42,15 +32,11 @@ public class MainPanel extends JPanel implements ComponentListener
 	 * @param size The panels initial size
 	 * @param split How the screen is split between multiple gamePanels
 	 */
-	public MainPanel(Dimension size, ScreenSplit split)
+	public SplitPanel(Dimension size, ScreenSplit split)
 	{
 		// Initializes attributes
 		this.gamePanels = new ArrayList<>();
 		this.split = split;
-		
-		PanelKeyHandler keyHandler = new PanelKeyHandler();
-		this.keyHandler = keyHandler;
-		addKeyListener(keyHandler);
 		
 		// Formats the screen
 		setSize(size);
@@ -116,32 +102,11 @@ public class MainPanel extends JPanel implements ComponentListener
 	{
 		if (panel != null && !this.gamePanels.contains(panel) && this.gamePanels.size() < 4)
 		{
+			add(panel);
 			this.gamePanels.add(panel);
 			updatePanelBounds();
-			
-			// Updates the panel's handler information, if necessary
-			if (!panel.getHandlerRelay().containsHandlerOfType(this.keyHandler.getHandlerType()))
-				panel.getHandlerRelay().addHandler(this.keyHandler);
-			if (!panel.getHandlerRelay().containsHandlerOfType(this.actorHandler.getHandlerType()))
-				panel.getHandlerRelay().addHandler(this.actorHandler);
 		}
 	}
-	
-	/**
-	 * Creates and adds a new GamePanel to the screen.
-	 * @return The panel that was just added
-	 */
-	/*
-	public GamePanel addGamePanel()
-	{
-		if (getGamePanelAmount() >= 4)
-			return null;
-		
-		GamePanel newPanel = new GamePanel(getSize());
-		addGamePanel(newPanel);
-		
-		return newPanel;
-	}*/
 	
 	/**
 	 * Removes a new GamePanel from the panels
@@ -235,36 +200,5 @@ public class MainPanel extends JPanel implements ComponentListener
 		 * The panels are placed next to each other
 		 */
 		VERTICAL;
-	}
-	
-	
-	// NESTED CLASSES	---------------
-	
-	/**
-	 * This listener handler receives its events from the awt keyboard events
-	 * @author Unto Solala & Mikko Hilpinen
-	 * @since 8.8.2013
-	 */
-	private static class PanelKeyHandler extends MainKeyListenerHandler implements KeyListener
-	{
-		@Override
-		public void keyPressed(KeyEvent ke)
-		{
-			onKeyPressed(ke.getKeyChar(), ke.getKeyCode(), 
-					ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED);
-		}
-
-		@Override
-		public void keyReleased(KeyEvent ke)
-		{
-			onKeyReleased(ke.getKeyChar(), ke.getKeyCode(), 
-					ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED);
-		}
-
-		@Override
-		public void keyTyped(KeyEvent arg0)
-		{
-			// Not needed
-		}
 	}
 }

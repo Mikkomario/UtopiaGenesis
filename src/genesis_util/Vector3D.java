@@ -100,6 +100,17 @@ public class Vector3D
 		this.third = 0;
 	}
 	
+	/**
+	 * Wraps a dimension into a 2D vector
+	 * @param dimension The dimension that is wrapped
+	 */
+	public Vector3D(final Dimension dimension)
+	{
+		this.first = dimension.getWidth();
+		this.second = dimension.getHeight();
+		this.third = 0;
+	}
+	
 	
 	// IMPLEMENTED METHODS	----------------------------------
 	

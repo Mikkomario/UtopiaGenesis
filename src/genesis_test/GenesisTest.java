@@ -1,26 +1,32 @@
 package genesis_test;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import genesis_event.AbstractMouseListenerHandler;
 import genesis_event.Drawable;
-import genesis_event.EventSelector;
-import genesis_event.Handled;
-import genesis_event.HandlerRelay;
+import genesis_event.MainKeyListenerHandler;
 import genesis_event.MouseEvent;
 import genesis_event.MouseListener;
 import genesis_event.StepHandler;
 import genesis_util.Line;
-import genesis_util.SimpleHandled;
 import genesis_util.Vector3D;
 import genesis_video.GamePanel;
 import genesis_video.GameWindow;
+import genesis_video.PanelKeyListenerHandler;
+import genesis_video.PanelMouseListenerHandler;
+import genesis_video.GamePanel.ScalingPolicy;
+import genesis_video.SplitPanel.ScreenSplit;
+import utopia.inception.event.EventSelector;
+import utopia.inception.handling.Handled;
+import utopia.inception.handling.HandlerRelay;
+import utopia.inception.util.SimpleHandled;
 
 /**
- * MouseListenerTest tests the capabilities of AdvancedMouseListener and related features
- * 
+ * MouseListenerTest tests the capabilities of MouseListener and related features
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
@@ -42,22 +48,37 @@ public class GenesisTest
 	 */
 	public static void main(String[] args)
 	{
-		GameWindow window = new GameWindow(new Vector3D(800, 600), "Test", true, 120, 20);
-		GamePanel panel = window.getMainPanel().addGamePanel();
+		// Creates the display
+		GameWindow window = new GameWindow(new Dimension(800, 600), "Test", false, 
+				ScreenSplit.HORIZONTAL);
+		GamePanel panel = new GamePanel(new Vector3D(800, 600), ScalingPolicy.PROJECT, 120);
 		panel.setBackground(Color.BLACK);
+		window.getMainPanel().addGamePanel(panel);
 		
-		// Uses mouseHandler and DrawableHandler by default (drawer is available after the 
-		// panel has been created)
-		HandlerRelay handlers = HandlerRelay.createDefaultHandlerRelay(window, panel);
+		// Creates the handlers (step, mouse, key)
+		StepHandler stepHandler = new StepHandler(120, 10);
+		AbstractMouseListenerHandler mouseHandler = new PanelMouseListenerHandler(panel, false);
+		MainKeyListenerHandler keyHandler = new PanelKeyListenerHandler(window);
+		stepHandler.add(mouseHandler);
+		stepHandler.add(keyHandler);
 		
-		Handled drawer = new MousePositionDrawer(handlers);
-		new KeyTester(handlers, drawer);
+		HandlerRelay handlers = new HandlerRelay();
+		handlers.addHandler(stepHandler);
+		handlers.addHandler(mouseHandler);
+		handlers.addHandler(keyHandler);
+		handlers.addHandler(panel.getDrawer());
+		
+		Handled drawer = new MousePositionDrawer();
+		handlers.add(drawer);
+		handlers.add(new KeyTester(handlers, drawer));
 		
 		// Creates a performance monitor as well
-		new TextPerformanceMonitor(1000, window.getStepHandler());
-		new StepHandler.PerformanceAccelerator(100, window.getStepHandler());
+		//new TextPerformanceMonitor(1000, stepHandler);
+		//new StepHandler.PerformanceAccelerator(100, stepHandler);
 		
-		new CircleLineIntersectionTest(handlers);
+		handlers.add(new CircleLineIntersectionTest());
+		
+		stepHandler.start();
 	}
 	
 	
@@ -75,10 +96,8 @@ public class GenesisTest
 		
 		// CONSTRUCTOR	-----------------
 		
-		public CircleLineIntersectionTest(HandlerRelay handlers)
+		public CircleLineIntersectionTest()
 		{
-			super(handlers);
-			
 			this.lastMouseLine = new Line(new Vector3D(1));
 			this.lastIntersectionPoints = new ArrayList<>();
 			this.selector = MouseEvent.createMouseMoveSelector();
