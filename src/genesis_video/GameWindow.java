@@ -123,6 +123,15 @@ public class GameWindow extends JFrame implements ComponentListener
 	// OTHER METHODS	 -----------------------------
 	
 	/**
+	 * Adds a new game panel to the panels displayed on this window
+	 * @param panel The panel that will be displayed on the window
+	 */
+	public void addGamePanel(GamePanel panel)
+	{
+		getMainPanel().addGamePanel(panel);
+	}
+	
+	/**
 	 * Makes the window fill the whole screen without borders
 	 */
 	public void setFullScreen()

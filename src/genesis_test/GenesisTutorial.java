@@ -3,29 +3,32 @@ package genesis_test;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import genesis_event.AbstractMouseListenerHandler;
 import genesis_event.Actor;
-import genesis_event.ActorHandler;
 import genesis_event.Drawable;
-import genesis_event.DrawableHandler;
-import genesis_event.EventSelector;
-import genesis_event.HandlerRelay;
 import genesis_event.KeyEvent;
 import genesis_event.KeyEvent.KeyEventType;
 import genesis_event.MouseEvent.MouseButton;
 import genesis_event.MouseEvent.MouseButtonEventType;
 import genesis_event.MouseEvent.MouseEventType;
 import genesis_event.KeyListener;
-import genesis_event.KeyListenerHandler;
+import genesis_event.MainKeyListenerHandler;
 import genesis_event.MouseEvent;
 import genesis_event.MouseListener;
-import genesis_event.MouseListenerHandler;
-import genesis_event.MultiEventSelector;
+import genesis_event.StepHandler;
 import genesis_util.DepthConstants;
 import genesis_util.HelpMath;
-import genesis_util.SimpleHandled;
 import genesis_util.Vector3D;
 import genesis_video.GamePanel;
 import genesis_video.GameWindow;
+import genesis_video.PanelKeyListenerHandler;
+import genesis_video.PanelMouseListenerHandler;
+import genesis_video.GamePanel.ScalingPolicy;
+import genesis_video.SplitPanel.ScreenSplit;
+import utopia.inception.event.EventSelector;
+import utopia.inception.event.MultiEventSelector;
+import utopia.inception.handling.HandlerRelay;
+import utopia.inception.util.SimpleHandled;
 
 /**
  * This is the example code for the Utopia tutorial's Genesis part
@@ -50,29 +53,37 @@ public class GenesisTutorial
 	 */
 	public static void main(String[] args)
 	{
-		// Opening a window
 		Vector3D resolution = new Vector3D(1360, 768);
-		GameWindow window = new GameWindow(resolution, "Genesis Tutorial", true, 120, 20);
+		
+		// Creates the window and panel first
+		GameWindow window = new GameWindow(resolution.toDimension(), "Genesis Tutorial", false, 
+				ScreenSplit.HORIZONTAL);
+		GamePanel panel = new GamePanel(resolution, ScalingPolicy.PROJECT, 120);
+		window.addGamePanel(panel);
 		
 		// Changing background color
-		GamePanel panel = window.getMainPanel().addGamePanel();
 		panel.setBackground(Color.BLACK);
+		
+		// Creating handlers (mouse, key, step)
+		StepHandler stepHandler = new StepHandler(0, 10);
+		AbstractMouseListenerHandler mouseHandler = new PanelMouseListenerHandler(panel, false);
+		MainKeyListenerHandler keyHandler = new PanelKeyListenerHandler(window);
+		
+		stepHandler.add(mouseHandler);
+		stepHandler.add(keyHandler);
 		
 		// Setting up a HandlerRelay
 		HandlerRelay handlers = new HandlerRelay();
-		handlers.addHandler(new DrawableHandler(false, panel.getDrawer()));
-		
-		// Modifying the HandlerRelay
-		handlers.addHandler(new KeyListenerHandler(false, window.getHandlerRelay()));
-		
-		// Mouse to the relay
-		handlers.addHandler(new MouseListenerHandler(false, window.getHandlerRelay()));
-		
-		// Finishing the HandlerRelay
-		handlers.addHandler(new ActorHandler(false, window.getStepHandler()));
+		handlers.addHandler(stepHandler);
+		handlers.addHandler(panel.getDrawer());
+		handlers.addHandler(keyHandler);
+		handlers.addHandler(mouseHandler);
 		
 		// Creating a visual object
-		new TestObject(handlers, resolution.dividedBy(2), resolution, 50);
+		handlers.add(new TestObject(handlers, resolution.dividedBy(2), resolution, 50));
+		
+		// Starts the game
+		stepHandler.start();
 	}
 	
 	
@@ -105,8 +116,6 @@ public class GenesisTutorial
 				int radius)
 		{
 			// Creating a visual object
-			super(handlers);
-			
 			this.position = position;
 			this.radius = radius;
 			this.handlers = handlers;
@@ -185,9 +194,9 @@ public class GenesisTutorial
 					this.position = this.lastMousePosition;
 				// Shooting bullets
 				else
-					new Bullet(this.handlers, this.position, 
+					this.handlers.add(new Bullet(this.position, 
 							HelpMath.lenDir(20, HelpMath.pointDirection(this.position, 
-							this.lastMousePosition)), this.resolution, this.radius / 5);
+							this.lastMousePosition)), this.resolution, this.radius / 5));
 			}
 		}
 
@@ -217,12 +226,9 @@ public class GenesisTutorial
 		
 		// CONSTRUCTOR	----------------------
 		
-		public Bullet(HandlerRelay handlers, Vector3D position, Vector3D velocity, 
-				Vector3D resolution, int radius)
+		public Bullet(Vector3D position, Vector3D velocity, Vector3D resolution, int radius)
 		{
 			// Shooting bullets
-			super(handlers);
-			
 			this.position = position;
 			this.resolution = resolution;
 			this.velocity = velocity;

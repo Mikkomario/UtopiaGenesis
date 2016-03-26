@@ -42,6 +42,8 @@ public class SplitPanel extends JPanel implements ComponentListener
 		setSize(size);
 		setVisible(true);
 		setLayout(null);
+		
+		addComponentListener(this);
 	}
 	
 	

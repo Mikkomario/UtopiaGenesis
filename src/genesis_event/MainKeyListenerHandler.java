@@ -3,10 +3,10 @@ package genesis_event;
 import genesis_event.KeyEvent.ContentType;
 import genesis_event.KeyEvent.KeyEventType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This class unites the actor and keyListening interfaces so that key events are 
@@ -19,7 +19,8 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 {
 	// ATTRIBUTES	------------------------------------------------------
 	
-	private Map<KeyEventType, Map<ContentType, List<Integer>>> keyStates;
+	private Map<KeyEventType, Map<ContentType, ConcurrentLinkedQueue<Integer>>> keyStates;
+	private ReentrantLock lock = new ReentrantLock();
 	
 	
 	// CONSTRUCTOR	------------------------------------------------------
@@ -45,15 +46,24 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 		handleObjects(new MainKeyOperator(steps), true);
 		
 		// Negates some of the changes (pressed & released)
-		for (KeyEventType eventType : this.keyStates.keySet())
+		// Locks the lists during the operation
+		lock();
+		try
 		{
-			if (eventType != KeyEventType.DOWN)
+			for (KeyEventType eventType : this.keyStates.keySet())
 			{
-				for (ContentType contentType : this.keyStates.get(eventType).keySet())
+				if (eventType != KeyEventType.DOWN)
 				{
-					this.keyStates.get(eventType).get(contentType).clear();
+					for (ContentType contentType : this.keyStates.get(eventType).keySet())
+					{
+						getKeyList(eventType, contentType).clear();
+					}
 				}
 			}
+		}
+		finally
+		{
+			unlock();
 		}
 	}
 	
@@ -75,15 +85,24 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 			content = code;
 		}
 		
-		// Checks whether the key was just pressed instead of being already down
-		if (!this.keyStates.get(KeyEventType.DOWN).get(contentType).contains(content))
+		// Locks the lists during the operation
+		lock();
+		try
 		{
-			// If so, marks the key as pressed
-			if (!this.keyStates.get(KeyEventType.PRESSED).get(contentType).contains(content))
-				this.keyStates.get(KeyEventType.PRESSED).get(contentType).add(content);
-		
-			// And sets the key down
-			this.keyStates.get(KeyEventType.DOWN).get(contentType).add(content);
+			// Checks whether the key was just pressed instead of being already down
+			if (!getKeyList(KeyEventType.DOWN, contentType).contains(content))
+			{
+				// If so, marks the key as pressed
+				if (!getKeyList(KeyEventType.PRESSED, contentType).contains(content))
+					getKeyList(KeyEventType.PRESSED, contentType).add(content);
+			
+				// And sets the key down
+				getKeyList(KeyEventType.DOWN, contentType).add(content);
+			}
+		}
+		finally
+		{
+			unlock();
 		}
 	}
 	
@@ -103,27 +122,56 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 			content = code;
 		}
 		
-		// Marks the key as released
-		if (!this.keyStates.get(KeyEventType.RELEASED).get(contentType).contains(content))
-			this.keyStates.get(KeyEventType.RELEASED).get(contentType).add(content);
-		
-		// Sets the key up (= not down)
-		List<Integer> keysDownList = this.keyStates.get(KeyEventType.DOWN).get(contentType);
-		if (keysDownList.contains(content))
-			keysDownList.remove(keysDownList.indexOf(content));
+		lock();
+		try
+		{
+			// Marks the key as released
+			if (!getKeyList(KeyEventType.RELEASED, contentType).contains(content))
+				getKeyList(KeyEventType.RELEASED, contentType).add(content);
+			
+			// Sets the key up (= not down)
+			getKeyList(KeyEventType.DOWN, contentType).remove(content);
+		}
+		finally
+		{
+			unlock();
+		}
+	}
+	
+	private ConcurrentLinkedQueue<Integer> getKeyList(KeyEventType eventType, ContentType contentType)
+	{
+		return this.keyStates.get(eventType).get(contentType);
+	}
+	
+	private void lock()
+	{
+		this.lock.lock();
+	}
+	
+	private void unlock()
+	{
+		this.lock.unlock();
 	}
 	
 	private void initialize()
 	{
-		// Initializes the attributes
-		this.keyStates = new HashMap<>();
-		for (KeyEventType keyEvent : KeyEventType.values())
+		lock();
+		try
 		{
-			this.keyStates.put(keyEvent, new HashMap<>());
-			for (ContentType contentType : ContentType.values())
+			// Initializes the attributes
+			this.keyStates = new HashMap<>();
+			for (KeyEventType keyEvent : KeyEventType.values())
 			{
-				this.keyStates.get(keyEvent).put(contentType, new ArrayList<>());
+				this.keyStates.put(keyEvent, new HashMap<>());
+				for (ContentType contentType : ContentType.values())
+				{
+					this.keyStates.get(keyEvent).put(contentType, new ConcurrentLinkedQueue<>());
+				}
 			}
+		}
+		finally
+		{
+			unlock();
 		}
 	}
 	
@@ -156,9 +204,9 @@ public class MainKeyListenerHandler extends KeyListenerHandler implements Actor
 				for (ContentType contentType : 
 						MainKeyListenerHandler.this.keyStates.get(eventType).keySet())
 				{
-					List<Integer> keys = 
-							MainKeyListenerHandler.this.keyStates.get(eventType).get(contentType);
+					ConcurrentLinkedQueue<Integer> keys = getKeyList(eventType, contentType);
 					
+					// TODO: Null pointer on next line. Make this thread safe
 					for (int key : keys)
 					{
 						informListenerAboutKeyEvent(listener, 
