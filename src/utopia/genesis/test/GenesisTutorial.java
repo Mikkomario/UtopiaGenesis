@@ -35,7 +35,7 @@ import utopia.inception.util.SimpleHandled;
  * @author Mikko Hilpinen
  * @since 26.7.2015
  */
-public class GenesisTutorial
+class GenesisTutorial
 {
 	// CONSTRUCTOR	--------------------
 	
@@ -57,7 +57,7 @@ public class GenesisTutorial
 		
 		// Creates the window and panel first
 		GameWindow window = new GameWindow(resolution.toDimension(), "Genesis Tutorial", false, 
-				ScreenSplit.HORIZONTAL);
+				true, ScreenSplit.HORIZONTAL);
 		GamePanel panel = new GamePanel(resolution, ScalingPolicy.PROJECT, 120);
 		window.addGamePanel(panel);
 		

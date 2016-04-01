@@ -35,7 +35,7 @@ import utopia.inception.util.SimpleHandled;
  * @author Mikko Hilpinen
  * @since 5.8.2015
  */
-public class GenesisDependencyTest
+class GenesisDependencyTest
 {
 	// CONSTRUCTOR	--------------------
 	
@@ -55,7 +55,7 @@ public class GenesisDependencyTest
 	{
 		// Creates the display
 		GameWindow window = new GameWindow(new Dimension(1360, 768), "Genesis dependency test", 
-				false, ScreenSplit.HORIZONTAL);
+				false, true, ScreenSplit.HORIZONTAL);
 		GamePanel panel = new GamePanel(new Vector3D(1360, 768), ScalingPolicy.PROJECT, 120);
 		panel.setBackground(Color.PINK);
 		window.getMainPanel().addGamePanel(panel);

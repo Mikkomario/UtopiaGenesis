@@ -30,7 +30,7 @@ import utopia.inception.util.SimpleHandled;
  * @author Mikko Hilpinen
  * @since 20.11.2014
  */
-public class GenesisTest
+class GenesisTest
 {
 	// CONSTRUCTOR	----------------------------------------------
 	
@@ -49,7 +49,7 @@ public class GenesisTest
 	public static void main(String[] args)
 	{
 		// Creates the display
-		GameWindow window = new GameWindow(new Dimension(800, 600), "Test", false, 
+		GameWindow window = new GameWindow(new Dimension(800, 600), "Test", false, true, 
 				ScreenSplit.HORIZONTAL);
 		GamePanel panel = new GamePanel(new Vector3D(800, 600), ScalingPolicy.PROJECT, 120);
 		panel.setBackground(Color.BLACK);

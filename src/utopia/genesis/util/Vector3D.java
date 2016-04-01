@@ -247,7 +247,7 @@ public class Vector3D
 	}
 	
 	/**
-	 * @return A vector that is perpendicular to this vector
+	 * @return A unit vector that is perpendicular to this vector
 	 */
 	public Vector3D normal()
 	{
@@ -259,7 +259,7 @@ public class Vector3D
 	
 	/**
 	 * This version of the method works as if the vector had no third dimension
-	 * @return A vector that is perpendicular to this vector.
+	 * @return A unit vector that is perpendicular to this vector.
 	 */
 	public Vector3D normal2D()
 	{

@@ -29,6 +29,7 @@ public class GameWindow extends JFrame implements ComponentListener
 	private ArrayList<JPanel> paddings;
 	private SplitPanel mainPanel;
 	private Vector3D originalPanelSize;
+	private boolean usesPaddings;
 	
 	private static final long serialVersionUID = -7682965360963042160L;
 	
@@ -41,11 +42,36 @@ public class GameWindow extends JFrame implements ComponentListener
 	 * window may be slightly larger
 	 * @param title The title displayed in the window's border
 	 * @param borderless Should the window be borderless
+	 * @param usePaddings Should the window display paddings when aspect ratio changes
 	 * @param split How the screen is split between multiple panels
 	 */
-	public GameWindow(Dimension size, String title, boolean borderless, ScreenSplit split)
+	public GameWindow(Dimension size, String title, boolean borderless, boolean usePaddings, 
+			ScreenSplit split)
 	{
-		initialize(size, title, borderless, split);
+		// initialises the layout information
+		if (borderless)
+			setUndecorated(true);
+		
+		setTitle(title);
+		setLayout(new BorderLayout());
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				
+		//setResizable(false);
+		getContentPane().setBackground(Color.BLACK);
+		setVisible(true);
+		
+		// Adds the insets to the window size
+		Insets insets = getInsets();
+		setSize(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom);
+		
+		// Initializes attributes
+		this.usesPaddings = usePaddings;
+		this.paddings = new ArrayList<>();
+		this.mainPanel = new SplitPanel(size, split);
+		this.originalPanelSize = new Vector3D(size);
+		
+		// Adds the panel
+		add(this.mainPanel, BorderLayout.CENTER);
 		
 		addComponentListener(this);
 	}
@@ -56,38 +82,42 @@ public class GameWindow extends JFrame implements ComponentListener
 	@Override
 	public void componentResized(ComponentEvent e)
 	{
-		// Resets the paddings
-		removePaddings();
-		
-		Insets insets = getInsets();
-		Vector3D actualSize = new Vector3D(getWidth() - insets.left - insets.right, 
-				getHeight() - insets.top - insets.bottom);
-		Vector3D requiredScaling = actualSize.dividedBy(this.originalPanelSize);
-		
-		// Calculates the main panel end size. If padding is required adds that
-		Vector3D mainPanelEndSize;
-		if (requiredScaling.getFirst() > requiredScaling.getSecond())
+		// May add paddings
+		if (this.usesPaddings)
 		{
-			mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getSecond());
-			// Adds padding to left and right
-			Dimension paddingSize = actualSize.minus(new Vector3D(mainPanelEndSize.getFirst(), 
-					0)).dividedBy(new Vector3D(2, 1, 1)).toDimension();
-			addPadding(paddingSize, BorderLayout.WEST);
-			addPadding(paddingSize, BorderLayout.EAST);
+			// Resets the paddings
+			removePaddings();
+			
+			Insets insets = getInsets();
+			Vector3D actualSize = new Vector3D(getWidth() - insets.left - insets.right, 
+					getHeight() - insets.top - insets.bottom);
+			Vector3D requiredScaling = actualSize.dividedBy(this.originalPanelSize);
+			
+			// Calculates the main panel end size. If padding is required adds that
+			Vector3D mainPanelEndSize;
+			if (requiredScaling.getFirst() > requiredScaling.getSecond())
+			{
+				mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getSecond());
+				// Adds padding to left and right
+				Dimension paddingSize = actualSize.minus(new Vector3D(mainPanelEndSize.getFirst(), 
+						0)).dividedBy(new Vector3D(2, 1, 1)).toDimension();
+				addPadding(paddingSize, BorderLayout.WEST);
+				addPadding(paddingSize, BorderLayout.EAST);
+			}
+			else if (requiredScaling.getSecond() > requiredScaling.getFirst())
+			{
+				mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getFirst());
+				// Adds padding to top and bottom
+				Dimension paddingSize = actualSize.minus(new Vector3D(0, 
+						mainPanelEndSize.getSecond())).dividedBy(new Vector3D(1, 2, 1)).toDimension();
+				addPadding(paddingSize, BorderLayout.NORTH);
+				addPadding(paddingSize, BorderLayout.SOUTH);
+			}
+			else
+				mainPanelEndSize = this.originalPanelSize.times(requiredScaling);
+			
+			this.mainPanel.setSize(mainPanelEndSize.toDimension());
 		}
-		else if (requiredScaling.getSecond() > requiredScaling.getFirst())
-		{
-			mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getFirst());
-			// Adds padding to top and bottom
-			Dimension paddingSize = actualSize.minus(new Vector3D(0, 
-					mainPanelEndSize.getSecond())).dividedBy(new Vector3D(1, 2, 1)).toDimension();
-			addPadding(paddingSize, BorderLayout.NORTH);
-			addPadding(paddingSize, BorderLayout.SOUTH);
-		}
-		else
-			mainPanelEndSize = this.originalPanelSize.times(requiredScaling);
-		
-		this.mainPanel.setSize(mainPanelEndSize.toDimension());
 	}
 
 	@Override
@@ -133,37 +163,22 @@ public class GameWindow extends JFrame implements ComponentListener
 	
 	/**
 	 * Makes the window fill the whole screen without borders
+	 * @param showTaskBar Should some area be left for the task bar
 	 */
-	public void setFullScreen()
+	public void setFullScreen(boolean showTaskBar)
 	{
-		setSize(Toolkit.getDefaultToolkit().getScreenSize());
-	}
-	
-	private void initialize(Dimension size, String title, boolean borderless, ScreenSplit split)
-	{
-		// initialises the layout information
-		if (borderless)
-			setUndecorated(true);
+		Dimension targetSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = 0, y = 0;
+		if (showTaskBar)
+		{
+			Insets screenInsets = Toolkit.getDefaultToolkit().getScreenInsets(getGraphicsConfiguration());
+			targetSize = new Dimension(targetSize.width - screenInsets.left - screenInsets.right, 
+					targetSize.height - screenInsets.top - screenInsets.bottom);
+			x = screenInsets.left;
+			y = screenInsets.top;
+		}
 		
-		setTitle(title);
-		setLayout(new BorderLayout());
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-				
-		//setResizable(false);
-		getContentPane().setBackground(Color.BLACK);
-		setVisible(true);
-		
-		// Adds the insets to the window size
-		Insets insets = getInsets();
-		setSize(size.width + insets.left + insets.right, size.height + insets.top + insets.bottom);
-		
-		// Initializes attributes
-		this.paddings = new ArrayList<>();
-		this.mainPanel = new SplitPanel(size, split);
-		this.originalPanelSize = new Vector3D(size);
-		
-		// Adds the panel
-		add(this.mainPanel, BorderLayout.CENTER);
+		setBounds(x, y, targetSize.width, targetSize.height);
 	}
 	
 	private void addPadding(Dimension size, String direction)

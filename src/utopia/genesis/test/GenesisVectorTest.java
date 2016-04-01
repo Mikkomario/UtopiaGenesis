@@ -8,7 +8,7 @@ import utopia.genesis.util.Vector3D;
  * @author Mikko Hilpinen
  * @since 24.3.2015
  */
-public class GenesisVectorTest
+class GenesisVectorTest
 {
 	// CONSTRUCTOR	------------------------------
 	
