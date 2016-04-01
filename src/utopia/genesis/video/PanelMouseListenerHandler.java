@@ -91,7 +91,7 @@ public class PanelMouseListenerHandler extends MainMouseListenerHandler
 	
 	private Vector3D getGameWorldPoint(Point point)
 	{
-		return new Vector3D(point).times(PanelMouseListenerHandler.this.panel.getScaling());
+		return new Vector3D(point).dividedBy(PanelMouseListenerHandler.this.panel.getScaling());
 	}
 	
 	private Vector3D pointInPanel(Vector3D point, Container panel)
@@ -159,7 +159,7 @@ public class PanelMouseListenerHandler extends MainMouseListenerHandler
 		@Override
 		public void mouseDragged(MouseEvent e)
 		{
-			// Ignored
+			setMousePosition(getGameWorldPoint(e.getPoint()));
 		}
 
 		@Override

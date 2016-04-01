@@ -41,7 +41,8 @@ class SplitScreenTest
 			panel.setBackground(colors[i]);
 			window.addGamePanel(panel);
 			
-			PanelMouseListenerHandler mouseHandler = new PanelMouseListenerHandler(panel, true);
+			PanelMouseListenerHandler mouseHandler = new PanelMouseListenerHandler(panel, false);
+			stepHandler.add(mouseHandler);
 			HandlerRelay handlers = new HandlerRelay();
 			handlers.addHandler(stepHandler, panel.getDrawer(), mouseHandler);
 			
