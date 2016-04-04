@@ -21,7 +21,7 @@ import utopia.genesis.util.HelpMath;
 import utopia.genesis.util.Vector3D;
 import utopia.genesis.video.GamePanel;
 import utopia.genesis.video.GameWindow;
-import utopia.genesis.video.PanelKeyListenerHandler;
+import utopia.genesis.video.WindowKeyListenerHandler;
 import utopia.genesis.video.PanelMouseListenerHandler;
 import utopia.genesis.video.GamePanel.ScalingPolicy;
 import utopia.genesis.video.SplitPanel.ScreenSplit;
@@ -67,7 +67,7 @@ class GenesisTutorial
 		// Creating handlers (mouse, key, step)
 		StepHandler stepHandler = new StepHandler(120, 10);
 		AbstractMouseListenerHandler mouseHandler = new PanelMouseListenerHandler(panel, false);
-		MainKeyListenerHandler keyHandler = new PanelKeyListenerHandler(window);
+		MainKeyListenerHandler keyHandler = new WindowKeyListenerHandler(window);
 		
 		stepHandler.add(mouseHandler);
 		stepHandler.add(keyHandler);

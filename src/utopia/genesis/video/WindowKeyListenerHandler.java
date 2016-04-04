@@ -1,6 +1,6 @@
 package utopia.genesis.video;
 
-import java.awt.Container;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
@@ -11,18 +11,18 @@ import utopia.genesis.event.MainKeyListenerHandler;
  * @author Unto Solala & Mikko Hilpinen
  * @since 8.8.2013
  */
-public class PanelKeyListenerHandler extends MainKeyListenerHandler
+public class WindowKeyListenerHandler extends MainKeyListenerHandler
 {
 	// CONSTRUCTOR	------------------
 	
 	/**
 	 * Creates a new listener handler. The events are originated from key events received 
-	 * by the contianer
-	 * @param panel The panel whose events the listeners will receive
+	 * by the window
+	 * @param window The window whose events the listeners will receive
 	 */
-	public PanelKeyListenerHandler(Container panel)
+	public WindowKeyListenerHandler(Window window)
 	{
-		panel.addKeyListener(new KeyEventReceiver());
+		window.addKeyListener(new KeyEventReceiver());
 	}
 	
 	
