@@ -9,6 +9,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
+import utopia.genesis.event.ActorHandler;
 import utopia.genesis.event.MainMouseListenerHandler;
 import utopia.genesis.util.Vector3D;
 
@@ -60,6 +61,24 @@ public class PanelMouseListenerHandler extends MainMouseListenerHandler
 			rootPanel.addMouseListener(eventListener);
 			rootPanel.addMouseWheelListener(eventListener);
 		}
+	}
+	
+	/**
+	 * Creates a new panel mouse listener handler and adds it to the provided actor handler
+	 * @param panel The panel this handler receives its events from
+	 * @param onlyEventsInsidePanel Should the listener only register events inside the panel 
+	 * (true), or outside events as well (false)
+	 * @param actorHandler The actor handler that will inform the handler about step events
+	 * @return a new panel mouse listener handler ready to be used
+	 */
+	public static PanelMouseListenerHandler createMouseHandler(GamePanel panel, 
+			boolean onlyEventsInsidePanel, ActorHandler actorHandler)
+	{
+		PanelMouseListenerHandler handler = new PanelMouseListenerHandler(panel, onlyEventsInsidePanel);
+		if (actorHandler != null)
+			actorHandler.add(handler);
+		
+		return handler;
 	}
 	
 	

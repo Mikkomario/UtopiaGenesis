@@ -4,6 +4,7 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import utopia.genesis.event.ActorHandler;
 import utopia.genesis.event.MainKeyListenerHandler;
 
 /**
@@ -17,12 +18,28 @@ public class WindowKeyListenerHandler extends MainKeyListenerHandler
 	
 	/**
 	 * Creates a new listener handler. The events are originated from key events received 
-	 * by the window
+	 * by the window. Remember to add the handler to a working actor handler.
 	 * @param window The window whose events the listeners will receive
 	 */
 	public WindowKeyListenerHandler(Window window)
 	{
 		window.addKeyListener(new KeyEventReceiver());
+	}
+	
+	/**
+	 * Creates a new listener handler. The events are originated from the key events received 
+	 * by the window. The handler will be added to the provided actor handler.
+	 * @param window The window whose events the listeners will receive
+	 * @param actorHandler The actor handler that will inform this handler about step events
+	 * @return a window key listener handler ready to be used
+	 */
+	public static WindowKeyListenerHandler createWindowKeyListenerHandler(Window window, 
+			ActorHandler actorHandler)
+	{
+		WindowKeyListenerHandler handler = new WindowKeyListenerHandler(window);
+		if (actorHandler != null)
+			actorHandler.add(handler);
+		return handler;
 	}
 	
 	
