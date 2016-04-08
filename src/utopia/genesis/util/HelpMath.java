@@ -1,5 +1,7 @@
 package utopia.genesis.util;
 
+import java.util.List;
+
 /**
  * This class calculates some mathematical problems
  * @author Mikko Hilpinen.
@@ -334,10 +336,9 @@ public class HelpMath
 	 * @param points A collection of points
 	 * @return The average point
 	 */
-	public static Vector3D getAveragePoint(Iterable<Vector3D> points)
+	public static Vector3D getAveragePoint(Vector3D[] points)
 	{
 		Vector3D average = null;
-		int size = 0;
 		
 		for (Vector3D point : points)
 		{
@@ -345,14 +346,22 @@ public class HelpMath
 				average = point;
 			else
 				average = average.plus(point);
-			
-			size ++;
 		}
 		
 		if (average == null)
 			return null;
 		else
-			return average.dividedBy(size);
+			return average.dividedBy(points.length);
+	}
+	
+	/**
+	 * Calculates an average point from multiple points
+	 * @param points A collection of points
+	 * @return The average point
+	 */
+	public static Vector3D getAveragePoint(List<Vector3D> points)
+	{
+		return getAveragePoint(points.toArray(new Vector3D[0]));
 	}
 	
 	/**
