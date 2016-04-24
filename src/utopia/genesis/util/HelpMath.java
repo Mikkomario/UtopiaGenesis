@@ -332,6 +332,59 @@ public class HelpMath
 	}
 	
 	/**
+	 * Calculates the minimum of the provided points
+	 * @param points a set of points
+	 * @return a point with minimum x, y and z coordinates
+	 */
+	public static Vector3D min(Vector3D... points)
+	{
+		double[] min = null;
+		for (Vector3D point : points)
+		{
+			if (min == null)
+				min = point.toArray();
+			else
+			{
+				double[] pointAsArray = point.toArray();
+				for (int i = 0; i < min.length; i++)
+				{
+					if (pointAsArray[i] < min[i])
+						min[i] = pointAsArray[i];
+				}
+			}
+		}
+		
+		return new Vector3D(min);
+	}
+	
+	/**
+	 * Calculates the maximum of the provided points
+	 * @param points a set of points
+	 * @return a point with maximum x, y and z coordinates
+	 */
+	public static Vector3D max(Vector3D... points)
+	{
+		// TODO: WET WET
+		double[] max = null;
+		for (Vector3D point : points)
+		{
+			if (max == null)
+				max = point.toArray();
+			else
+			{
+				double[] pointAsArray = point.toArray();
+				for (int i = 0; i < max.length; i++)
+				{
+					if (pointAsArray[i] > max[i])
+						max[i] = pointAsArray[i];
+				}
+			}
+		}
+		
+		return new Vector3D(max);
+	}
+	
+	/**
 	 * Calculates an average point from multiple points
 	 * @param points A collection of points
 	 * @return The average point
