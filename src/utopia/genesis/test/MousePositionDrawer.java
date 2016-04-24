@@ -38,8 +38,8 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 	 */
 	public MousePositionDrawer()
 	{
-		this.lastPressPosition = Vector3D.zeroVector();
-		this.lastMousePosition = Vector3D.zeroVector();
+		this.lastPressPosition = Vector3D.ZERO;
+		this.lastMousePosition = Vector3D.ZERO;
 		this.mouseIsDown = false;
 		this.wheelTurn = 0;
 		
@@ -107,15 +107,15 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 		// If mouse is pressed, draws a line between the two points
 		if (this.mouseIsDown)
 		{
-			g2d.drawLine(this.lastPressPosition.getFirstInt(), 
-					this.lastPressPosition.getSecondInt(), 
-					this.lastMousePosition.getFirstInt(), 
-					this.lastMousePosition.getSecondInt());
+			g2d.drawLine(this.lastPressPosition.getXInt(), 
+					this.lastPressPosition.getYInt(), 
+					this.lastMousePosition.getXInt(), 
+					this.lastMousePosition.getYInt());
 		}
 		// Otherwise draws a circle around the mouse
 		else
-			g2d.drawOval(this.lastMousePosition.getFirstInt() - 10, 
-					this.lastMousePosition.getSecondInt() - 10 - (int) this.wheelTurn * 10, 
+			g2d.drawOval(this.lastMousePosition.getXInt() - 10, 
+					this.lastMousePosition.getYInt() - 10 - (int) this.wheelTurn * 10, 
 					20, 20);
 	}
 

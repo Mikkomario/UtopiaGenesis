@@ -95,21 +95,21 @@ public class GameWindow extends JFrame implements ComponentListener
 			
 			// Calculates the main panel end size. If padding is required adds that
 			Vector3D mainPanelEndSize;
-			if (requiredScaling.getFirst() > requiredScaling.getSecond())
+			if (requiredScaling.getX() > requiredScaling.getY())
 			{
-				mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getSecond());
+				mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getY());
 				// Adds padding to left and right
-				Dimension paddingSize = actualSize.minus(new Vector3D(mainPanelEndSize.getFirst(), 
+				Dimension paddingSize = actualSize.minus(new Vector3D(mainPanelEndSize.getX(), 
 						0)).dividedBy(new Vector3D(2, 1, 1)).toDimension();
 				addPadding(paddingSize, BorderLayout.WEST);
 				addPadding(paddingSize, BorderLayout.EAST);
 			}
-			else if (requiredScaling.getSecond() > requiredScaling.getFirst())
+			else if (requiredScaling.getY() > requiredScaling.getX())
 			{
-				mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getFirst());
+				mainPanelEndSize = this.originalPanelSize.times(requiredScaling.getX());
 				// Adds padding to top and bottom
 				Dimension paddingSize = actualSize.minus(new Vector3D(0, 
-						mainPanelEndSize.getSecond())).dividedBy(new Vector3D(1, 2, 1)).toDimension();
+						mainPanelEndSize.getY())).dividedBy(1, 2, 1).toDimension();
 				addPadding(paddingSize, BorderLayout.NORTH);
 				addPadding(paddingSize, BorderLayout.SOUTH);
 			}

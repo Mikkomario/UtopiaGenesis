@@ -232,8 +232,8 @@ public class HelpMath
 	public static boolean pointIsInRange(Vector3D point, double minx, double maxx, 
 			double miny, double maxy)
 	{
-		return (point.getFirst() > minx && point.getSecond() > miny && point.getFirst() 
-				< maxx && point.getSecond() < maxy);
+		return (point.getX() > minx && point.getY() > miny && point.getX() 
+				< maxx && point.getY() < maxy);
 	}
 	
 	/**
@@ -245,7 +245,7 @@ public class HelpMath
 	 */
 	public static boolean pointIsInRange(Vector3D point, Vector3D min, Vector3D max)
 	{
-		return pointIsInRange(point, min.getFirst(), max.getFirst(), min.getSecond(), max.getSecond());
+		return pointIsInRange(point, min.getX(), max.getX(), min.getY(), max.getY());
 	}
 	
 	/*
@@ -291,7 +291,7 @@ public class HelpMath
 		Vector3D rotated2D = rotationOrigin.plus(Vector3D.unitVector(pointDirection(
 				rotationOrigin, point) + rotation).withLength(
 				pointDistance2D(rotationOrigin, point)));
-		return new Vector3D(rotated2D.getFirst(), rotated2D.getSecond(), point.getThird());
+		return new Vector3D(rotated2D.getX(), rotated2D.getY(), point.getZ());
 	}
 	
 	/**

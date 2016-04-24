@@ -132,7 +132,7 @@ class GenesisTutorial
 			// Reacting to mouse movement
 			selector.addOption(MouseEvent.createMouseMoveSelector());
 			this.mouseEventSelector = selector;
-			this.lastMousePosition = Vector3D.zeroVector();
+			this.lastMousePosition = Vector3D.ZERO;
 		}
 		
 		
@@ -146,9 +146,8 @@ class GenesisTutorial
 			this.position.drawAsPoint(this.radius, g2d);
 			
 			// Reacting to mouse movement
-			g2d.drawLine(this.position.getFirstInt(), this.position.getSecondInt(), 
-					this.lastMousePosition.getFirstInt(), 
-					this.lastMousePosition.getSecondInt());
+			g2d.drawLine(this.position.getXInt(), this.position.getYInt(), 
+					this.lastMousePosition.getXInt(), this.lastMousePosition.getYInt());
 		}
 
 		@Override

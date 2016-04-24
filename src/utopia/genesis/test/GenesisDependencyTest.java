@@ -101,7 +101,7 @@ class GenesisDependencyTest
 			
 			this.parent = parent;
 			this.ownTransformation = new Transformation(relativePosition, new Vector3D(0.8, 
-					0.8), Vector3D.zeroVector(), 5);
+					0.8), Vector3D.ZERO, 5);
 			this.handlers = handlers;
 			
 			this.childAmount = 0;
@@ -155,7 +155,7 @@ class GenesisDependencyTest
 		{
 			if (getTransformation() != null)
 				return HelpMath.pointDistance2D(getTransformation().inverseTransform(position), 
-						Vector3D.zeroVector()) < 100;
+						Vector3D.ZERO) < 100;
 			return false;
 		}
 

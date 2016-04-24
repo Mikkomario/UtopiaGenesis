@@ -15,22 +15,33 @@ public class Vector3D
 {	
 	// ATTRIBUTES	------------------------------------------
 	
-	private final double first, second, third;
+	/**
+	 * An identity vector (1, 1, 1)
+	 */
+	public static final Vector3D IDENTITY =  new Vector3D(1, 1, 1);
+	/**
+	 * A vector with zero length (0, 0, 0)
+	 */
+	public static final Vector3D ZERO = new Vector3D(0, 0, 0);
+	/**
+	 * A unit vector that goes along x-axis (1, 0, 0)
+	 */
+	public static final Vector3D UNIT = new Vector3D(1, 0, 0);
+	
+	private final double[] xyz;
 	
 	
 	// CONSTRUCTOR	------------------------------------------
 	
 	/**
 	 * Creates a new vector
-	 * @param first The first number in the vector
-	 * @param second The second number in the vector
-	 * @param third The third number in the vector
+	 * @param x The x coordinate / the first number in the vector
+	 * @param y The y coordinate / the second number in the vector
+	 * @param z The z coordinate / the third number in the vector
 	 */
-	public Vector3D(double first, double second, double third)
+	public Vector3D(double x, double y, double z)
 	{
-		this.first = first;
-		this.second = second;
-		this.third = third;
+		this.xyz = new double[] {x, y, z};
 	}
 	
 	/**
@@ -39,32 +50,42 @@ public class Vector3D
 	 */
 	public Vector3D(final Vector3D other)
 	{
-		this.first = other.first;
-		this.second = other.second;
-		this.third = other.third;
+		this.xyz = other.xyz;
 	}
 	
 	/**
 	 * Creates a new 2D vector
-	 * @param first The first number in the vector
-	 * @param second The second number in the vector
+	 * @param x The x coordinate / the first number in the vector
+	 * @param y The y coordinate / the second number in the vector
 	 */
-	public Vector3D(double first, double second)
+	public Vector3D(double x, double y)
 	{
-		this.first = first;
-		this.second = second;
-		this.third = 0;
+		this.xyz = new double[] {x, y, 0};
 	}
 	
 	/**
 	 * Creates a new 1D vector
-	 * @param first The first number in the vector
+	 * @param x The x coordinate / the first number in the vector
 	 */
-	public Vector3D(double first)
+	public Vector3D(double x)
 	{
-		this.first = first;
-		this.second = 0;
-		this.third = 0;
+		this.xyz = new double[] {x, 0, 0};
+	}
+	
+	/**
+	 * Wraps a double array into a vector
+	 * @param array a double array. Indices after index 2 are ignored.
+	 */
+	public Vector3D(double[] array)
+	{
+		this.xyz = new double[3];
+		for (int i = 0; i < 3; i++)
+		{
+			if (array.length <= i)
+				this.xyz[i] = 0;
+			else
+				this.xyz[i] = array[i];
+		}
 	}
 	
 	/**
@@ -73,9 +94,7 @@ public class Vector3D
 	 */
 	public Vector3D(final Point2D.Double point)
 	{
-		this.first = point.x;
-		this.second = point.y;
-		this.third = 0;
+		this.xyz = new double[] {point.getX(), point.getY(), 0};
 	}
 	
 	/**
@@ -84,9 +103,7 @@ public class Vector3D
 	 */
 	public Vector3D(final Point point)
 	{
-		this.first = point.x;
-		this.second = point.y;
-		this.third = 0;
+		this.xyz = new double[] {point.getX(), point.getY(), 0};
 	}
 	
 	/**
@@ -95,9 +112,7 @@ public class Vector3D
 	 */
 	public Vector3D(final Point2D point)
 	{
-		this.first = point.getX();
-		this.second = point.getY();
-		this.third = 0;
+		this.xyz = new double[] {point.getX(), point.getY(), 0};
 	}
 	
 	/**
@@ -106,9 +121,7 @@ public class Vector3D
 	 */
 	public Vector3D(final Dimension dimension)
 	{
-		this.first = dimension.getWidth();
-		this.second = dimension.getHeight();
-		this.third = 0;
+		this.xyz = new double[] {dimension.getWidth(), dimension.getHeight(), 0};
 	}
 	
 	
@@ -117,58 +130,131 @@ public class Vector3D
 	@Override
 	public String toString()
 	{
-		return getFirst() + "," + getSecond() + "," + getThird();
+		return getX() + "," + getY() + "," + getZ();
 	}
 
 	
 	// GETTERS & SETTERS	----------------------------------
 	
 	/**
+	 * Finds the number at a certain point in the vector
+	 * @param index The index of the requested point [0, 2]
+	 * @return The number at that index
+	 * @throws IndexOutOfBoundsException If the index was not within the vector
+	 */
+	public double get(int index) throws IndexOutOfBoundsException
+	{
+		return this.xyz[index];
+	}
+	
+	/**
+	 * @return How many indices there are in the vector. Always 3.
+	 */
+	public int size()
+	{
+		return this.xyz.length;
+	}
+	
+	/**
+	 * @return The x-coordinate of the vector
+	 */
+	public double getX()
+	{
+		return this.xyz[0];
+	}
+	
+	/**
+	 * @return The x-coordinate of the vector
+	 */
+	public int getXInt()
+	{
+		return (int) getX();
+	}
+	
+	/**
 	 * @return The first value in the vector
+	 * @deprecated Please use {@link #getX()} instead
 	 */
 	public double getFirst()
 	{
-		return this.first;
+		return getX();
 	}
 	
 	/**
 	 * @return The first value in the vector in int format
+	 * @deprecated Please use {@link #getXInt()} instead
 	 */
 	public int getFirstInt()
 	{
-		return (int) getFirst();
+		return getXInt();
+	}
+	
+	/**
+	 * @return The y-coordinate of the vector
+	 */
+	public double getY()
+	{
+		return this.xyz[1];
+	}
+	
+	/**
+	 * @return The y-coordinate of the vector
+	 */
+	public int getYInt()
+	{
+		return (int) getY();
 	}
 	
 	/**
 	 * @return The second value in the vector
+	 * @deprecated Please use {@link #getY()} instead
 	 */
 	public double getSecond()
 	{
-		return this.second;
+		return getY();
 	}
 	
 	/**
 	 * @return The second value in the vector in int format
+	 * @deprecated Please use {@link #getYInt()} instead
 	 */
 	public int getSecondInt()
 	{
-		return (int) getSecond();
+		return getYInt();
+	}
+	
+	/**
+	 * @return The z-coordinate of the vector
+	 */
+	public double getZ()
+	{
+		return this.xyz[2];
+	}
+	
+	/**
+	 * @return The z-coordinate of the vector
+	 */
+	public int getZInt()
+	{
+		return (int) getZ();
 	}
 	
 	/**
 	 * @return The second value in the vector
+	 * @deprecated Please use {@link #getZ()} instead
 	 */
 	public double getThird()
 	{
-		return this.third;
+		return getZ();
 	}
 	
 	/**
 	 * @return The second value in the vector in int format
+	 * @deprecated Please use {@link #getZInt()} instead
 	 */
 	public int getThirdInt()
 	{
-		return (int) getThird();
+		return getZInt();
 	}
 	
 	/**
@@ -176,7 +262,7 @@ public class Vector3D
 	 */
 	public double getZDirection()
 	{
-		return getZDirection(getFirst(), getSecond());
+		return getZDirection(getX(), getY());
 	}
 	
 	/**
@@ -184,15 +270,15 @@ public class Vector3D
 	 */
 	public double getYDirection()
 	{
-		return getZDirection(getFirst(), getThird());
+		return getZDirection(getX(), getZ());
 	}
 	
 	/**
-	 * @return The direction of the vector around x-axis (on y-z plane)
+	 * @return The direction of the vector around x-axis (on z-y plane)
 	 */
 	public double getXDirection()
 	{
-		return getZDirection(getThird(), getSecond());
+		return getZDirection(getZ(), getY());
 	}
 	
 	/**
@@ -205,6 +291,36 @@ public class Vector3D
 	
 	
 	// OTHER METHODS	--------------------------------------
+	
+	/**
+	 * @return The vector as an array of 3 (x, y, z)
+	 */
+	public double[] toArray()
+	{
+		return this.xyz.clone();
+	}
+	
+	/**
+	 * The vector as an array of 0, 1, 2 or 3
+	 * @param maxLength The maximum length of the array [0, 3]
+	 * @return The (partial) vector as an array
+	 */
+	public double[] toArray(int maxLength)
+	{
+		if (maxLength >= 3)
+			return toArray();
+		else if (maxLength <= 0)
+			return new double[0];
+		else
+		{
+			double[] array = new double[maxLength];
+			for (int i = 0; i < maxLength; i++)
+			{
+				array[i] = this.xyz[i];
+			}
+			return array;
+		}
+	}
 	
 	/**
 	 * @param other The other vector
@@ -232,8 +348,12 @@ public class Vector3D
 	public double dotProduct(Vector3D other)
 	{
 		Vector3D multiplication = this.times(other);
-		return multiplication.getFirst() + multiplication.getSecond() + 
-				multiplication.getThird();
+		int sum = 0;
+		for (double d : multiplication.xyz)
+		{
+			sum += d;
+		}
+		return sum;
 	}
 	
 	/**
@@ -251,8 +371,8 @@ public class Vector3D
 	 */
 	public Vector3D normal()
 	{
-		if (equalsIn2D(Vector3D.zeroVector()) && !HelpMath.areApproximatelyEqual(getThird(), 0))
-			return new Vector3D(1, 0, 0);
+		if (equalsIn2D(ZERO) && !HelpMath.areApproximatelyEqual(getZ(), 0))
+			return new Vector3D(1);
 		else
 			return normal2D();
 	}
@@ -263,7 +383,7 @@ public class Vector3D
 	 */
 	public Vector3D normal2D()
 	{
-		return new Vector3D(getSecond() * -1, getFirst()).normalized();
+		return new Vector3D(getY() * -1, getX()).normalized();
 	}
 	
 	/**
@@ -284,7 +404,7 @@ public class Vector3D
 	{
 		// = |a||b|sin(a, b)e, |e| = 1 (in this we skip the e)
 		double angleDifference = 0;
-		if (!equalsIn2D(Vector3D.zeroVector()) && !other.equalsIn2D(Vector3D.zeroVector()))
+		if (!equalsIn2D(ZERO) && !other.equalsIn2D(ZERO))
 			angleDifference = other.getZDirection() - getZDirection();
 		else
 			angleDifference = other.getYDirection() - getYDirection();
@@ -319,7 +439,7 @@ public class Vector3D
 			y = HelpMath.lendirY(length, direction);
 		}
 		
-		return new Vector3D(x, y, getThird());
+		return new Vector3D(x, y, getZ());
 	}
 	
 	/**
@@ -328,8 +448,8 @@ public class Vector3D
 	 */
 	public Vector3D withYDirection(double direction)
 	{
-		Vector3D zRotated = new Vector3D(getFirst(), getThird(), 0).withZDirection(direction);
-		return new Vector3D(zRotated.getFirst(), getSecond(), zRotated.getSecond());
+		Vector3D zRotated = new Vector3D(getX(), getZ(), 0).withZDirection(direction);
+		return new Vector3D(zRotated.getX(), getY(), zRotated.getY());
 	}
 	
 	/**
@@ -337,7 +457,7 @@ public class Vector3D
 	 */
 	public Vector3D asUnitVector()
 	{
-		return this.dividedBy(getLength());
+		return withDividedLength(getLength());
 	}
 	
 	/**
@@ -359,6 +479,43 @@ public class Vector3D
 	}
 	
 	/**
+	 * @param lengthScaling How much the vector's length is scaled
+	 * @return The scaled vector
+	 */
+	public Vector3D withScaledLength(double lengthScaling)
+	{
+		return times(lengthScaling);
+	}
+	
+	/**
+	 * @param lengthDivision How much the vector's length is divided
+	 * @return The divided vector
+	 */
+	public Vector3D withDividedLength(double lengthDivision)
+	{
+		return dividedBy(lengthDivision);
+	}
+	
+	/**
+	 * @param lengthIncrease How much the vector's length is increased
+	 * @return The increased vector
+	 */
+	public Vector3D withIncreasedLength(double lengthIncrease)
+	{
+		double length = getLength();
+		return withScaledLength((length + lengthIncrease) / length);
+	}
+	
+	/**
+	 * @param lengthDecrease How much the vector's length is decreased
+	 * @return The decreased vector
+	 */
+	public Vector3D withDecreasedLength(double lengthDecrease)
+	{
+		return withIncreasedLength(-lengthDecrease);
+	}
+	
+	/**
 	 * @param other The other vector
 	 * @return A combination of the two vectors
 	 */
@@ -366,8 +523,19 @@ public class Vector3D
 	{
 		if (other == null)
 			return this;
-		return new Vector3D(getFirst() + other.getFirst(), getSecond() + other.getSecond(), 
-				getThird() + other.getThird());
+		return plus(other.getX(), other.getY(), other.getZ());
+	}
+	
+	/**
+	 * Increases the vector by given proportions
+	 * @param xPlus How much the vector is increased along the x-axis
+	 * @param yPlus How much the vector is increased along the y-axis
+	 * @param zPlus How much the vector is increased along the z-axis
+	 * @return An increased vector
+	 */
+	public Vector3D plus(double xPlus, double yPlus, double zPlus)
+	{
+		return new Vector3D(getX() + xPlus, getY() + yPlus, getZ() + zPlus);
 	}
 	
 	/**
@@ -393,6 +561,18 @@ public class Vector3D
 	}
 	
 	/**
+	 * Decreases the vector by give proportions
+	 * @param xMinus How much the vector is decreased along the x-axis
+	 * @param yMinus How much the vector is decreased along the y-axis
+	 * @param zMinus How much the vector is decreased along the z-axis
+	 * @return A decreased vector
+	 */
+	public Vector3D minus(double xMinus, double yMinus, double zMinus)
+	{
+		return plus(-xMinus, -yMinus, -zMinus);
+	}
+	
+	/**
 	 * @return A reverse of this vector (2, 3) would become (-2,-3), for example
 	 */
 	public Vector3D reverse()
@@ -415,29 +595,29 @@ public class Vector3D
 	 */
 	public Vector3D times(final Vector3D other)
 	{
-		return times(other.getFirst(), other.getSecond(), other.getThird());
+		return times(other.getX(), other.getY(), other.getZ());
 	}
 	
 	/**
-	 * @param a The multiplier for the first index
-	 * @param b The multiplier for the second index
-	 * @param c The multiplier for the third index
+	 * @param xScale How much the vector is scaled along the x-axis
+	 * @param yScale How much the vector is scaled along the y-axis 
+	 * @param zScale How much the vector is scaled along the z-axis
 	 * @return The vector scaled with the given values. (2, 3, 1) scaled with 3, 2 and 1 would be 
 	 * (6, 6, 1)
 	 */
-	public Vector3D times(double a, double b, double c)
+	public Vector3D times(double xScale, double yScale, double zScale)
 	{
-		return new Vector3D(getFirst() * a, getSecond() * b, getThird() * c);
+		return new Vector3D(getX() * xScale, getY() * yScale, getZ() * zScale);
 	}
 	
 	/**
-	 * @param a
+	 * @param scaling How much the vector is scaled along all axes
 	 * @return The vector scaled with the given value. (2, 3, 1) scaled with 2 would be (4, 6, 2), 
 	 * for example
 	 */
-	public Vector3D times(double a)
+	public Vector3D times(double scaling)
 	{
-		return times(a, a, a);
+		return times(scaling, scaling, scaling);
 	}
 	
 	/**
@@ -446,27 +626,27 @@ public class Vector3D
 	 */
 	public Vector3D dividedBy(final Vector3D other)
 	{
-		return dividedBy(other.getFirst(), other.getSecond(), other.getThird());
+		return dividedBy(other.getX(), other.getY(), other.getZ());
 	}
 	
 	/**
-	 * @param a The divider for the first index
-	 * @param b The divider for the second index
-	 * @param c The divider for the third index
+	 * @param xDivide The divider for the x index
+	 * @param yDivide The divider for the y index
+	 * @param zDivide The divider for the z index
 	 * @return The vector divided by the given values. (6, 6, 1) divided by 3, 2 and 1 would be 
 	 * (2, 3, 1)
 	 */
-	public Vector3D dividedBy(double a, double b, double c)
+	public Vector3D dividedBy(double xDivide, double yDivide, double zDivide)
 	{
 		// Can't divide with 0
-		if (a == 0)
-			a = 1;
-		if (b == 0)
-			b = 1;
-		if (c == 0)
-			c = 1;
+		if (xDivide == 0)
+			xDivide = 1;
+		if (yDivide == 0)
+			yDivide = 1;
+		if (zDivide == 0)
+			zDivide = 1;
 		
-		return new Vector3D(getFirst() / a, getSecond() / b, getThird() / c);
+		return new Vector3D(getX() / xDivide, getY() / yDivide, getZ() / zDivide);
 	}
 	
 	/**
@@ -484,8 +664,7 @@ public class Vector3D
 	 */
 	public boolean equals(Vector3D other)
 	{
-		return equalsIn2D(other) && 
-				HelpMath.areApproximatelyEqual(getThird(), other.getThird());
+		return equalsIn(size(), other);
 	}
 	
 	/**
@@ -495,8 +674,18 @@ public class Vector3D
 	 */
 	public boolean equalsIn2D(Vector3D other)
 	{
-		return HelpMath.areApproximatelyEqual(getFirst(), other.getFirst()) && 
-				HelpMath.areApproximatelyEqual(getSecond(), other.getSecond());
+		return equalsIn(2, other);
+	}
+	
+	private boolean equalsIn(int dimensions, Vector3D other)
+	{
+		for (int i = 0; i < dimensions; i++)
+		{
+			if (!HelpMath.areApproximatelyEqual(get(i), other.get(i)))
+				return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -504,7 +693,7 @@ public class Vector3D
 	 */
 	public Vector3D in2D()
 	{
-		return new Vector3D(getFirst(), getSecond(), 0);
+		return new Vector3D(getX(), getY(), 0);
 	}
 	
 	/**
@@ -512,7 +701,7 @@ public class Vector3D
 	 */
 	public Point2D.Double toPoint()
 	{
-		return new Point2D.Double(getFirst(), getSecond());
+		return new Point2D.Double(getX(), getY());
 	}
 	
 	/**
@@ -520,7 +709,7 @@ public class Vector3D
 	 */
 	public Dimension toDimension()
 	{
-		return new Dimension(getFirstInt(), getSecondInt());
+		return new Dimension(getXInt(), getYInt());
 	}
 	
 	/**
@@ -530,7 +719,7 @@ public class Vector3D
 	 */
 	public void drawAsPoint(int radius, Graphics2D g2d)
 	{
-		g2d.drawOval(getFirstInt() - radius / 2, getSecondInt() - radius / 2, radius, radius);
+		g2d.drawOval(getXInt() - radius / 2, getYInt() - radius / 2, radius, radius);
 	}
 	
 	/**
@@ -539,31 +728,7 @@ public class Vector3D
 	 */
 	public void drawAsLine(Graphics2D g2d)
 	{
-		g2d.drawLine(0, 0, getFirstInt(), getSecondInt());
-	}
-	
-	/**
-	 * @return An identity vector (1, 1, 1)
-	 */
-	public static Vector3D identityVector()
-	{
-		return new Vector3D(1, 1, 1);
-	}
-	
-	/**
-	 * @return A vector with zero length
-	 */
-	public static Vector3D zeroVector()
-	{
-		return new Vector3D(0, 0, 0);
-	}
-	
-	/**
-	 * @return A unit vector that goes along x-axis (1, 0, 0)
-	 */
-	public static Vector3D unitVector()
-	{
-		return new Vector3D(1, 0, 0);
+		g2d.drawLine(0, 0, getXInt(), getYInt());
 	}
 	
 	/**
@@ -572,7 +737,7 @@ public class Vector3D
 	 */
 	public static Vector3D unitVector(double zDirection)
 	{
-		return unitVector().withZDirection(zDirection);
+		return UNIT.withZDirection(zDirection);
 	}
 	
 	/**
@@ -587,9 +752,9 @@ public class Vector3D
 	
 	/**
 	 * Parses a vector from a string.
-	 * @param s The string that is parsed into vector format. "1.0,2" will be interpreted as 
-	 * (1.0, 2.0) as will "1.0, 2". "1.0" will be interpreted as (1.0, 0) while "" will be 
-	 * interpreted as (0, 0)
+	 * @param s The string that is parsed into vector format. "1.0,2,0" will be interpreted as 
+	 * (1.0, 2.0, 0.0) as will "1.0, 2". "1.0" will be interpreted as (1.0, 0, 0) while "" will be 
+	 * interpreted as (0, 0, 0)
 	 * @return A vector parsed from the string
 	 * @throws NumberFormatException If the contents of the string cannot be parsed into numbers
 	 */
@@ -627,9 +792,9 @@ public class Vector3D
 			Ny = UzVx - UxVz
 			Nz = UxVy - UyVx
 		 */
-		double x = u.getSecond() * v.getThird() - u.getThird() * v.getSecond();
-		double y = u.getThird() * v.getFirst() - u.getFirst() * v.getThird();
-		double z = u.getFirst() * v.getSecond() - u.getSecond() * v.getFirst();
+		double x = u.getY() * v.getZ() - u.getZ() * v.getY();
+		double y = u.getZ() * v.getX() - u.getX() * v.getZ();
+		double z = u.getX() * v.getY() - u.getY() * v.getX();
 		
 		return new Vector3D(x, y, z);
 	}

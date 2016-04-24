@@ -42,7 +42,7 @@ public class Line
 	public Line(Vector3D end)
 	{
 		// Initializes attributes
-		this.start = Vector3D.zeroVector();
+		this.start = Vector3D.ZERO;
 		this.end = end;
 	}
 
@@ -99,8 +99,8 @@ public class Line
 	 */
 	public void draw(Graphics2D g2d)
 	{
-		g2d.drawLine(getStart().getFirstInt(), getStart().getSecondInt(), 
-				getEnd().getFirstInt(), getEnd().getSecondInt());
+		g2d.drawLine(getStart().getXInt(), getStart().getYInt(), 
+				getEnd().getXInt(), getEnd().getYInt());
 	}
 	
 	/**
@@ -181,9 +181,9 @@ public class Line
 		Vector3D V = toVector(); // The translation vector
 		Vector3D L = getStart().minus(origin); // The line start in relation to the circle origin
 		
-		double a = Math.pow(V.getFirst(), 2) + Math.pow(V.getSecond(), 2);
-		double b = 2 * V.getFirst() * L.getFirst() + 2 * V.getSecond() * L.getSecond();
-		double c = Math.pow(L.getFirst(), 2) + Math.pow(L.getSecond(), 2) - Math.pow(radius, 2);
+		double a = Math.pow(V.getX(), 2) + Math.pow(V.getY(), 2);
+		double b = 2 * V.getX() * L.getX() + 2 * V.getY() * L.getY();
+		double c = Math.pow(L.getX(), 2) + Math.pow(L.getY(), 2) - Math.pow(radius, 2);
 		
 		/*
 		 * The equation

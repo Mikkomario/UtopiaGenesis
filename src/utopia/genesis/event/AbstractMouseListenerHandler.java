@@ -205,8 +205,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	private void initialize()
 	{
 		// Initializes attributes
-		this.currentMousePosition = Vector3D.zeroVector();
-		this.lastStepDuration = 0;
+		this.currentMousePosition = Vector3D.ZERO;
 		
 		this.mouseButtonStates = new HashMap<MouseButtonEventType, HashMap<MouseButton, 
 				Boolean>>();

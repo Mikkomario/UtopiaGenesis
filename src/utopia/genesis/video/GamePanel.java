@@ -212,9 +212,9 @@ public class GamePanel extends JPanel implements ComponentListener
 			this.gameWorldSize = this.originalGameWorldSize.vectorProjection(size);
 		else
 		{
-			double originalXYRatio = this.originalGameWorldSize.getFirst() / 
-					this.originalGameWorldSize.getSecond();
-			double newXYRatio = size.getFirst() / size.getSecond();
+			double originalXYRatio = this.originalGameWorldSize.getX() / 
+					this.originalGameWorldSize.getY();
+			double newXYRatio = size.getX() / size.getY();
 			
 			boolean preserveX = originalXYRatio > newXYRatio;
 			if (this.scalingPolicy == ScalingPolicy.CROP)
@@ -222,16 +222,16 @@ public class GamePanel extends JPanel implements ComponentListener
 			
 			if (preserveX)
 				// (x1, y1 * y2/x2)
-				this.gameWorldSize = new Vector3D(this.originalGameWorldSize.getFirst(), 
-						this.originalGameWorldSize.getSecond() * size.getSecond() / size.getFirst());
+				this.gameWorldSize = new Vector3D(this.originalGameWorldSize.getX(), 
+						this.originalGameWorldSize.getY() * size.getY() / size.getX());
 			else if (!preserveX)
 				// (x1 * x2/y2, y1)
-				this.gameWorldSize = new Vector3D(this.originalGameWorldSize.getFirst() * 
-						size.getFirst() / size.getSecond(), this.originalGameWorldSize.getSecond());
+				this.gameWorldSize = new Vector3D(this.originalGameWorldSize.getX() * 
+						size.getX() / size.getY(), this.originalGameWorldSize.getY());
 		}
 		
 		// Calculates the scaling used in drawing
-		this.scaling = size.dividedBy(this.gameWorldSize).getFirst();
+		this.scaling = size.dividedBy(this.gameWorldSize).getX();
 	}
 	
 	

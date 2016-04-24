@@ -19,6 +19,10 @@ public final class Transformation
 {
 	// ATTRIBUTES	-----------------------------------
 	
+	/**
+	 * The identity transformation that doesn't transform
+	 */
+	public static final Transformation IDENTITY = new Transformation();
 	private Vector3D position, scaling, shear;
 	private double angle;
 	
@@ -176,7 +180,7 @@ public final class Transformation
 				// In the case the current transformation can't be inverted, 
 				// inverts the translations (seems to be enough)
 				inverse = new AffineTransform();
-				inverse.translate(-getPosition().getFirst(), -getPosition().getSecond());
+				inverse.translate(-getPosition().getX(), -getPosition().getY());
 			}
 		}
 		catch (NoninvertibleTransformException exception)
@@ -219,7 +223,7 @@ public final class Transformation
 	public Transformation inverse()
 	{
 		return new Transformation(getPosition().reverse(), 
-				Vector3D.identityVector().dividedBy(getScaling()), getShear().reverse(), 
+				Vector3D.IDENTITY.dividedBy(getScaling()), getShear().reverse(), 
 				HelpMath.checkDirection(-getAngle()));
 	}
 	
@@ -319,32 +323,24 @@ public final class Transformation
 	{
 		AffineTransform t = new AffineTransform();
 		
-		t.translate(getPosition().getFirst(), getPosition().getSecond());
+		t.translate(getPosition().getX(), getPosition().getY());
 		t.rotate(Math.toRadians((360 - getAngle())));
-		t.scale(getScaling().getFirst(), getScaling().getSecond());
-		t.shear(getShear().getFirst(), getShear().getSecond());
+		t.scale(getScaling().getX(), getScaling().getY());
+		t.shear(getShear().getX(), getShear().getY());
 		
 		return t;
 	}
 	
 	private void initialize()
 	{
-		this.position = Vector3D.zeroVector();
-		this.scaling = Vector3D.identityVector();
-		this.shear = Vector3D.zeroVector();
+		this.position = Vector3D.ZERO;
+		this.scaling = Vector3D.IDENTITY;
+		this.shear = Vector3D.ZERO;
 		this.angle = 0;
 	}
 	
 	
 	// FACTORIES	---------------------------
-	
-	/**
-	 * @return A transformation that can be added to any other transformation and keep it same
-	 */
-	public static Transformation identityTransformation()
-	{
-		return new Transformation();
-	}
 	
 	/**
 	 * @param transition The position attribute of the transformation
@@ -363,7 +359,7 @@ public final class Transformation
 	 */
 	public static Transformation scalingTransformation(Vector3D scaling)
 	{
-		return identityTransformation().withScaling(scaling);
+		return IDENTITY.withScaling(scaling);
 	}
 	
 	/**
@@ -373,7 +369,7 @@ public final class Transformation
 	 */
 	public static Transformation scalingTransformation(double scaling)
 	{
-		return identityTransformation().withScaling(new Vector3D(scaling, scaling));
+		return IDENTITY.withScaling(new Vector3D(scaling, scaling));
 	}
 	
 	/**
@@ -383,7 +379,7 @@ public final class Transformation
 	 */
 	public static Transformation shearTransformation(Vector3D shear)
 	{
-		return identityTransformation().withShear(shear);
+		return IDENTITY.withShear(shear);
 	}
 	
 	/**
@@ -393,6 +389,6 @@ public final class Transformation
 	 */
 	public static Transformation rotationTransformation(double rotation)
 	{
-		return identityTransformation().withAngle(rotation);
+		return IDENTITY.withAngle(rotation);
 	}
 }
