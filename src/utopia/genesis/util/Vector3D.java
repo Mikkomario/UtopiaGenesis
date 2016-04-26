@@ -348,7 +348,7 @@ public class Vector3D
 	public double dotProduct(Vector3D other)
 	{
 		Vector3D multiplication = this.times(other);
-		int sum = 0;
+		double sum = 0;
 		for (double d : multiplication.xyz)
 		{
 			sum += d;

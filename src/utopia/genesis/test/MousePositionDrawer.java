@@ -11,6 +11,7 @@ import utopia.genesis.event.MouseEvent.MouseButton;
 import utopia.genesis.event.MouseEvent.MouseButtonEventType;
 import utopia.genesis.event.MouseEvent.MouseEventType;
 import utopia.genesis.util.DepthConstants;
+import utopia.genesis.util.Line;
 import utopia.genesis.util.Vector3D;
 import utopia.inception.event.EventSelector;
 import utopia.inception.event.MultiEventSelector;
@@ -107,10 +108,22 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 		// If mouse is pressed, draws a line between the two points
 		if (this.mouseIsDown)
 		{
+			Line line = new Line(this.lastPressPosition, this.lastMousePosition);
+			
+			if (line.toVector().isParallerWith(new Vector3D(2, 2)))
+				g2d.setColor(Color.GREEN);
+			
+			line.draw(g2d);
+			
+			// Also draws the normal
+			new Line(line.getStart(), 
+					line.getStart().plus(line.toVector().normal2D().times(100))).draw(g2d);
+			/*
 			g2d.drawLine(this.lastPressPosition.getXInt(), 
 					this.lastPressPosition.getYInt(), 
 					this.lastMousePosition.getXInt(), 
 					this.lastMousePosition.getYInt());
+					*/
 		}
 		// Otherwise draws a circle around the mouse
 		else
