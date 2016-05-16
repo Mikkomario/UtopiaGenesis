@@ -4,9 +4,11 @@ import utopia.flow.generics.DataType;
 import utopia.flow.generics.Value;
 import utopia.flow.io.ElementValueParser;
 import utopia.flow.structure.Element;
+import utopia.flow.structure.Node;
 import utopia.flow.structure.TreeNode;
 import utopia.genesis.util.HelpMath;
 import utopia.genesis.util.Line;
+import utopia.genesis.util.Transformation;
 import utopia.genesis.util.Vector3D;
 
 /**
@@ -21,7 +23,8 @@ public class GenesisElementValueParser implements ElementValueParser
 	@Override
 	public DataType[] getParsedTypes()
 	{
-		return new DataType[]{GenesisDataType.VECTOR, GenesisDataType.LINE};
+		return new DataType[]{GenesisDataType.VECTOR, GenesisDataType.LINE, 
+				GenesisDataType.TRANSFORMATION};
 	}
 
 	@Override
@@ -45,6 +48,18 @@ public class GenesisElementValueParser implements ElementValueParser
 			TreeNode<Element> root = new TreeNode<>(new Element("line"));
 			root.addChild(new TreeNode<>(new Element("start", GenesisDataType.Vector(line.getStart()))));
 			root.addChild(new TreeNode<>(new Element("end", GenesisDataType.Vector(line.getEnd()))));
+			
+			return root;
+		}
+		// A transformation is formed from vector and double elements
+		else if (value.getType().equals(GenesisDataType.TRANSFORMATION))
+		{
+			Transformation t = GenesisDataType.valueToTransformation(value);
+			TreeNode<Element> root = new TreeNode<>(new Element("transformation"));
+			root.addChild(new TreeNode<>(new Element("rotation", Value.Double(t.getAngle()))));
+			root.addChild(new TreeNode<>(new Element("position", GenesisDataType.Vector(t.getPosition()))));
+			root.addChild(new TreeNode<>(new Element("scaling", GenesisDataType.Vector(t.getScaling()))));
+			root.addChild(new TreeNode<>(new Element("shear", GenesisDataType.Vector(t.getShear()))));
 			
 			return root;
 		}
@@ -82,6 +97,28 @@ public class GenesisElementValueParser implements ElementValueParser
 					end = GenesisDataType.valueToVector(child.getContent().getContent());
 			}
 			return GenesisDataType.Line(new Line(start, end));
+		}
+		else if (targetType.equals(GenesisDataType.TRANSFORMATION))
+		{
+			double rotation = 0;
+			Vector3D position = Vector3D.ZERO;
+			Vector3D scaling = Vector3D.IDENTITY;
+			Vector3D shear = Vector3D.ZERO;
+			
+			for (Element child : Node.getNodeContent(element.getChildren()))
+			{
+				if (child.getName().equalsIgnoreCase("rotation"))
+					rotation = child.getContent().toDouble();
+				else if (child.getName().equalsIgnoreCase("position"))
+					position = GenesisDataType.valueToVector(child.getContent());
+				else if (child.getName().equalsIgnoreCase("scaling"))
+					scaling = GenesisDataType.valueToVector(child.getContent());
+				else if (child.getName().equalsIgnoreCase("shear"))
+					shear = GenesisDataType.valueToVector(child.getContent());
+			}
+			
+			return GenesisDataType.Transformation(new Transformation(position, scaling, shear, 
+					rotation));
 		}
 		
 		throw new ElementValueParsingFailedException("Unsupported target type " + targetType);
