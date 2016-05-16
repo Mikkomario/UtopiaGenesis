@@ -92,6 +92,24 @@ public class StepHandler extends ActorHandler implements Runnable
 	}
 	
 	/**
+	 * @param millis A number of milliseconds
+	 * @return The amount of milliseconds in steps
+	 */
+	public static double millisToSteps(double millis)
+	{
+		return millis / STEPLENGTH;
+	}
+	
+	/**
+	 * @param steps A number of steps
+	 * @return The number of steps in milliseconds
+	 */
+	public static double stepsToMillis(double steps)
+	{
+		return steps * STEPLENGTH;
+	}
+	
+	/**
 	 * Adds a performance monitor to the informed monitors
 	 * @param monitor The performance monitor that will be informed
 	 */

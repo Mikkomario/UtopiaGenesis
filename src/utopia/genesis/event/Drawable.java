@@ -1,5 +1,6 @@
 package utopia.genesis.event;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 
 import utopia.inception.handling.Handled;
@@ -27,4 +28,14 @@ public interface Drawable extends Handled
 	 * @see utopia.genesis.util.DepthConstants
 	 */
 	public int getDepth();
+	
+	/**
+	 * Changes the drawing alpha value of a graphics object
+	 * @param g2d A graphics object
+	 * @param alpha The alpha set to the graphics object
+	 */
+	public static void setDrawAlpha(Graphics2D g2d, float alpha)
+	{
+		g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+	}
 }
