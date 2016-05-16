@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 import utopia.genesis.event.AbstractMouseListenerHandler;
+import utopia.genesis.event.Actor;
 import utopia.genesis.event.Drawable;
 import utopia.genesis.event.GenesisHandlerType;
 import utopia.genesis.event.MouseEvent;
@@ -14,6 +15,7 @@ import utopia.genesis.event.StepHandler;
 import utopia.genesis.event.MouseEvent.MouseButton;
 import utopia.genesis.event.MouseEvent.MouseButtonEventScale;
 import utopia.genesis.event.MouseEvent.MouseButtonEventType;
+import utopia.genesis.util.DependentDrawer;
 import utopia.genesis.util.HelpMath;
 import utopia.genesis.util.Transformable;
 import utopia.genesis.util.Transformation;
@@ -73,6 +75,12 @@ class GenesisDependencyTest
 		
 		// Creates the test node
 		handlers.add(new TestNode(handlers, null, new Vector3D(150, 150)));
+		
+		// Creates the rotating boxes
+		TestRotator rotator = new TestRotator(new Vector3D(600, 300));
+		handlers.add(rotator, 
+				new TestRotatingBoxDrawer(rotator, 32, new Vector3D(50, 0)), 
+				new TestRotatingBoxDrawer(rotator, 16, new Vector3D(-50, 0)));
 		
 		// Starts the game
 		stepHandler.start();
@@ -218,6 +226,74 @@ class GenesisDependencyTest
 		public int getDepth()
 		{
 			return 1;
+		}
+	}
+	
+	private static class TestRotator extends SimpleHandled implements Actor, Transformable
+	{
+		// ATTRIBUTES	--------------
+		
+		private Transformation transformation;
+		
+		
+		// CONSTRUCTOR	--------------
+		
+		public TestRotator(Vector3D position)
+		{
+			this.transformation = new Transformation(position);
+		}
+		
+		
+		// IMPLEMENTED METHODS	------
+		
+		@Override
+		public void act(double duration)
+		{
+			setTrasformation(getTransformation().rotated(duration));
+		}
+
+		@Override
+		public Transformation getTransformation()
+		{
+			return this.transformation;
+		}
+
+		@Override
+		public void setTrasformation(Transformation t)
+		{
+			this.transformation = t;
+		}
+	}
+	
+	private static class TestRotatingBoxDrawer extends DependentDrawer<TestRotator> implements Actor
+	{
+		// ATTRIBUTES	----------------
+		
+		private int diameter;
+		
+		
+		// CONSTRUCTOR	----------------
+		
+		public TestRotatingBoxDrawer(TestRotator user, int diameter, Vector3D relativeStartPosition)
+		{
+			super(user, new Vector3D(diameter / 2, diameter / 2), 0);
+			setTrasformation(new Transformation(relativeStartPosition));
+			this.diameter = diameter;
+		}
+		
+		
+		// IMPLEMENTED METHODS	-------
+
+		@Override
+		protected void drawSelfBasic(Graphics2D g2d)
+		{
+			g2d.drawRect(0, 0, this.diameter, this.diameter);
+		}
+
+		@Override
+		public void act(double duration)
+		{
+			setTrasformation(getTransformation().rotated(duration));
 		}
 	}
 }

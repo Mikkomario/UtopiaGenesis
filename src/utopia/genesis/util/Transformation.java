@@ -292,6 +292,56 @@ public final class Transformation
 	}
 	
 	/**
+	 * Translates the transformation's position
+	 * @param transition How much the position is adjusted
+	 * @return a new translated transformation
+	 */
+	public Transformation translated(Vector3D transition)
+	{
+		return withPosition(getPosition().plus(transition));
+	}
+	
+	/**
+	 * Rotates the transformation's angle
+	 * @param rotation How much the angle is rotated
+	 * @return a new rotated transformation
+	 */
+	public Transformation rotated(double rotation)
+	{
+		return withAngle(getAngle() + rotation);
+	}
+	
+	/**
+	 * Scales the transformation
+	 * @param scaling How much the transformation is scaled
+	 * @return The scaled transformation
+	 */
+	public Transformation scaled(Vector3D scaling)
+	{
+		return withScaling(getScaling().times(scaling));
+	}
+	
+	/**
+	 * Scales the transformation
+	 * @param scaling How much the transformation is scaled
+	 * @return The scaled transformation
+	 */
+	public Transformation scaled(double scaling)
+	{
+		return withScaling(getScaling().times(scaling));
+	}
+	
+	/**
+	 * Increases the transformation's shear
+	 * @param shear How much the shear is adjusted
+	 * @return The sheared transformation
+	 */
+	public Transformation sheared(Vector3D shear)
+	{
+		return withShear(getShear().plus(shear));
+	}
+	
+	/**
 	 * Creates a new transformation with position and angle as if it was rotated around a 
 	 * position in the world space.
 	 * @param rotation How much the transformation is rotated (in degrees)

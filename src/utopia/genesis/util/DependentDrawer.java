@@ -21,6 +21,7 @@ public abstract class DependentDrawer<T extends Transformable & Handled> extends
 	private Transformation transformation = Transformation.IDENTITY;
 	private int depth;
 	private float alpha = 1;
+	private Vector3D origin;
 	
 	
 	// CONSTRUCTOR	-----------------------------
@@ -29,12 +30,14 @@ public abstract class DependentDrawer<T extends Transformable & Handled> extends
 	 * Creates a new drawer. The drawer's visibility will depend from the user's activity.
 	 * @param user The user that will use the drawer. The drawer's state (activity and visibility) 
 	 * will be tied to that of the user.
+	 * @param origin The origin the drawer uses
 	 * @param initialDepth How deep the drawer draws stuff
 	 */
-	public DependentDrawer(T user, int initialDepth)
+	public DependentDrawer(T user, Vector3D origin, int initialDepth)
 	{
 		super(user);
 		this.depth = initialDepth;
+		this.origin = origin;
 	}
 	
 	
@@ -57,7 +60,10 @@ public abstract class DependentDrawer<T extends Transformable & Handled> extends
 			Drawable.setDrawAlpha(g2d, getAlpha());
 		
 		AffineTransform lastTransform = g2d.getTransform();
+		// Applies combined transformation
 		g2d.transform(getCombinedTransformation().toAffineTransform());
+		// Applies origin as well
+		g2d.translate(-getOrigin().getX(), -getOrigin().getY());
 		
 		drawSelfBasic(g2d);
 		
@@ -117,6 +123,23 @@ public abstract class DependentDrawer<T extends Transformable & Handled> extends
 			this.alpha = 0;
 		if (getAlpha() > 1)
 			this.alpha = 1;
+	}
+	
+	/**
+	 * @return The origin used in the drawing
+	 */
+	public Vector3D getOrigin()
+	{
+		return this.origin;
+	}
+	
+	/**
+	 * Changes the drawer's origin
+	 * @param origin The origin used in the drawing
+	 */
+	public void setOrigin(Vector3D origin)
+	{
+		this.origin = origin;
 	}
 	
 	
