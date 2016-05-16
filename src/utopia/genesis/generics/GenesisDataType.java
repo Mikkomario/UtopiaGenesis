@@ -7,6 +7,7 @@ import utopia.flow.generics.DataTypes;
 import utopia.flow.generics.Value;
 import utopia.flow.io.XmlElementWriter;
 import utopia.genesis.util.Line;
+import utopia.genesis.util.Transformation;
 import utopia.genesis.util.Vector3D;
 
 /**
@@ -26,7 +27,12 @@ public enum GenesisDataType implements DataType
 	 * The line formed by two vectors
 	 * @see Line
 	 */
-	LINE;
+	LINE,
+	/**
+	 * A transformation dictating how an object is drawn / interacted with
+	 * @see Transformation
+	 */
+	TRANSFORMATION;
 	
 	
 	// ATTRIBUTES	--------------------
@@ -66,6 +72,16 @@ public enum GenesisDataType implements DataType
 	}
 	
 	/**
+	 * Wraps a transformation into a value
+	 * @param transformation a transformation
+	 * @return The transformation wrapped into a value
+	 */
+	public static Value Transformation(Transformation transformation)
+	{
+		return new Value(transformation, TRANSFORMATION);
+	}
+	
+	/**
 	 * Parses the vector value of a value
 	 * @param value a value
 	 * @return The vector value of that value
@@ -86,6 +102,16 @@ public enum GenesisDataType implements DataType
 	}
 	
 	/**
+	 * Parses a transformation value of a value
+	 * @param value a value
+	 * @return The transformation value of the value
+	 */
+	public static Transformation valueToTransformation(Value value)
+	{
+		return (Transformation) value.parseTo(TRANSFORMATION);
+	}
+	
+	/**
 	 * Initialises genesis data types, their parsing and element parsing. This method 
 	 * should be called before the data types are actually used
 	 */
@@ -100,6 +126,7 @@ public enum GenesisDataType implements DataType
 			DataTypeTreeNode object = types.get(BasicDataType.OBJECT);
 			types.add(new DataTypeTreeNode(VECTOR, object));
 			types.add(new DataTypeTreeNode(LINE, object));
+			types.add(new DataTypeTreeNode(TRANSFORMATION, object));
 			
 			// Adds parsing for the new types as well
 			types.addParser(GenesisDataTypeParser.getInstance());
