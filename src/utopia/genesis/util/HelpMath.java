@@ -1,5 +1,6 @@
 package utopia.genesis.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -426,5 +427,20 @@ public class HelpMath
 	public static boolean areApproximatelyEqual(double first, double second)
 	{
 		return (int) (first * 1000) == (int) (second * 1000);
+	}
+	
+	/**
+	 * @param list a list
+	 * @return a list containing the same elements but in reversed order
+	 */
+	public static <T> List<T> reverse(List<T> list)
+	{
+		List<T> reversed = new ArrayList<>();
+		for (int i = list.size() - 1; i >= 0; i--)
+		{
+			reversed.add(list.get(i));
+		}
+		
+		return reversed;
 	}
 }

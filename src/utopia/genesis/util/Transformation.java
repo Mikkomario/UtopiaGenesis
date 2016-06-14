@@ -270,6 +270,15 @@ public final class Transformation
 	}
 	
 	/**
+	 * @param scaling The new scaling attribute (used for both x and y scaling
+	 * @return A transformation like this one except with the given scaling
+	 */
+	public Transformation withScaling(double scaling)
+	{
+		return withScaling(new Vector3D(scaling, scaling));
+	}
+	
+	/**
 	 * @param shear The new shear attribute
 	 * @return A transformation like this one except with the given shear
 	 */
