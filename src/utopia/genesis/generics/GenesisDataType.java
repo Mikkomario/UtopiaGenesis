@@ -5,7 +5,6 @@ import utopia.flow.generics.DataType;
 import utopia.flow.generics.DataTypeTreeNode;
 import utopia.flow.generics.DataTypes;
 import utopia.flow.generics.Value;
-import utopia.flow.io.XmlElementWriter;
 import utopia.genesis.util.Line;
 import utopia.genesis.util.Transformation;
 import utopia.genesis.util.Vector3D;
@@ -130,7 +129,7 @@ public enum GenesisDataType implements DataType
 			
 			// Adds parsing for the new types as well
 			types.addParser(GenesisDataTypeParser.getInstance());
-			XmlElementWriter.introduceSpecialParser(new GenesisElementValueParser());
+			types.introduceSpecialParser(new GenesisElementValueParser());
 		}
 	}
 }

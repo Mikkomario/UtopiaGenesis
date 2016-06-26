@@ -1,8 +1,5 @@
 package utopia.genesis.event;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * This class calculates millisconds and calls all actors when a certain number 
  * of milliseconds has passed. All of the actors should be under the command of 
@@ -15,15 +12,9 @@ public class StepHandler extends ActorHandler implements Runnable
 {
 	// ATTRIBUTES	-------------------------------------------------------
 	
-	/**
-	 * How long does a single step take in milliseconds.
-	 */
-	public static final int STEPLENGTH = 15;
-	
-	private int callinterval;
-	private double maxStepsPerCall;
-	private long nextupdatemillis, lastactmillis;
-	private List<PerformanceMonitor> monitors;
+	private double callintervalMillis;
+	private int maxMillisPerCall;
+	private long nextupdateNanos, lastactNanos;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -37,18 +28,17 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * @param minActionsPerSecond How many actions per second the handler supports at minimum. 
 	 * Some physics related functions may break if too many steps are simulated at once.
 	 */
-	public StepHandler(int maxActionsPerSecond, double minActionsPerSecond)
+	public StepHandler(int maxActionsPerSecond, int minActionsPerSecond)
 	{	
 		// Initializes attributes
 		if (maxActionsPerSecond <= 0)
-			this.callinterval = 0;
+			this.callintervalMillis = 0;
 		else
-			this.callinterval = 1000 / maxActionsPerSecond;
+			this.callintervalMillis = 1000 / (double) maxActionsPerSecond;
 		
-		this.maxStepsPerCall = (1000 / minActionsPerSecond) / STEPLENGTH;
-		this.nextupdatemillis = 0;
-		this.lastactmillis = System.currentTimeMillis();
-		this.monitors = new ArrayList<>();
+		this.maxMillisPerCall = (1000 / minActionsPerSecond);
+		this.nextupdateNanos = 0;
+		this.lastactNanos = System.nanoTime();
 	}
 	
 	/**
@@ -60,7 +50,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * @return The stepHandler that was started
 	 */
 	public static StepHandler createAndStartStepHandler(int maxActionsPerSecond, 
-			double minActionsPerSecond)
+			int minActionsPerSecond)
 	{
 		StepHandler handler = new StepHandler(maxActionsPerSecond, minActionsPerSecond);
 		new Thread(handler).start();
@@ -91,69 +81,29 @@ public class StepHandler extends ActorHandler implements Runnable
 		return thread;
 	}
 	
-	/**
-	 * @param millis A number of milliseconds
-	 * @return The amount of milliseconds in steps
-	 */
-	public static double millisToSteps(double millis)
-	{
-		return millis / STEPLENGTH;
-	}
-	
-	/**
-	 * @param steps A number of steps
-	 * @return The number of steps in milliseconds
-	 */
-	public static double stepsToMillis(double steps)
-	{
-		return steps * STEPLENGTH;
-	}
-	
-	/**
-	 * Adds a performance monitor to the informed monitors
-	 * @param monitor The performance monitor that will be informed
-	 */
-	private void addPerformanceMonitor(PerformanceMonitor monitor)
-	{
-		this.monitors.add(monitor);
-	}
-	
 	// This method updates the actors when needed
 	private synchronized void update()
 	{
 		// Remembers the time
-		this.nextupdatemillis = System.currentTimeMillis() + this.callinterval;
+		this.nextupdateNanos = System.nanoTime() + millisToNanos(this.callintervalMillis);
 		
-		// Calculates the step length that is informed for the objects
-		long thisActStartedAt = System.currentTimeMillis();
-		double steps = (thisActStartedAt - this.lastactmillis) / 
-				(double) STEPLENGTH;
+		// Calculates the duration that is informed for the objects
+		long thisActStartedNanos = System.nanoTime();
+		double millis = nanoDifferenceToMillis(this.lastactNanos, thisActStartedNanos);
 		
-		// Occasional historical error: when put to 120 fps, the program works with 60. 
-		// It can't go higher either... 
-		// Except randomly after the software has been accelerated once and 
-		// the computer has "awaken"
-		//System.out.println(thisActStartedAt - this.lastactmillis);
-		
-		// Sometimes the true amount of steps can't be informed and a 
+		// Sometimes the true duration can't be informed and a 
 		// different number is given instead (physics don't like there 
-		// being too many steps at once)
-		if (steps > this.maxStepsPerCall)
-			steps = this.maxStepsPerCall;
+		// being too many updates at once)
+		if (millis > this.maxMillisPerCall)
+			millis = this.maxMillisPerCall;
 		
-		act(steps);
+		act(millis);
 		
-		// Updates the stepmillis
-		this.lastactmillis = thisActStartedAt;
+		// Updates the current status
+		this.lastactNanos = thisActStartedNanos;
 		
-		// Informs the monitors
-		for (PerformanceMonitor monitor : this.monitors)
-		{
-			monitor.updateOperationTime(System.currentTimeMillis() - this.lastactmillis, steps);
-		}
-		
-		// If there is time, the thread will wait until another step is needed
-		long waitMillis = this.nextupdatemillis - System.currentTimeMillis();
+		// If there is time, the thread will wait until another call is needed
+		long waitMillis = (long) nanoDifferenceToMillis(System.nanoTime(), this.nextupdateNanos);
 		if (waitMillis > 0)
 		{
 			while (true)
@@ -165,12 +115,22 @@ public class StepHandler extends ActorHandler implements Runnable
 				}
 				catch (InterruptedException exception)
 				{
-					waitMillis = this.nextupdatemillis - System.currentTimeMillis();
+					waitMillis = (long) nanoDifferenceToMillis(System.nanoTime(), this.nextupdateNanos);
 					if (waitMillis <= 0)
 						break;
 				}
 			}
 		}
+	}
+	
+	private static double nanoDifferenceToMillis(long startNanos, long endNanos)
+	{
+		return (endNanos - startNanos) / 1000000;
+	}
+	
+	private static long millisToNanos(double millis)
+	{
+		return (long) (millis * 1000000);
 	}
 	
 	
@@ -182,6 +142,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * @author Mikko Hilpinen
 	 * @since 11.12.2014
 	 */
+	/*
 	public abstract static class PerformanceMonitor
 	{
 		// ATTRIBUTES	----------------------------
@@ -200,6 +161,7 @@ public class StepHandler extends ActorHandler implements Runnable
 		 * @param stepHandler The stepHandler that will inform this monitor about performance 
 		 * times
 		 */
+	/*
 		public PerformanceMonitor(long updateInterval, StepHandler stepHandler)
 		{
 			// Initializes atributes
@@ -222,6 +184,7 @@ public class StepHandler extends ActorHandler implements Runnable
 		 * last interval
 		 * @param stepsPerCall How many steps each act event took care of, in average
 		 */
+	/*
 		protected abstract void updatePerformanceStatus(double lastCalculationMillis, 
 				double stepsPerCall);
 		
@@ -250,6 +213,7 @@ public class StepHandler extends ActorHandler implements Runnable
 		 * the interval
 		 * @return How large a portion of the maximum performance was in use [0, 100]
 		 */
+	/*
 		protected int getIntervalPerformance(double calculationMillis)
 		{
 			return (int) (100 * calculationMillis / this.updateInterval);
@@ -262,6 +226,7 @@ public class StepHandler extends ActorHandler implements Runnable
 	 * @author Mikko Hilpinen
 	 * @since 12.12.2014
 	 */
+	/*
 	public static class PerformanceAccelerator extends PerformanceMonitor
 	{
 		// ATTRIBUTES	--------------------------
@@ -277,6 +242,7 @@ public class StepHandler extends ActorHandler implements Runnable
 		 * @param updateInterval How often modifications are made (in milliseconds)
 		 * @param stepHandler The stepHandler that is monitored and adjusted
 		 */
+	/*
 		public PerformanceAccelerator(long updateInterval,
 				StepHandler stepHandler)
 		{
@@ -284,7 +250,7 @@ public class StepHandler extends ActorHandler implements Runnable
 			
 			// Initializes attributes
 			this.stepHandler = stepHandler;
-			this.maxInterval = this.stepHandler.callinterval;
+			this.maxInterval = this.stepHandler.callintervalMillis;
 		}
 		
 		
@@ -297,13 +263,14 @@ public class StepHandler extends ActorHandler implements Runnable
 			int performance = getIntervalPerformance(lastCalculationMillis);
 			
 			// If the time usage was under 30%, accelerates
-			if (performance < 30 && this.stepHandler.callinterval > 1)
+			if (performance < 30 && this.stepHandler.callintervalMillis > 1)
 			{
-				this.stepHandler.callinterval -= 1;
+				this.stepHandler.callintervalMillis -= 1;
 			}
 			// If it got over 70%, slows it down (if possible)
-			else if (performance > 70 && this.stepHandler.callinterval < this.maxInterval)
-				this.stepHandler.callinterval += 1;
+			else if (performance > 70 && this.stepHandler.callintervalMillis < this.maxInterval)
+				this.stepHandler.callintervalMillis += 1;
 		}
 	}
+	*/
 }

@@ -26,7 +26,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	private HashMap<MouseButtonEventType, HashMap<MouseButton, Boolean>> mouseButtonStates;
 	private HashMap<MouseMovementEventType, List<MouseListener>> movementEventTargets;
 	
-	private double lastStepDuration;
+	private double lastUpdateMillis;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -50,15 +50,15 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 	}
 	
 	@Override
-	public void act(double steps)
+	public void act(double millis)
 	{
-		this.lastStepDuration = steps;
+		this.lastUpdateMillis = millis;
 		
 		// Informs the objects
 		informObjectsAboutMouseButtonEvents(new MouseEvent(MouseButtonEventType.NONE, 
-				MouseButton.NONE, this.currentMousePosition, steps));
+				MouseButton.NONE, this.currentMousePosition, millis));
 		informObjectsAboutMouseEnterExit(new MouseEvent(this.currentMousePosition, 
-				steps));
+				millis));
 	}
 	
 	@Override
@@ -82,7 +82,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 		
 		// Informs the listener about the move event
 		informObjectAboutMouseEvent(l, new MouseEvent(getMousePosition(), 
-				this.lastStepDuration).withMovementType(MouseMovementEventType.MOVE));
+				this.lastUpdateMillis).withMovementType(MouseMovementEventType.MOVE));
 		
 		return true;
 	}
@@ -153,7 +153,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 			return;
 		
 		handleObjects(new MouseWheelEventOperator(new MouseEvent(wheelTurn, 
-				wheelTurnInt, this.currentMousePosition, this.lastStepDuration)), true);
+				wheelTurnInt, this.currentMousePosition, this.lastUpdateMillis)), true);
 	}
 	
 	
@@ -313,7 +313,7 @@ public abstract class AbstractMouseListenerHandler extends Handler<MouseListener
 					if (buttonStates.get(buttonEventType).get(button))
 						informObjectAboutMouseEvent(l, new MouseEvent(buttonEventType, 
 								button, getBaseEvent().getPosition(), 
-								getBaseEvent().getDuration()).withScale(scale));
+								getBaseEvent().getDurationMillis()).withScale(scale));
 				}
 			}
 			

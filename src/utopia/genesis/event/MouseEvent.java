@@ -35,10 +35,10 @@ public class MouseEvent implements Event
 	 * @param type The type of the button originated event
 	 * @param button The mouse button that originated the event
 	 * @param position The mouse position when the event occurred
-	 * @param duration How many steps the event lasted
+	 * @param durationMillis How many milliseconds the event lasted
 	 */
 	public MouseEvent(MouseButtonEventType type, MouseButton button, 
-			Vector3D position, double duration)
+			Vector3D position, double durationMillis)
 	{
 		// Initializes attributes
 		this.button = button;
@@ -46,7 +46,7 @@ public class MouseEvent implements Event
 		this.buttonEvent = type;
 		this.movementType = MouseMovementEventType.NONE;
 		this.position = position;
-		this.duration = duration;
+		this.duration = durationMillis;
 		this.scale = MouseButtonEventScale.NONE;
 		this.wheelTurn = 0;
 		this.wheelTurnInt = 0;
@@ -55,9 +55,9 @@ public class MouseEvent implements Event
 	/**
 	 * Creates a new MouseMovementEvent with the given information
 	 * @param position The mouse position when the event occurred
-	 * @param duration How many steps the event lasted
+	 * @param durationMillis How many milliseconds the event lasted
 	 */
-	public MouseEvent(Vector3D position, double duration)
+	public MouseEvent(Vector3D position, double durationMillis)
 	{
 		// Initializes attributes
 		this.button = MouseButton.NONE;
@@ -65,7 +65,7 @@ public class MouseEvent implements Event
 		this.buttonEvent = MouseButtonEventType.NONE;
 		this.movementType = MouseMovementEventType.NONE;
 		this.position = position;
-		this.duration = duration;
+		this.duration = durationMillis;
 		this.scale = MouseButtonEventScale.NONE;
 		this.wheelTurn = 0;
 		this.wheelTurnInt = 0;
@@ -76,10 +76,10 @@ public class MouseEvent implements Event
 	 * @param wheelTurn How much the mouse wheel turned
 	 * @param wheelTurnInt How much the mouse wheel turned (in complete notches)
 	 * @param position Where the mouse was when the wheel turned
-	 * @param duration How many steps the event lasted
+	 * @param durationMillis How many milliseconds the event lasted
 	 */
 	public MouseEvent(double wheelTurn, int wheelTurnInt, Vector3D position, 
-			double duration)
+			double durationMillis)
 	{
 		// Initializes attributes
 		this.button = MouseButton.NONE;
@@ -87,7 +87,7 @@ public class MouseEvent implements Event
 		this.buttonEvent = MouseButtonEventType.NONE;
 		this.movementType = MouseMovementEventType.NONE;
 		this.position = position;
-		this.duration = duration;
+		this.duration = durationMillis;
 		this.scale = MouseButtonEventScale.NONE;
 		this.wheelTurn = wheelTurn;
 		this.wheelTurnInt = wheelTurnInt;
@@ -100,7 +100,7 @@ public class MouseEvent implements Event
 		this.buttonEvent = other.getButtonEventType();
 		this.movementType = other.getMovementEventType();
 		this.position = other.getPosition();
-		this.duration = other.getDuration();
+		this.duration = other.getDurationMillis();
 		this.scale = scale;
 		this.wheelTurn = other.getWheelTurn();
 		this.wheelTurnInt = other.getWheelTurnInt();
@@ -113,7 +113,7 @@ public class MouseEvent implements Event
 		this.buttonEvent = other.getButtonEventType();
 		this.movementType = movementType;
 		this.position = other.getPosition();
-		this.duration = other.getDuration();
+		this.duration = other.getDurationMillis();
 		this.scale = other.getButtonEventScale();
 		this.wheelTurn = other.getWheelTurn();
 		this.wheelTurnInt = other.getWheelTurnInt();
@@ -205,9 +205,9 @@ public class MouseEvent implements Event
 	}
 	
 	/**
-	 * @return How many steps the event lasted
+	 * @return How many milliseconds the event lasted
 	 */
-	public final double getDuration()
+	public final double getDurationMillis()
 	{
 		return this.duration;
 	}

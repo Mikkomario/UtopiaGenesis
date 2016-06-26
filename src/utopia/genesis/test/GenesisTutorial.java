@@ -161,7 +161,7 @@ class GenesisTutorial
 		public void onKeyEvent(KeyEvent event)
 		{
 			// Moving with wasd
-			double speed = 5 * event.getDuration();
+			double speed = event.getDurationMillis();
 			
 			if (event.getKeyChar() == 'a')
 				this.position = this.position.plus(new Vector3D(-speed, 0));
@@ -241,7 +241,7 @@ class GenesisTutorial
 		public void act(double duration)
 		{
 			// Shooting bullets
-			this.position = this.position.plus(this.velocity.times(duration));
+			this.position = this.position.plus(this.velocity.times(duration * 0.2));
 			
 			if (!HelpMath.pointIsInRange(this.position, new Vector3D(-32, -32), 
 					this.resolution.plus(new Vector3D(32, 32))))

@@ -91,7 +91,7 @@ public class KeyEvent implements Event
 	 * @param key The key (or keyCode) that originated the event
 	 * @param eventType The type of the event
 	 * @param contentType The type of the content (key)
-	 * @param duration How long the event lasted
+	 * @param duration How long the event lasted (in milliseconds)
 	 */
 	public KeyEvent(int key, KeyEventType eventType, ContentType contentType, 
 			double duration)
@@ -150,9 +150,9 @@ public class KeyEvent implements Event
 	}
 	
 	/**
-	 * @return How long the event lasted
+	 * @return How long the event lasted, in milliseconds
 	 */
-	public double getDuration()
+	public double getDurationMillis()
 	{
 		return this.duration;
 	}

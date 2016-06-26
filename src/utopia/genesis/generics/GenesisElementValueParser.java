@@ -93,7 +93,7 @@ public class GenesisElementValueParser implements ElementValueParser
 			{
 				if (child.getContent().getName().equalsIgnoreCase("start"))
 					start = GenesisDataType.valueToVector(child.getContent().getContent());
-				if (child.getContent().getName().equalsIgnoreCase("end"))
+				else if (child.getContent().getName().equalsIgnoreCase("end"))
 					end = GenesisDataType.valueToVector(child.getContent().getContent());
 			}
 			return GenesisDataType.Line(new Line(start, end));
