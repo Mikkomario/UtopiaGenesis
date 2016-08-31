@@ -113,8 +113,7 @@ class GenesisDependencyTest
 			this.handlers = handlers;
 			
 			this.childAmount = 0;
-			StrictEventSelector<MouseEvent, MouseEvent.Feature> localPressSelector = 
-					new StrictEventSelector<>();
+			StrictEventSelector<MouseEvent> localPressSelector = new StrictEventSelector<>();
 			localPressSelector.addRequiredFeature(MouseButtonEventType.PRESSED);
 			localPressSelector.addRequiredFeature(MouseButtonEventScale.LOCAL);
 			this.selector = localPressSelector;
@@ -249,7 +248,7 @@ class GenesisDependencyTest
 		@Override
 		public void act(double duration)
 		{
-			setTrasformation(getTransformation().rotated(duration));
+			setTrasformation(getTransformation().rotated(duration * 0.1));
 		}
 
 		@Override
@@ -293,7 +292,7 @@ class GenesisDependencyTest
 		@Override
 		public void act(double duration)
 		{
-			setTrasformation(getTransformation().rotated(duration));
+			setTrasformation(getTransformation().rotated(duration * 0.1));
 		}
 	}
 }

@@ -69,7 +69,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	{
 		// Initializes attributes
 		// The handler listens to all keyboard events
-		this.selector = new StrictEventSelector<KeyEvent, KeyEvent.Feature>();
+		this.selector = new StrictEventSelector<KeyEvent>();
 		this.lastEvent = null;
 	}
 	
