@@ -16,7 +16,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 {
 	// ATTRIBUTES	---------------------------------------
 	
-	private MultiEventSelector<MouseEvent> selector;
+	private MultiEventSelector selector;
 	
 	
 	// CONSTRUCTOR	-------------------------------------------------------
@@ -54,7 +54,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	}
 
 	@Override
-	public EventSelector<MouseEvent> getMouseEventSelector()
+	public EventSelector getMouseEventSelector()
 	{
 		return this.selector;
 	}
@@ -73,7 +73,7 @@ public class MouseListenerHandler extends AbstractMouseListenerHandler
 	{		
 		// The handler accepts the mouse move event as well as mouse button events and mouse 
 		// wheel events
-		this.selector = new MultiEventSelector<>();
+		this.selector = new MultiEventSelector();
 		
 		this.selector.addOption(MouseEvent.createButtonStateChangeSelector());
 		this.selector.addOption(MouseEvent.createMouseMoveSelector());

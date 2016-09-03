@@ -165,9 +165,9 @@ public class KeyEvent implements Event
 	 * @param eventType The type of event the selector accepts
 	 * @return A selector that only accepts button events of the given type
 	 */
-	public static StrictEventSelector<KeyEvent> createEventTypeSelector(KeyEventType eventType)
+	public static StrictEventSelector createEventTypeSelector(KeyEventType eventType)
 	{
-		StrictEventSelector<KeyEvent> selector = new StrictEventSelector<>();
+		StrictEventSelector selector = new StrictEventSelector();
 		selector.addRequiredFeature(eventType);
 		return selector;
 	}
@@ -175,9 +175,9 @@ public class KeyEvent implements Event
 	/**
 	 * @return A selector that accepts button presses as well as button releases
 	 */
-	public static StrictEventSelector<KeyEvent> createButtonStateChangeSelector()
+	public static StrictEventSelector createButtonStateChangeSelector()
 	{
-		StrictEventSelector<KeyEvent> selector = new StrictEventSelector<>();
+		StrictEventSelector selector = new StrictEventSelector();
 		selector.addUnacceptableFeature(KeyEventType.DOWN);
 		return selector;
 	}

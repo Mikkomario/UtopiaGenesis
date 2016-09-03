@@ -91,7 +91,7 @@ class GenesisTest
 		
 		private Line lastMouseLine;
 		private List<Vector3D> lastIntersectionPoints;
-		private EventSelector<MouseEvent> selector;
+		private EventSelector selector;
 		
 		
 		// CONSTRUCTOR	-----------------
@@ -134,7 +134,7 @@ class GenesisTest
 		}
 
 		@Override
-		public EventSelector<MouseEvent> getMouseEventSelector()
+		public EventSelector getMouseEventSelector()
 		{
 			return this.selector;
 		}

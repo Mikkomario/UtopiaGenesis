@@ -95,7 +95,7 @@ class GenesisDependencyTest
 		// ATTRIBUTES	--------------------
 		
 		private Transformation ownTransformation;
-		private EventSelector<MouseEvent> selector;
+		private EventSelector selector;
 		private TestNode parent;
 		private int childAmount;
 		private HandlerRelay handlers;
@@ -113,7 +113,7 @@ class GenesisDependencyTest
 			this.handlers = handlers;
 			
 			this.childAmount = 0;
-			StrictEventSelector<MouseEvent> localPressSelector = new StrictEventSelector<>();
+			StrictEventSelector localPressSelector = new StrictEventSelector();
 			localPressSelector.addRequiredFeature(MouseButtonEventType.PRESSED);
 			localPressSelector.addRequiredFeature(MouseButtonEventScale.LOCAL);
 			this.selector = localPressSelector;
@@ -152,7 +152,7 @@ class GenesisDependencyTest
 		}
 
 		@Override
-		public EventSelector<MouseEvent> getMouseEventSelector()
+		public EventSelector getMouseEventSelector()
 		{
 			return this.selector;
 		}

@@ -24,7 +24,7 @@ public interface MouseListener extends Handled
 	 * @return A mouseEventSelector that determines which mouse events the listener is 
 	 * interested in
 	 */
-	public EventSelector<MouseEvent> getMouseEventSelector();
+	public EventSelector getMouseEventSelector();
 	
 	/**
 	 * Tell's whether the given position is in the object's special area of interest

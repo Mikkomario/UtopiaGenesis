@@ -20,7 +20,7 @@ public class KeyTester extends SimpleHandled implements KeyListener
 {
 	// ATTRIBUTES	-----------------------------------------
 	
-	private EventSelector<KeyEvent> selector;
+	private EventSelector selector;
 	private HandlerRelay handlers;
 	private Handled target;
 	
@@ -79,7 +79,7 @@ public class KeyTester extends SimpleHandled implements KeyListener
 	}
 
 	@Override
-	public EventSelector<KeyEvent> getKeyEventSelector()
+	public EventSelector getKeyEventSelector()
 	{
 		return this.selector;
 	}

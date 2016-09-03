@@ -15,7 +15,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 {
 	// ATTRIBUTES	---------------------------------
 	
-	private EventSelector<KeyEvent> selector;
+	private EventSelector selector;
 	private KeyEvent lastEvent;
 	
 	
@@ -44,7 +44,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	}
 
 	@Override
-	public EventSelector<utopia.genesis.event.KeyEvent> getKeyEventSelector()
+	public EventSelector getKeyEventSelector()
 	{
 		return this.selector;
 	}
@@ -69,7 +69,7 @@ public class KeyListenerHandler extends Handler<KeyListener> implements
 	{
 		// Initializes attributes
 		// The handler listens to all keyboard events
-		this.selector = new StrictEventSelector<KeyEvent>();
+		this.selector = StrictEventSelector.createAllAcceptingSelector();
 		this.lastEvent = null;
 	}
 	

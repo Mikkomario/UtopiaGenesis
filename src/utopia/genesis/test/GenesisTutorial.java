@@ -99,11 +99,11 @@ class GenesisTutorial
 		private int radius;
 		
 		// Moving with wasd
-		private EventSelector<KeyEvent> keyEventSelector;
+		private EventSelector keyEventSelector;
 		
 		// Reacting to mouse movement
 		private Vector3D lastMousePosition;
-		private EventSelector<MouseEvent> mouseEventSelector;
+		private EventSelector mouseEventSelector;
 		
 		// Shooting bullets
 		private HandlerRelay handlers;
@@ -125,7 +125,7 @@ class GenesisTutorial
 			this.keyEventSelector = KeyEvent.createEventTypeSelector(KeyEventType.DOWN);
 			
 			// Listening to mouse button presses
-			MultiEventSelector<MouseEvent> selector = new MultiEventSelector<>();
+			MultiEventSelector selector = new MultiEventSelector();
 			selector.addOption(MouseEvent.createButtonEventTypeSelector(
 					MouseButtonEventType.PRESSED));
 			
@@ -174,7 +174,7 @@ class GenesisTutorial
 		}
 
 		@Override
-		public EventSelector<KeyEvent> getKeyEventSelector()
+		public EventSelector getKeyEventSelector()
 		{
 			// Moving with wasd
 			return this.keyEventSelector;
@@ -200,7 +200,7 @@ class GenesisTutorial
 		}
 
 		@Override
-		public EventSelector<MouseEvent> getMouseEventSelector()
+		public EventSelector getMouseEventSelector()
 		{
 			// Reacting to mouse movement
 			return this.mouseEventSelector;

@@ -28,7 +28,7 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 	
 	private Vector3D lastPressPosition, lastMousePosition;
 	private boolean mouseIsDown;
-	private MultiEventSelector<MouseEvent> selector;
+	private MultiEventSelector selector;
 	private double wheelTurn;
 	
 	
@@ -45,7 +45,7 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 		this.wheelTurn = 0;
 		
 		// Listens to mouse presses & releases as well as mouse move
-		this.selector = new MultiEventSelector<>();
+		this.selector = new MultiEventSelector();
 		this.selector.addOption(MouseEvent.createButtonStateChangeSelector());
 		this.selector.addOption(MouseEvent.createMouseMoveSelector());
 		this.selector.addOption(MouseEvent.createMouseWheelSelector());
@@ -89,7 +89,7 @@ public class MousePositionDrawer extends SimpleHandled implements Drawable, Mous
 	}
 
 	@Override
-	public EventSelector<MouseEvent> getMouseEventSelector()
+	public EventSelector getMouseEventSelector()
 	{
 		return this.selector;
 	}

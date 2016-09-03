@@ -241,10 +241,9 @@ public class MouseEvent implements Event
 	/**
 	 * @return A selector that accepts mouse button events
 	 */
-	public static StrictEventSelector<MouseEvent> createButtonEventSelector()
+	public static StrictEventSelector createButtonEventSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = 
-				new StrictEventSelector<>();
+		StrictEventSelector selector = new StrictEventSelector();
 		selector.addRequiredFeature(MouseEventType.BUTTON);
 		return selector;
 	}
@@ -252,10 +251,9 @@ public class MouseEvent implements Event
 	/**
 	 * @return A selector that accepts mouse movement events
 	 */
-	public static StrictEventSelector<MouseEvent> createMovementEventSelector()
+	public static StrictEventSelector createMovementEventSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = 
-				new StrictEventSelector<>();
+		StrictEventSelector selector = new StrictEventSelector();
 		selector.addRequiredFeature(MouseEventType.MOVEMENT);
 		return selector;
 	}
@@ -263,9 +261,9 @@ public class MouseEvent implements Event
 	/**
 	 * @return A selector that accepts mouse button state change events (presses & releases)
 	 */
-	public static StrictEventSelector<MouseEvent> createButtonStateChangeSelector()
+	public static StrictEventSelector createButtonStateChangeSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = 
+		StrictEventSelector selector = 
 				createButtonEventSelector();
 		selector.addUnacceptableFeature(MouseButtonEventType.DOWN);
 		return selector;
@@ -275,9 +273,9 @@ public class MouseEvent implements Event
 	 * @return A selector that accepts mouse button state change events that occur in an 
 	 * object's local scale.
 	 */
-	public static StrictEventSelector<MouseEvent> createLocalButtonStateChangeSelector()
+	public static StrictEventSelector createLocalButtonStateChangeSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = 
+		StrictEventSelector selector = 
 				createButtonStateChangeSelector();
 		selector.addRequiredFeature(MouseButtonEventScale.LOCAL);
 		return selector;
@@ -286,9 +284,9 @@ public class MouseEvent implements Event
 	/**
 	 * @return A selector that accepts mouse entering and mouse exiting events
 	 */
-	public static StrictEventSelector<MouseEvent> createEnterExitSelector()
+	public static StrictEventSelector createEnterExitSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = 
+		StrictEventSelector selector = 
 				createMovementEventSelector();
 		selector.addUnacceptableFeature(MouseMovementEventType.MOVE);
 		selector.addUnacceptableFeature(MouseMovementEventType.OVER);
@@ -298,9 +296,9 @@ public class MouseEvent implements Event
 	/**
 	 * @return A selector that accepts only the mouse move event
 	 */
-	public static StrictEventSelector<MouseEvent> createMouseMoveSelector()
+	public static StrictEventSelector createMouseMoveSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = 
+		StrictEventSelector selector = 
 				createMovementEventSelector();
 		selector.addRequiredFeature(MouseMovementEventType.MOVE);
 		return selector;
@@ -310,9 +308,9 @@ public class MouseEvent implements Event
 	 * @param requiredButton The mouse button that should originate the selected events.
 	 * @return A selector that accepts only events caused by a single mouse button
 	 */
-	public static StrictEventSelector<MouseEvent> createMouseButtonSelector(MouseButton requiredButton)
+	public static StrictEventSelector createMouseButtonSelector(MouseButton requiredButton)
 	{
-		StrictEventSelector<MouseEvent> selector = 
+		StrictEventSelector selector = 
 				createButtonEventSelector();
 		selector.addRequiredFeature(requiredButton);
 		return selector;
@@ -321,9 +319,9 @@ public class MouseEvent implements Event
 	/**
 	 * @return A mouseEventSelector that only selects mouse wheel events
 	 */
-	public static StrictEventSelector<MouseEvent> createMouseWheelSelector()
+	public static StrictEventSelector createMouseWheelSelector()
 	{
-		StrictEventSelector<MouseEvent> selector = new StrictEventSelector<>();
+		StrictEventSelector selector = new StrictEventSelector();
 		selector.addRequiredFeature(MouseEventType.WHEEL);
 		return selector;
 	}
@@ -333,10 +331,10 @@ public class MouseEvent implements Event
 	 * @param type The type of mouse button event accepted
 	 * @return A selector that only accepts mouse button events of the given type
 	 */
-	public static StrictEventSelector<MouseEvent> createButtonEventTypeSelector(
+	public static StrictEventSelector createButtonEventTypeSelector(
 			MouseButtonEventType type)
 	{
-		StrictEventSelector<MouseEvent> selector = createButtonEventSelector();
+		StrictEventSelector selector = createButtonEventSelector();
 		selector.addRequiredFeature(type);
 		return selector;
 	}
